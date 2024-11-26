@@ -12,7 +12,7 @@
                       :paths ["/styles.css"]}}
 
    :optimus/assets [{:public-dir "public"
-                     :paths [#".*\.jpg"]}]
+                     :paths [#".*\.jpg" #".*\.png"]}]
 
    :imagine/config {:prefix "image-assets"
                     :resource-path "public"
@@ -24,5 +24,5 @@
                       :retina-optimized? true
                       :retina-quality 0.4
                       :width 184}}}})
-                      
+
 
