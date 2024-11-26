@@ -7,10 +7,23 @@
 
 (comment
 
-  (dev/start)   ;; 2
-  (dev/stop)    ;; 3
-  (dev/reset)   ;; 4
+  (set! *print-namespace-maps* false)
 
-  (dev/get-app) ;; 5
+  (dev/start)
+  (dev/stop)
+  (dev/reset)
+
+  (def app (dev/get-app))
+
+  (require '[datomic.api :as d])
+
+  (def db (d/db (:datomic/conn app)))
+
+  (->> (d/entity db [:page/uri "/blog-posts/first-post/"])
+       :blog-post/author
+       (into {}))
+
+  ;;=> {:person/id :christian
+  ;;    :person/full-name "Christian Johansen"}
 
   )
