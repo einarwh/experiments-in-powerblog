@@ -95,10 +95,10 @@ So what are our options for explicit representations of these JSON documents in 
 
 We’ll take a look at the following:
 
-    Explicit JSON model (Newtonsoft)
-    Explicit DTO model
-    Anonymous DTO model
-    Dictionary
+* Explicit JSON model (Newtonsoft)
+* Explicit DTO model
+* Anonymous DTO model
+* Dictionary
 
 ## Explicit JSON model
 
@@ -106,7 +106,7 @@ Let’s start by using an explicit JSON model. An obvious possibility is to use 
 
 We’ll look at serialization first. Here’s how we might create a paid cart as a JObject and use it to serialize to the appropriate JSON.
 
-
+```csharp
 var paidCartObject = new JObject(
   new JProperty("_state", new JValue("paid")),
   new JProperty("paidItems", 
@@ -123,19 +123,13 @@ var paidCartObject = new JObject(
       new JProperty("amount", new JValue(123.5)),
       new JProperty("currency", new JValue("USD")))),
   new JProperty("timestamp", new JValue("2020-04-11T10:11:33.514+02:00")));
-
-view raw
-
-
-PaidCartJsonObject.cs
-
-hosted with ❤ by GitHub
+```
 
 There’s no denying it: it is a bit verbose. At the same time, it’s very clear what we’re creating. We are making no assumptions that could be invalidated by future changes. We have full control over the JSON since we are constructing it by hand. We have no problems with optional properties.
 
 What about deserialization?
 
-
+```csharp
 var paidCartJsonString = @"{
   ""_state"": ""paid"",
   ""paidItems"": [
@@ -162,26 +156,21 @@ var firstItemTitleToken = paidCartDeserialized["paidItems"][0]["title"];
 var firstItemTitle = ((JValue) firstItemTitleToken).Value;
 var paymentCurrencyToken = paidCartDeserialized["payment"]["currency"];
 var paymentCurrency = ((JValue) paymentCurrencyToken).Value;
-
-view raw
-
-
-PaidCartJsonObjectDeserialized.cs
-
-hosted with ❤ by GitHub
+```
 
 The deserialization itself is trivial, a one-liner. More importantly: there is no configuration involved, which is great news. Deserialization is often a one-liner, but you have to set up and configure the JSON serializer “just so” to get the output you want. Not so in this case. There are no hidden mechanisms and hence no surprises.
 
 We can read data from the deserialized JObject by using indexers, which read pretty nicely. Unfortunately the last step is a little bit cumbersome, since we need to cast the JToken to a JValue before we can actually get to the value itself. Also, we obviously have to make sure that we get the property names right.
 
 A drawback of using Newtonsoft’s JSON model is, of course, that we get locked-in to Newtonsoft. If we decide we want to try a hot new JSON serializer for whatever reason, we have to rewrite a bunch of pretty boring code. An alternative would be to create our own simple data model for JSON. But that approach has its issues too. Not only would we have to implement that data model, but we would probably have to teach our JSON serializer how to use it as a serialization source or deserialization target as well. A lot of work for questionable gain.
-Explicit DTO model
+
+## Explicit DTO model
 
 Many readers of my previous blog post said they mitigated the pain of JSON serialization by using dedicated data transfer objects or DTOs as intermediaries between their domain model and any associated JSON documents. The implied cure for the pain, of course, is that the DTOs are much nearer to the JSON representation than the domain model is. The DTOs don’t have to concern themselves with things such as data integrity and business rules. The domain model will handle all those things. The domain model in turn doesn’t need to know that such a thing as JSON even exists. This gives us a separation of concerns, which is great.
 
 However, the picture is actually a little bit more complex.
 
-JSON serialization and deserialization with DTOs.
+TODO: Image: JSON serialization and deserialization with DTOs.
 
 To keep the drawing simple, I’m pretending that there is a single DTO model and a bi-directional mapping between the DTO and the JSON. That doesn’t have to be the case. There might well be just a unidirectional mapping.
 
@@ -197,7 +186,7 @@ First we’re going to have to make some decisions about property names. In C#, 
 
 One option is to combine an assumption with an admission. That is, we can 1) make the assumption that our JSON documents only will contain “benign” property names that don’t contain whitespace or control characters and 2) accept that our DTOs will have property names that violate the sensitivies of a C# style checker. That will yield the following set of DTOs:
 
-
+```csharp
 public abstract class ShoppingCart 
 {
   public ShoppingCart(string state) 
@@ -239,19 +228,13 @@ public class Money
   public float amount { get; set; }
   public string currency { get; set; }
 }
-
-view raw
-
-
-ShoppingCartDtos1.cs
-
-hosted with ❤ by GitHub
+```
 
 Depending on your sensitivies, you may have run away screaming at this point. A benefit however, is that it works reasonably well out of the box. The property names in the DTOs and in the JSON are identical, which makes sense since the DTOs are a representation of the same property bags we find in the JSON. In this scenario, coupling of names is actually a good thing.
 
 Another option is to add custom attributes to the properties of our DTOs. Custom attributes are a mechanism that some JSON serializers employ to let us create an explicit mapping between property names in our data model and property names in the JSON document. This clearly is a violation of the no-configuration rule, though. Do it at your own peril.
 
-
+```csharp
 abstract class ShoppingCart 
 {
   public ShoppingCart(string state) 
@@ -310,13 +293,7 @@ class Money
   [JsonProperty("currency")]
   public string Currency { get; set; }
 }
-
-view raw
-
-
-ShoppingCartDtos2.cs
-
-hosted with ❤ by GitHub
+```
 
 This yields perhaps more conventional-looking DTOs. They are, however, now littered with custom attributes specific to the JSON serializer I’m using. There’s really a lot of configuration going on: every property is being reconfigured to use a different name.
 
@@ -326,7 +303,7 @@ But ok. Let’s look at how our DTOs hold up as source models for serialization 
 
 Here’s how you would create an instance of DTO v1 and serialize it to JSON.
 
-
+```csharp
 var paidCartDto1 = new PaidCart
 {
   paidItems = new Item[] {
@@ -348,19 +325,13 @@ var paidCartDto1 = new PaidCart
 };
 
 var paidCartDto1JsonText = JsonConvert.SerializeObject(paidCartDto1);
-
-view raw
-
-
-PaidCartDto1JsonText.cs
-
-hosted with ❤ by GitHub
+```
 
 It’s pretty succinct and legible, and arguably looks quite similar to the JSON text it serializes to. However, there is a small caveat: our optional description is included with a null value in the JSON. That’s not really what we aimed for. To change that behaviour, we can configure our JSON serializer to omit properties with null values from the serialized output. But now we have two problems. The first is that we had to resort to configuration, the second is that we’ve placed a bet: that all properties with null values should always be omitted from the output. That’s the case today, but it could definitely change. To gain more fine-grained control, we’d have to dig out more granular and intrusive configuration options, like custom attributes or custom serializers. Or perhaps some combination? That’s even worse, now our configuration is spread over multiple locations – who knows what the aggregated behavior is and why?
 
 What about DTO v2? The code looks very similar, except it follows C# property naming standards and at the same time deviates a little bit from the property names that we actually find in the JSON document. We’d have to look at the definition of the PaidCart to convince ourselves that it probably will serialize to the appropriate JSON text, since we find the JSON property names there – not at the place we’re creating our DTO.
 
-
+```csharp
 var paidCartDto2 = new PaidCart
 {
   PaidItems = new Item[] {
@@ -382,13 +353,7 @@ var paidCartDto2 = new PaidCart
 };
 
 var paidCartDto2JsonText = JsonConvert.SerializeObject(paidCartDto2);
-
-view raw
-
-
-PaidCartDto2JsonText.cs
-
-hosted with ❤ by GitHub
+```
 
 A benefit is that since we already littered the DTO with custom attributes, I made sure to add a NullValueHandling.Ignore to the Description property, so that the property is not included in the JSON if the value is null. Of course I had to Google how to do it, since I can’t ever remember all the configuration options and how they fit together.
 
@@ -396,7 +361,7 @@ So that’s serialization. We can get it working, but it’s obvious that the lo
 
 What about deserialization? Here’s how it looks for a paid cart using DTO v2:
 
-
+```csharp
 var paidCartJsonString = @"{
   ""_state"": ""paid"",
   ""paidItems"": [
@@ -421,13 +386,7 @@ var paidCartDtoFromText = JsonConvert.DeserializeObject<PaidCart>(paidCartJsonSt
 
 var firstItemTitle = paidCartDtoFromText.PaidItems[0].Title;
 var currency = paidCartDtoFromText.Payment.Currency;
-
-view raw
-
-
-PaidCartDtoV2Deserialized.cs
-
-hosted with ❤ by GitHub
+```
 
 Well, what can I say. It’s quite easy if we know in advance if we’re dealing with an empty cart, an active cart or a paid cart! And it’s very easy and access the various property values.
 
@@ -435,21 +394,15 @@ But of course we generally don’t know what kind of shopping the JSON document 
 
 What we would like to write in our code is something like this:
 
-
+```csharp
 var shoppingCartDtoFromText = JsonConvert.DeserializeObject<ShoppingCart>(jsonText);
-
-view raw
-
-
-DeserializeShoppingCart.js
-
-hosted with ❤ by GitHub
+```
 
 But the poor JSON serializer can’t do that, not without help! The problem is that the JSON serializer doesn’t know which subclass of ShoppingCart to instantiate. In fact, it doesn’t even know that the subclasses exist.
 
 We have three choices at this point. First, we can create a third variation of our DTO, one that doesn’t have this problem. We could just the collapse our fancy class hierarchy and use something like this:
 
-
+```csharp
 class ShoppingCart 
 {
   [JsonProperty("_state")]
@@ -467,13 +420,7 @@ class ShoppingCart
   [JsonProperty("timestamp", NullValueHandling = NullValueHandling.Ignore)]
   public string Timestamp { get; set; }
 }
-
-view raw
-
-
-ShoppingCartDtos3.cs
-
-hosted with ❤ by GitHub
+```
 
 It’s not ideal, to put it mildly. I think we can probably agree that this is not a good DTO, as it completely muddles together what was clearly three distinct kinds of JSON documents. We’ve lost that now, in an effort to make the JSON deserialization process easier.
 
@@ -484,13 +431,14 @@ The third option is to protest against the design of the JSON documents! That wo
 It’s worth noting that these problems only apply to DTOs as target models for deserialization. As source models for serialization, we can use our previous two variations, with the caveats mentioned earlier.
 
 To conclude then, explicit DTOs are relatively straightforward as source models for serialization, potentially less so as target models for deserialization. A general drawback of using explicit DTOs is that we must write, maintain and configure a bunch of classes. That should be offset by some real, tangible advantage. Is it?
-Anonymous classes
+
+## Anonymous classes
 
 We can avoid the chore of having to write and maintain such classes by using anonymous classes in C# as DTOs instead. It might not be as silly as it sounds, at least for simple use cases.
 
 For the serialization case, it would look something like this:
 
-
+```csharp
 var paidCartAnon = new
 {
   _state = "paid",
@@ -513,13 +461,7 @@ var paidCartAnon = new
 };
 
 var paidCartAnonJsonText = JsonConvert.SerializeObject(paidCartAnon);
-
-view raw
-
-
-PaidCartAnonymousDto.cs
-
-hosted with ❤ by GitHub
+```
 
 This is actually very clean! The code looks really similar to the target JSON output. You may notice that the paidItems array is typed as object. This is to allow for the optional description of items. The two items are actually instances of distinct anonymous classes generated by the compiler. One is a DTO with two properties, the other a DTO with three properties. For the compiler, the two DTOs have no more in common than the fact that they are both objects.
 
@@ -529,7 +471,7 @@ A short-coming compared to explicit DTOs is ease of composition and reuse across
 
 What about deserialization? Surely it doesn’t make sense to use an anonymous type as target model for deserialization? Newtonsoft thinks otherwise! Ambitious JSON serializers indeed!
 
-
+```csharp
 var paidCartJsonString = @"{
   ""_state"": ""paid"",
   ""paidItems"": [
@@ -571,24 +513,19 @@ var anonymousPaidCartObject = JsonConvert.DeserializeAnonymousType(paidCartJsonS
 
 var firstItemTitle = anonymousPaidCartObject.paidItems[0].title;
 var currency = anonymousPaidCartObject.payment.currency;
-
-view raw
-
-
-AnonymousPaidCartDtoFromJson.cs
-
-hosted with ❤ by GitHub
+```
 
 This actually works, but it’s a terrible idea, I hope you’ll agree. Creating a throw-away instance of an anonymous type in order to be able to reflect over the type definition is not how you declare types. It’s convoluted and confusing.
 
 So while it is technically possible to use anonymous DTOs as target models for deserialization, you really shouldn’t. As source models for serialization, however, anonymous DTOs are not too bad. In fact, they have some advantages over explicit DTOs in that you don’t have to write and maintain them yourself.
-Dictionary
+
+## Dictionary
 
 Finally, we come to the venerable old dictionary! With respect to representing a property bag, it really is an obvious choice, isn’t it? A property bag is literally what a dictionary is. In particular, it should be a dictionary that uses strings for keys and objects for values.
 
 Here is a dictionary used as serialization source:
 
-
+```csharp
 var paidCartBag = new Dictionary<string, object> {
   {
     "_state", "paid"
@@ -618,13 +555,7 @@ var paidCartBag = new Dictionary<string, object> {
     "timestamp", "2020-04-11T10:11:33.514+02:00"
   }
  };
-
-view raw
-
-
-PaidCartBagToJsonText.cs
-
-hosted with ❤ by GitHub
+```
 
 It is more verbose than the versions using explicit or anonymous DTOs above. I’m using the dictionary initializer syntax in C# to make it as compact as possible, but still.
 
@@ -632,7 +563,7 @@ It is very straightforward however. It makes no assumptions and places no bets a
 
 What about the deserialization target scenario, which caused so much trouble for our DTOs? We would like to be able to write something like this:
 
-
+```csharp
 var paidCartJsonString = @"{
   ""_state"": ""paid"",
   ""paidItems"": [
@@ -657,13 +588,7 @@ var paidCartBagFromText = JsonConvert.DeserializeObject<Dictionary<string, objec
 
 var firstItemTitle = paidCartBagFromText["paidItems"][0]["title"];
 var currency = paidCartBagFromText["payment"]["currency"];
-
-view raw
-
-
-PaidCartBagFromJsonText.cs
-
-hosted with ❤ by GitHub
+```
 
 Alas, it doesn’t work! The reason is that while we can easily tell the JSON serializer that we want the outermost object to be a dictionary, it doesn’t know that we want that rule to apply recursively. In general, the JSON serializer doesn’t know what to do with JSON objects and JSON arrays, so it must revert to defaults.
 
@@ -671,7 +596,7 @@ We’re back to custom deserializers, in fact. Deserialization really is much mo
 
 Here is a naive attempt at an implementation, thrown together in maybe half an hour:
 
-
+```csharp
 public class PropertyBagDeserializer : JsonConverter
 {
   public override bool CanRead => true;
@@ -745,19 +670,13 @@ public class PropertyBagDeserializer : JsonConverter
     throw new NotImplementedException();
   }
 }
-
-view raw
-
-
-PropertyBagDeserializer.cs
-
-hosted with ❤ by GitHub
+```
 
 It probably has bugs. It didn’t crash on my one test input (the paid cart JSON we’ve seen multiple times in this blog post), that’s all the verification I have done. Writing custom deserializers is a pain, and few developers have enough time available to become experts at it. I’m certainly no expert, I have to look it up and go through a slow discovery process every time. But there is a chance that it might one day become relatively bug-free, since the target isn’t moving. There are no external sources of trouble.
 
 With the custom deserializer, deserializing to a dictionary looks like this:
 
-
+```csharp
 var paidCartJsonString = @"{
   ""_state"": ""paid"",
   ""paidItems"": [
@@ -786,18 +705,13 @@ var firstItemTitle = (string) firstItem["title"];
 
 var payment = (Dictionary<string, object>) paidCartBagFromText["payment"];
 var currency = (string) payment["currency"];
-
-view raw
-
-
-PaidCartBagFromJsonText.cs
-
-hosted with ❤ by GitHub
+```
 
 There is a lot of casting going on. We might be able to gloss it over a bit by offering some extension methods on dictionary and list. I’m not sure it would help or make matters worse.
 
 The reason is in JSON’s nature, I guess. It is a completely heterogenic property bag. It’s never going to be a frictionless thing in a statically typed language, at least not of the C# ilk.
-Summary
+
+## Summary
 
 What did we learn? Did we learn anything?
 
