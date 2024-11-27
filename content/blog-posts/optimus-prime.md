@@ -21,7 +21,7 @@ There are actually two simple ways to implement an IEnumerable<int> that would g
 
 Anyways, first implementation:
 
-
+```csharp
 public class Incrementer : IEnumerable<int>
 {
   public IEnumerator<int> GetEnumerator()
@@ -62,17 +62,11 @@ public class IncrementingEnumerator : IEnumerator<int>
     _n = 0;
   }
 }
-
-view raw
-
-
-Incrementer.cs
-
-hosted with ❤ by GitHub
+```
 
 An alternative implementation would be this:
 
-
+```csharp
 public class ContinuationIncrementer : IEnumerable<int>
 {
   public IEnumerator<int> GetEnumerator()
@@ -89,49 +83,35 @@ public class ContinuationIncrementer : IEnumerable<int>
     return GetEnumerator();
   }
 }
-
-view raw
-
-
-ContinuationIncrementer.cs
-
-hosted with ❤ by GitHub
+```
 
 This is simpler in terms of lines of code, but it requires you to understand what the yield keyword does. So what does the yield keyword do? Conceptually, yield gives you what is known as a continuation. In essence, it allows you to jump right back into the code where you left off at the previous step in the iteration. Of course, the best way to find out what is going on under the hood is to look at the IL. If you do that, you’ll see that what the C# compiler actually does is conjure up an IEnumerator<int> of its own. This generated class essentially performs the same task as our handwritten IncrementingEnumerator.
 
 Unsurprisingly, then, the end result is the same, regardless of the implementation we choose. What Incrementer gives you is an infinite sequence of consecutive positive integers, starting with 1. So if you have code like this:
 
-
+```csharp
 foreach (int i in new Incrementer())
 {
   Console.WriteLine(i); 
   if (i == 10) { break; } 
 }
-
-view raw
-
-
-Iterating.cs
-
-hosted with ❤ by GitHub
+```
 
 That’s going to print the numbers 1 through 10. And since there’s no built-in way to stop the Incrementer, it’s fairly important to break out of that loop!
 
- 
-
 That’s not terribly interesting, though. Although it might be worth noting that at least it consumes little memory, since the IEnumerable<int> only holds on to a single integer at a time. That’s good. Furthermore, we could generalize it to produce the sequence
 
-   n, 2n, 3n, 4n, 5n…
+> n, 2n, 3n, 4n, 5n…
 
 instead (without exciting people too much, I guess). We could even provide an additional constructor to enable you to set a start value k, so you’d get the sequence
 
-   n+k, 2n+k, 3n+k, 4n+k, 5n+k…
+> n+k, 2n+k, 3n+k, 4n+k, 5n+k…
 
 Still not excited? Oh well. There’s no pleasing some people.
 
 Let’s implement it anyway. We’ll call it NumberSequence and have it use a NumberEnumerator to do the actual work, such as it is (it isn’t much):
 
-
+```csharp
 public class NumberSequence : IEnumerable<int>
 {
   private readonly int _startValue;
@@ -194,23 +174,19 @@ public class NumberEnumerator : IEnumerator<int>,
     return Current.CompareTo(other.Current);
   }
 }
-
-view raw
-
-
-NumberSequence.cs
-
-hosted with ❤ by GitHub
+```
 
 You’ll notice that I got a bit carried away and implemented IComparable<NumberEnumerator> as well, so that we could compare the state of two such NumberEnumerator instances should we so desire.
 
 A completely different, but equally simple way to create an infinite sequence is to repeat the same finite sequence over and over again. You could do that completely generically, by repeating an IEnumerable<T>. Like so:
 
+TODO: Inline Gist.
+
 https://gist.github.com/1263173
 
 So you could write code like this:
 
-
+```csharp
 var words = new [] { "Hello", "dear", "friend" }; 
 int wordCount = 0; 
 foreach (string s in new BrokenRecord(words)) 
@@ -218,19 +194,11 @@ foreach (string s in new BrokenRecord(words))
   Console.WriteLine(s);
   if (++wordCount == 10) { break; } 
 }
-
-view raw
-
-
-PlayBrokenRecord.cs
-
-hosted with ❤ by GitHub
+```
 
 And of course the output would be:
 
-   Hello
-dear
-friend
+```
 Hello
 dear
 friend
@@ -238,6 +206,10 @@ Hello
 dear
 friend
 Hello
+dear
+friend
+Hello
+```
 
 Now you could put a finite sequence of numbers in there, or just about any sequence you like, in fact. Including, as it were, an infinite sequence of some sort – although that wouldn’t be very meaningful, since you’d never see that thing starting over!
 
@@ -251,15 +223,15 @@ You have a finite list of consecutive integers, starting at 2. You take the firs
 
 Here’s a simple example of the primes from 2-20.
 
-   2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20
+> 2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20
 
 The number 2 is a prime! Cross out all the multiples of 2.
 
-   2  3  X  5  X  7  X  9  X 11  X 13  X 15  X 17  X 19  X
+> 2  3  X  5  X  7  X  9  X 11  X 13  X 15  X 17  X 19  X
 
 The number 3 is also a prime! Now cross out all its multiples:
 
-   2  3  X  5  X  7  X  X  X 11  X 13  X  X  X 17  X 19  X
+> 2  3  X  5  X  7  X  X  X 11  X 13  X  X  X 17  X 19  X
 
 And we keep going for 5, 7, 11, 13, 17 and 19. As it turns out, all the multiples have already been covered by other prime-multiples, so there are actually no more numbers being crossed out. But algorithmically, we obviously need to go through the same process for all the primes.
 
@@ -271,7 +243,7 @@ Now how do we keep track of our prime-multiple-sequences? A naive approach would
 
 Here, then, is how we could implement an IEnumerable<int> that represents an infinite sequence of primes:
 
-
+```csharp
 public class PrimeSequence : IEnumerable<int>
 {
   public IEnumerator<int> GetEnumerator()
@@ -332,21 +304,15 @@ public class SimplePrimeEnumerator : IEnumerator<int>
 
   public void Dispose() {}
 }
+```
 
-view raw
-
-
-PrimeSequence.cs
-
-hosted with ❤ by GitHub
-
-An interesting thing to point out is that the prime-multiple sequence doesn’t have to start until prime*prime. Why? Because smaller multiples of the prime will already be covered by previously considered primes! For instance, the prime-multiple sequence for 17 doesn’t have to contain the multiple 17*11 since the prime-multiple sequence for 11 will contain the same number.
+An interesting thing to point out is that the prime-multiple sequence doesn’t have to start until prime\*prime. Why? Because smaller multiples of the prime will already be covered by previously considered primes! For instance, the prime-multiple sequence for 17 doesn’t have to contain the multiple 17\*11 since the prime-multiple sequence for 11 will contain the same number.
 
 Now this implementation is actually pretty decent. There’s just one thing that leaps to mind as sort of wasted effort. We’re checking every number there is to see if it could possibly be a prime. Yet we know that 2 is the only even number that is a prime (all the others, well, they’d be divisible by 2, right?). So half of our checks are completely in vain.
 
 What if we baked in a little bit of smarts to handle this special case? Say we create a PrimeSequence like so:
 
-
+```csharp
 public class PrimeSequence : IEnumerable<int>
 {
   public IEnumerator<int> GetEnumerator()
@@ -364,21 +330,15 @@ public class PrimeSequence : IEnumerable<int>
     return GetEnumerator();
   }
 }
-
-view raw
-
-
-OddPrimeSequence.cs
-
-hosted with ❤ by GitHub
+```
 
 The OddPrimeEnumerator is actually quite similar to the naive PrimeEnumerator, except three things:
 
-    It needs to start at 3 instead of 2, since we already yielded 2 in the PrimeSequence.
-    It needs to skip every other number, so it uses 2 as an increment instead of 1.
-    The MoveNext method can no longer assume that n <= the smallest pending prime-multiple. In fact, it may very well have skipped past a prime-multiple.
+1. It needs to start at 3 instead of 2, since we already yielded 2 in the PrimeSequence.
+2. It needs to skip every other number, so it uses 2 as an increment instead of 1.
+3. The MoveNext method can no longer assume that n <= the smallest pending prime-multiple. In fact, it may very well have skipped past a prime-multiple.
 
-
+```csharp
 public class OddPrimeEnumerator : IEnumerator<int>
 {
   private readonly IEnumerator<int> _candidates = 
@@ -431,17 +391,11 @@ public class OddPrimeEnumerator : IEnumerator<int>
     throw new NotSupportedException();
   }
 }
-
-view raw
-
-
-OddPrimeEnumerator.cs
-
-hosted with ❤ by GitHub
+```
 
 Note that we must go out of our way a little bit to handle the case where we skip past a prime-multiple. Hence the code is microscopically uglier, but we cut our work pretty much in half. But of course, it’s tempting to go further. We check an awful lot of multiples of 3 as well, you know? And of 5? What if we could just skip those too? Turns out there’s a well-known optimization technique known as “wheel factorization” that allows us to do just that.
 
-Here’s a 2*3*5 wheel (well, the three first layers of it, anyway). Note that it starts at 7, which is the first prime we’re not including in this wheel factorization.
+Here’s a 2\*3\*5 wheel (well, the three first layers of it, anyway). Note that it starts at 7, which is the first prime we’re not including in this wheel factorization.
 Wheel
 
 The green “spokes” of the wheel represents sectors where you might find a prime number. The big red areas you don’t even have to check, because they contain only multiples of the first three primes.
@@ -452,20 +406,14 @@ Now how do we implement this wheel in our code? Well, clearly the wheel can be r
 
 Say you wanted to create an infinite skip sequence corresponding to the wheel shown above. This code would do nicely:
 
-
+```csharp
 var skip = new[] { 4, 2, 4, 2, 4, 6, 2, 6 };
 var skipSequence = new BrokenRecord<int>(skip);
-
-view raw
-
-
-SkipSequence.cs
-
-hosted with ❤ by GitHub
+```
 
 Now we can use the skip sequence to create a sequence of prime candidate numbers. We’ll call it a WheelSequence for lack of a better term.
 
-
+```csharp
 public class WheelSequence : IEnumerable<int>
 {
   private readonly int _startValue;
@@ -531,17 +479,11 @@ public class WheelSequenceEnumerator : IEnumerator<int>
 
   public void Dispose() { }
 }
-
-view raw
-
-
-WheelSequence.cs
-
-hosted with ❤ by GitHub
+```
 
 Now we can replace our original naive PrimeEnumerator with one that uses wheel factorization to greatly reduce the number of candidates considered.
 
-
+```csharp
 public class WheelPrimeEnumerator : IEnumerator<int>
 {
   private readonly IEnumerator<int> _candidates = 
@@ -598,19 +540,13 @@ public class WheelPrimeEnumerator : IEnumerator<int>
     throw new NotSupportedException();
   }
 }
-
-view raw
-
-
-WheelPrimeEnumerator.cs
-
-hosted with ❤ by GitHub
+```
 
 This particular implementation uses a wheel that pre-eliminates multiples of 2, 3, and 5, but obviously you could use any wheel you want. Note that the only difference between this implementation and the OddPrimeEnumerator is in the choice of IEnumerator<int> for prime number candidates. The rest is unchanged.
 
 Of course, to use this thing, we must first manually yield the primes that we eliminated the multiples of. Like so:
 
-
+```csharp
 public class WheelPrimeSequence : IEnumerable<int>
 {
   public IEnumerator<int> GetEnumerator()
@@ -630,15 +566,9 @@ public class WheelPrimeSequence : IEnumerable<int>
     return GetEnumerator();
   }
 }
+```
 
-view raw
-
-
-WheelPrimeSequence.cs
-
-hosted with ❤ by GitHub
-
-That just about wraps it up. I should point out that the current implementation doesn’t really give you an infinite sequence of primes. Unfortunately, the abstraction is all a-leak like a broken faucet since the pesky real world of finite-sized integers causes it to break down at a certain point. In fact, for the current implementation, that point is after the 4.792th prime, which is 46.349. Why? Because then we start a prime-multiple sequence at 46.349*46.349, which won’t fit into the 32-bit integer we’re currently using to store the current value. Hence we get a overflow, the prime-multiple sequence gets a negative number, and it’s all messed up. We really should put an if-statement in there, to return false from MoveNext if and when we overflow, effectively terminating our not-so-infinite-infinite sequence.
+That just about wraps it up. I should point out that the current implementation doesn’t really give you an infinite sequence of primes. Unfortunately, the abstraction is all a-leak like a broken faucet since the pesky real world of finite-sized integers causes it to break down at a certain point. In fact, for the current implementation, that point is after the 4.792th prime, which is 46.349. Why? Because then we start a prime-multiple sequence at 46.349\*46.349, which won’t fit into the 32-bit integer we’re currently using to store the current value. Hence we get a overflow, the prime-multiple sequence gets a negative number, and it’s all messed up. We really should put an if-statement in there, to return false from MoveNext if and when we overflow, effectively terminating our not-so-infinite-infinite sequence.
 
 Of course we could use a 64-bit integer instead, but keep in mind that we’re really just buying time – we’re not fixing the underlying problem. C# doesn’t have arbitrary-sized integers, end of story. Nevertheless, 64-bit integers will give you primes larger than 3.000.000.000. I’d say it’s good enough for an academic exercise; or as I like to put it, large enough for all impractical purposes.
 

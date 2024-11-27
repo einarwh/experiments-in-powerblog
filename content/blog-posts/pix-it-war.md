@@ -22,11 +22,12 @@ The basic idea is for the user to POST a description of the image as JSON, and h
 We’ll let the user specify the number of coarse-grained “pixels” in two dimensions, as well as the size of the “pixels”. Based on this, the HTTP handler lays out a grid constituting the image. By default, all pixels are transparent, except those that are explicitly associated with a color. For each color, we indicate coordinates for the corresponding thus-colored pixels within the grid.
 
 So, say we wanted to draw something simple, like the canonical space invader. We’ll draw a grid by hand, and fill in pixels as appropriate. A thirteen by ten pixel grid will do nicely.
-Invader-skisse-w350
+
+TODO: Image: Invader-skisse-w350
 
 We can glean the appropriate pixels to color black from the grid, which makes it rather easy to translate into a suitable JSON file. The result might be something like:
 
-
+```json
 { 
   "pixelsWide": 13,
   "pixelsHigh": 10,
@@ -53,13 +54,7 @@ We can glean the appropriate pixels to color black from the grid, which makes it
       } 
     ]
 }
-
-view raw
-
-
-invader.json
-
-hosted with ❤ by GitHub
+```
 
 Is this the optimal textual format for describing a retro-style coarse-pixeled image? Of course not, I made it up in ten seconds (about the same time Brendan Eich spent designing and implementing JavaScript, or so I hear). Is it good enough for this blog post? Aaaabsolutely. But the proof of the pudding is in the eating. So let’s eat!
 
@@ -69,7 +64,7 @@ Unfortunately, getting the JSON from the POST request is more cumbersome than it
 
 I use Json.NET‘s useful Linq-to-JSON capability to coerce the JSON into a .NET object, which I feed to the image-producing method. The Linq-to-JSON code is pretty simple, once you get used to the API:
 
-
+```csharp
 private static PixItData ToPixItData(string json)
 {
   JObject o = JObject.Parse(json);
@@ -100,19 +95,13 @@ private static PixItData ToPixItData(string json)
   }
   return new PixItData(wide, high, size, dict);
 }
-
-view raw
-
-
-ToPixItData.cs
-
-hosted with ❤ by GitHub
+```
 
 You might be able to do this even simpler by using Json.NET’s deserialization support, but this works for me. There’s a little bit of fiddling in order to allow for the optional specification of a background color for the image.
 
 The .NET type looks like this:
 
-
+```csharp
 public class PixItData
 {
   private readonly Color? _bgColor;
@@ -157,17 +146,11 @@ public class PixItData
     get { return _data; }
   }
 }
-
-view raw
-
-
-PixItData.cs
-
-hosted with ❤ by GitHub
+```
 
 The Pixel type simply represents an (X, Y) coordinate in the grid:
 
-
+```csharp
 public class Pixel
 {
   private readonly int _x;
@@ -189,17 +172,11 @@ public class Pixel
     get { return _y; }
   }
 }
-
-view raw
-
-
-Pixel.cs
-
-hosted with ❤ by GitHub
+```
 
 Creating the image is really, really simple. We start with a blank slate that’s either transparent or has the specified background color, and then we add colored squares to it as appropriate. Here’s how I do it:
 
-
+```csharp
 private static Image CreateImage(PixItData data)
 {
   int width = data.PixelSize * data.PixelsWide;
@@ -234,20 +211,13 @@ private static Image CreateImage(PixItData data)
   }
   return image;
 }
-
-view raw
-
-
-CreateImage.cs
-
-hosted with ❤ by GitHub
+```
 
 That’s just about all there is to it. The entire HTTP handler looks like this:
 
-
+```csharp
 public class PixItHandler : IHttpHandler
 {
-
   public bool IsReusable
   {
     get { return true; }
@@ -351,21 +321,14 @@ public class PixItHandler : IHttpHandler
     response.BinaryWrite(buffer);
     response.Flush();
   }
-
 }
-
-view raw
-
-
-PixItHandler.cs
-
-hosted with ❤ by GitHub
+```
 
 Warning: I take it for granted that you won’t put code this naïve into production, opening yourself up to denial-of-service attacks and what have you. It takes CPU and memory to produce images, you know.
 
 Of course, as always when using a custom HTTP handler, we must add the handler to web.config. Like so:
 
-
+```xml
 <configuration>
    <system.web>
       <httpHandlers>
@@ -374,13 +337,7 @@ Of course, as always when using a custom HTTP handler, we must add the handler t
       </httpHandlers>
    </system.web>
 </configuration>
-
-view raw
-
-
-gistfile1.xml
-
-hosted with ❤ by GitHub
+```
 
 Note that we restrict the HTTP verb to POST, since we need the JSON data to produce the image.
 
@@ -392,13 +349,14 @@ Fiddler-request-builder
 The image only includes the headers for the request, but Fiddler also has a text area for the request body, which is where you’ll stick the JSON data.
 
 The PNG-file returned by our HTTP handler looks like this:
-Invader-black
+
+TODO: Image: Invader-black
 
 Nice!
 
 Of course, we could create more elaborate images, using more pixels and more colors. For instance, the following JSON could be used to evoke the memory of a certain anti-hero named Larry, hailing from the hey-day of Sierra On-Line.
 
-
+```json
 { 
   "background": "#54FCFC",
   "pixelsWide": 18,
@@ -486,15 +444,10 @@ Of course, we could create more elaborate images, using more pixels and more col
     }
   ]
 }
-
-view raw
-
-
-laffer.json
-
-hosted with ❤ by GitHub
+```
 
 The result?
-Larry-4
+
+TODO: Image: Larry-4
 
 You might say “that’s a big file to create a small image”, but that would be neglecting the greatness of the Laffer, and his impact on a generation of young adolescents.

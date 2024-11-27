@@ -21,14 +21,14 @@ Here’s a scenario: there’s a database. A big, honkin’ legacy database. It�
 
 Now what sort of constraints can we embrace and exploit in this scenario?
 
-    Everything will be stored procedures.
-    It’s SQL Server, and that’s not going to change.
+1. Everything will be stored procedures.
+2. It’s SQL Server, and that’s not going to change.
 
 As it turns out, the second point is not really significant, since we’ll need database-agnostic code if we’re going to write tests. The first one is interesting though. We’ll also assume that the stored procedures will accept input parameters only. That’s going to simplify our code a great deal.
 
 Let’s start by introducing a naive client doing straight invocation of a few stored procedures in plain ol’ ADO.NET:
 
-
+```csharp
 public class Client1
 {
     private readonly string _connStr;
@@ -124,30 +124,24 @@ public class Client1
         }
     }
 }
-
-view raw
-
-
-Client1.cs
-
-hosted with ❤ by GitHub
+```
 
 So you can see, there’s a great deal of duplication going on there. And obviously, as you add new queries and commands, the amount of duplication increases linearly. It’s the embryo of a maintenance nightmare right there. But we’ll fight back with that trusty ol’ weapon of ours: abstraction! To arrive at a suitable one, let’s play a game of compare and contrast.
 
 What varies?
 
-    The list of input parameters.
-    In the case of queries: the data row we’re mapping from and the .NET type we’re mapping to.
-    The names of stored procedures.
-    The execute method (ExecuteReader, ExecuteScalar, ExecuteNonQuery). We’re gonna ignore DataSets since I don’t like them. (I’ll be using my own anemic POCOs, thank you very much!).
+* The list of input parameters.
+* In the case of queries: the data row we’re mapping from and the .NET type we’re mapping to.
+* The names of stored procedures.
+* The execute method (ExecuteReader, ExecuteScalar, ExecuteNonQuery). We’re gonna ignore DataSets since I don’t like them. (I’ll be using my own anemic POCOs, thank you very much!).
 
 What stays the same?
 
-    The connection string.
-    The need to create and open a connection.
-    The need to create and configure a command object.
-    The need to execute the command against the database.
-    The need to map the result of the command to some suitable representation (unless we’re doing ExecuteNonQuery).
+* The connection string.
+* The need to create and open a connection.
+* The need to create and configure a command object.
+* The need to execute the command against the database.
+* The need to map the result of the command to some suitable representation (unless we’re doing ExecuteNonQuery).
 
 There are a couple of design patterns that spring to mind, like Strategy or Template method, that might help us clean things up. We’ll be leaving GoF on the shelf next to PoEAA, though, and use lambdas and generic methods instead.
 
@@ -155,7 +149,7 @@ I take “don’t repeat yourself” quite literally. So we’re aiming for a si
 
 To work towards that goal, let’s refactor into some generic methods:
 
-
+```csharp
 public class Client2
 {
     private readonly string _connStr;
@@ -271,13 +265,7 @@ public class Client2
         }
     }
 }
-
-view raw
-
-
-Client2.cs
-
-hosted with ❤ by GitHub
+```
 
 So we’ve bloated the code a little bit – in fact, we just doubled the number of methods. But we’re in a much better position to write new queries and commands. We’re done with connections and usings and what have you. Later on, we can just reuse the same generic methods.
 
@@ -285,7 +273,7 @@ However, we still have some glaring duplication hurting our eyes: the three exec
 
 To wring those few remaining drops out of the code, we need to abstract over the execute methods. The solution? To go even more generic!
 
-
+```csharp
 public TResult Execute<T, TResult>(string spName, 
   DbParameter[] sqlParams, Func<IDbCommand, T> execute, 
   Func<T, TResult> map)
@@ -303,18 +291,11 @@ public TResult Execute<T, TResult>(string spName,
         return map(execute(cmd));
     }
 }
+```
 
-view raw
+So basically the solution is to pass in a function that specifies the execute method to run. The other execute methods can use this to get their stuff done. Now that we have our single, magical do-all database interaction method, let’s make make things a bit more reusable. We’ll cut the database code out of the client, and introduce a tiny abstraction. Let’s call it Database, since that’s what it is. In fact, for good measure, let’s throw in a new method that might be useful in the process: ExecuteRow. Here’s the code:
 
-
-Execute.cs
-
-hosted with ❤ by GitHub
-
-So basically the solution is to pass in a function that specifies the execute method to run. The other execute methods can use this to get
-their stuff done. Now that we have our single, magical do-all database interaction method, let’s make make things a bit more reusable. We’ll cut the database code out of the client, and introduce a tiny abstraction. Let’s call it Database, since that’s what it is. In fact, for good measure, let’s throw in a new method that might be useful in the process: ExecuteRow. Here’s the code:
-
-
+```csharp
 public class Database
 {
     private readonly string _connStr;
@@ -385,13 +366,7 @@ public class Database
         }
     }
 }
-
-view raw
-
-
-Database.cs
-
-hosted with ❤ by GitHub
+```
 
 ExecuteScalar is pretty straightforward, but there are a few interesting details concerning the others. First, ExecuteReader derives a map from IDataReader to IEnumerable from the user-supplied map from IDataRecord to T. Second, ExecuteNonQuery doesn’t really care about the result from calling DbCommand.ExecuteNonQuery against the database (which indicates the number of rows affected by the command/non-query). So we’re providing the simplest possible map – the identity map – to the Execute method.
 
@@ -399,7 +374,7 @@ So the execution code is pretty DRY now. Basically, you’re just passing in the
 
 Let’s attack redundancy in the client code. Here’s what it looks like at the moment:
 
-
+```csharp
 public class Client4
 {
     private readonly Database _db;
@@ -445,17 +420,11 @@ public class Client4
                 });
     }
 }
-
-view raw
-
-
-Client4.cs
-
-hosted with ❤ by GitHub
+```
 
 Actually, it’s not too bad, but I’m not happy about the repeated chanting of new SqlParameter. We’ll introduce a simple abstraction to DRY up that too, and give us a syntax that’s a bit more succinct and declarative-looking.
 
-
+```csharp
 public class StoredProcedure
 {
     private readonly DbProviderFactory _dpf;
@@ -494,17 +463,11 @@ public class StoredProcedure
         return this;
     }
 }
-
-view raw
-
-
-StoredProcedure.cs
-
-hosted with ❤ by GitHub
+```
 
 This is basically a sponge for parameters. It uses a little trick with a get-indexer with side-effects to do its thing. This allows for a simple fluent syntax to add parameters to a DbCommand object. Let’s refactor the generic Execute method to use it.
 
-
+```csharp
 public TResult Execute<T, TResult>(string spName, 
     Func<StoredProcedure, StoredProcedure> configure, 
     Func<IDbCommand, T> execute, 
@@ -523,17 +486,11 @@ public TResult Execute<T, TResult>(string spName,
         return map(execute(cmd));
     }
 }
-
-view raw
-
-
-ExecuteRefactored.cs
-
-hosted with ❤ by GitHub
+```
 
 The refactoring ripples through to the other execute methods as well, meaning you pass in a Func instead of the parameter array. Now the interesting part is how the new abstraction affects the client code. Here’s how:
 
-
+```csharp
 public class Client5
 {
     private readonly Database _db;
@@ -579,12 +536,6 @@ public class Client5
                     ["@zip", u.ZipCode]);
     }
 }
-
-view raw
-
-
-Client5.cs
-
-hosted with ❤ by GitHub
+```
 
 Which is pretty much as DRY as it gets, at least in my book. We just grab the data and go. Wheee! Where’s my tea?

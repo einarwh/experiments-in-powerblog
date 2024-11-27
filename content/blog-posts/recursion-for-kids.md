@@ -9,12 +9,13 @@ Posted: January 19, 2012
 
 Consider the following problem:
 
-The field vole can have up to 18 litters (batches of offspring) each year, each litter contains up to 8 children. The newborn voles may have offspring of their own after 25 days. How many field voles can a family grow to during the course of a year?
+> The field vole can have up to 18 litters (batches of offspring) each year, each litter contains up to 8 children. The newborn voles may have offspring of their own after 25 days. How many field voles can a family grow to during the course of a year?
 
 Of course, unless you’re a native English speaker, you might wonder what the heck a field vole is. I know I did.
 
 This a field vole:
-Field-vole-500px-border
+
+TODO: Image: Field-vole-500px-border
 
 I’m not really sure if it’s technically a mouse or just a really close relative, but for all our intents and purposes, it sure is. A small, very reproductive mouse.
 
@@ -26,18 +27,18 @@ If you do, that’s great, but if you don’t, you probably have a whole litter 
 
 You see, the father of one of those fifth graders is a friend of mine. He emailed this problem to a rather eclectic group of people (including some with PhDs in matematics). Between us, we came up with a list of questions including these:
 
-    What is the distribution of sexes among the voles?
-    What is the average number of voles per litter? And the distribution?
-    How many voles are gay?
-    How many voles die before they reach a fertile age?
-    How many voles are celibate? Alternatively, how many voles prefer to live without offspring? (Given that voles don’t use prophylactics, these questions yield equivalent results.)
-    Will ugly voles get laid?
-    What is the cheese supply like?
-    Are there cats in the vicinity?
+* What is the distribution of sexes among the voles?
+* What is the average number of voles per litter? And the distribution?
+* How many voles are gay?
+* How many voles die before they reach a fertile age?
+* How many voles are celibate? Alternatively, how many voles prefer to live without offspring? (Given that voles don’t use prophylactics, these questions yield equivalent results.)
+* Will ugly voles get laid?
+* What is the cheese supply like?
+* Are there cats in the vicinity?
 
 And so on and so forth. Luckily, the fifth grade teacher was able to come up with some constraints for us. Of course, they were rather arbitrary, but perhaps not completely unreasonable:
 
-Each litter contains exactly 8 new voles, 4 females and 4 males. No voles die during the year in question.
+> Each litter contains exactly 8 new voles, 4 females and 4 males. No voles die during the year in question.
 
 That’s great! Given these constraints, we can get to work on a solution.
 
@@ -47,7 +48,7 @@ Now we just need to count the offspring of female voles. Since we know that the 
 
 To calculate an answer, we can write a small program.
 
-
+```csharp
 public class Voles 
 {
   private static int _daysBeforeFirst = 25;
@@ -76,23 +77,21 @@ public class Voles
     return 1 + 4 * count;
   }
 }
-
-view raw
-
-
-Voles.cs
-
-hosted with ❤ by GitHub
+```
 
 The F method calculates the total number of offspring for a female vole as a function of how many days it has lived. If you call F with an input of 365 days, you’ll find that the answer is 55,784,398,225. That’s a lot of voles.
 
 How does the algorithm work, though? Well, we assume that we start with a single newborn female vole that has 365 days available to produce offspring (with the first litter arriving after 25 days). Then the number of offspring is given by:
 
+```
 F(365) = 1 + 4 * F(340) + 4 + 4 * F(320) + 4 + … + 4 * F(0) + 4
+```
 
 Of course, you can factor out all the 4’s, like so:
 
+```
 F(365) = 1 + 4 * (F(340) + 1 + F(320 + 1 + … + F(0) + 1)
+```
 
 And that’s pretty much what the code does. In addition, it uses a cache, so that it won’t have to calculate a value twice.
 

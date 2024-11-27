@@ -17,7 +17,7 @@ Luckily, a little-known HTML feature called the data URI scheme comes to the res
 
 You might think I’d declare victory at this point, but there’s one more obstacle in our way. Unfortunately, it seems that JQuery isn’t entirely happy funnelling the binary response through to us. Loading up binary data isn’t really the scenario the XMLHttpRequest object was designed to support, and so different browsers may or may not allow this to proceed smoothly. I haven’t really gone down to the bottom of the rabbit hole on this issue, because there’s a much simpler solution available: do the base64-encoding server side and pass the image data as text. So I’ve written a BixItHandler which is almost identical to the PixItHandler, except it base64-encodes the result before writing it to the response stream:
 
-
+```csharp
 private static void WriteResponse(
   HttpResponse response, 
   byte[] buffer)
@@ -26,13 +26,7 @@ private static void WriteResponse(
    response.Write(Convert.ToBase64String(buffer));
    response.Flush();
 }
-
-view raw
-
-
-WriteResponse.cs
-
-hosted with ❤ by GitHub
+```
 
 Problem solved! Now we can easily create an HTML page with some JQuery to showcase our pix-it images. Here’s one way to do it:
 
@@ -63,7 +57,7 @@ Problem solved! Now we can easily create an HTML page with some JQuery to showca
 
 Not much going on in the HTML file, as you can see. Three innocuous-looking div‘s that aren’t even visible yet, that’s all. As you might imagine, they are just placeholders that our JavaScript code can work with. That’s where pixit.js comes in:
 
-
+```javascript
 var PixIt = {
   load : function () {
     var j = {
@@ -112,15 +106,10 @@ var PixIt = {
     });
   }
 }
-
-view raw
-
-
-pixit.js
-
-hosted with ❤ by GitHub
+```
 
 As you can see, we define the basic outline for a space invader as static JSON data in the script. For each of the div tags, we hijack the color code inside and use that to override the color for the space invader. Then we issue the POST request to our brand new BixItHandler, which has been configured to capture requests aimed at the bix.it virtual resource. The response is a base64-encoded PNG file, which we then insert into the src attribute of an img element that we conjure up on the fly.
 
 And how does it look?
-Invaders-in-the-browser
+
+TODO: Image: Invaders-in-the-browser

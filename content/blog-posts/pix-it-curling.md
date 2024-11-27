@@ -12,4 +12,6 @@ I mentioned cURL in passing in the last blog post. In case you haven’t heard o
 It’s a breeze, really. So effortless! If you’ve installed cURL and vim (and added them to your PATH), you can do the whole command-line ninja thing and never take your fingers off the keyboard. Fiddler is a bit more -uh- fiddly for in that respect.
 
 Here’s the work flow in it’s entirety. Repeat as necessary.
-Command-prompt-workflow
+
+TODO: Image: Command-prompt-workflow
+

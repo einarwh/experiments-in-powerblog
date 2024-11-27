@@ -13,22 +13,16 @@ As you well know, the purpose of using is to make it 1) more convenient for prog
 
 The archetypical usage is something like:
 
-
+```csharp
 using (var resource = new Resource())
 {  
   // Use the resource here.
 }
-
-view raw
-
-
-using.cs
-
-hosted with ❤ by GitHub
+```
 
 This will expand to:
 
-
+```csharp
 var resource = new Resource();
 try
 {
@@ -40,13 +34,7 @@ finally {
     resource.Dispose();
   }
 }
-
-view raw
-
-
-using.desugared.cs
-
-hosted with ❤ by GitHub
+```
 
 The using statement has a lot of potential use cases beyond that, though – indeed, that’s what this blog post is all about! The MSDN documentation states that “the primary use of IDisposable is to release unmanaged resources”, but it is easy and fun to come up with interesting secondary uses. Basically any time you need something to happen before and after an operation, you got a potential use case for using. In other words, you can use it as sort of a poor man’s AOP.
 
@@ -54,11 +42,11 @@ Some people find the secondary uses for using to be abuse, others find it artist
 
 So with that out of the way, let’s start abusing using:
 
-Example 1: Performance timing
+## Example 1: Performance timing
 
 In my mind, the simplest non-standard application of using is to measure the time spent doing some operation (typically a method call). A PerfTimer implementing IDisposible gives you a neat syntax for that:
 
-
+```csharp
 class Program
 {  
   static void Main()  
@@ -85,21 +73,15 @@ class PerfTimer : IDisposable
     Console.WriteLine("Spent {0} ms.", _.ElapsedMilliseconds);  
   }
 }
-
-view raw
-
-
-Using.PerfTimer.cs
-
-hosted with ❤ by GitHub
+```
 
 Note that you don’t have to hold on to the PerfTimer you obtain in the using statement, since you’re not actually using it inside the scope of the using block. Obviously Dispose will be called nevertheless.
 
-Example 2: Impersonation
+## Example 2: Impersonation
 
 Impersonation is one of my favorite using use cases. What you want is to carry out a sequence of instructions using a particular identity, and then revert to the original identity when you’re done. Wrapping your fake id up in an IDisposable makes it all very clean and readable:
 
-
+```csharp
 class Program
 {  
   static void Main()  
@@ -126,21 +108,15 @@ class Persona : IDisposable
     _.Undo();
   }
 }
+```
 
-view raw
-
-
-Using.Impersonate.cs
-
-hosted with ❤ by GitHub
-
-Example 3: Temporary dependency replacement
+## Example 3: Temporary dependency replacement
 
 Another useful application of using is to fake out some global resource during testing. It’s really a kind of dependency injection happening in the using statement. The neat thing is that you can reinject the real object when you’re done. This can help avoid side-effects from one test affecting another test.
 
 Let’s say you want to control time:
 
-
+```csharp
 class Program 
 {
   static void Main() 
@@ -188,24 +164,19 @@ public static class Timepiece
     }
   }
 }
-
-view raw
-
-
-Using.Timepiece.cs
-
-hosted with ❤ by GitHub
+```
 
 The idea is that we eliminate uses of DateTime.Now in our code, and consistently use Timepiece.Now instead. By default, Timepiece.Now uses DateTime.Now to yield the current time, but you’re free to replace it. You can pass in your own time provider to the Replacement method, and that we be used instead – until someone calls Dispose on the TempTimepiece instance returned from Replacement, that is. In the code above, we’re causing time to go backwards for the three Ticks inside the using block. The output looks like this:
-Timepiece-backwards
 
-Example 4: Printing nested structures
+TODO: Image: Timepiece-backwards
+
+## Example 4: Printing nested structures
 
 So far we’ve seen some modest examples of abuse. For our last example, let’s go a bit overboard, forget our inhibitions and really embrace using!
 
 Here’s what I mean:
 
-
+```csharp
 public override void Write()
 {
   using(Html())
@@ -226,26 +197,21 @@ public override void Write()
     }
   }
 }
-
-view raw
-
-
-Using.Dsl.cs
-
-hosted with ❤ by GitHub
+```
 
 Hee hee.
 
 Yup, it’s an embedded DSL for writing HTML, based on the using statement. Whatever your other reactions might be – it’s fairly readable, don’t you think?
 
 When you run it, it produces the following output (nicely formatted and everything):
-Html-writer
+
+TODO: Image: Html-writer
 
 How does it work, though?
 
 Well, the basic idea is that you don’t really have to obtain a new IDisposable every time you’re using using. You can keep using the same one over and over, altering its state as you go along. Here’s how you can do it:
 
-
+```csharp
 class Program
 {
   static void Main(string[] args)
@@ -315,7 +281,7 @@ class DisposableWriter : IDisposable
 }
 
 abstract class BaseHtmlWriter
-{      
+{
   private readonly DisposableWriter _;
 
   protected BaseHtmlWriter(TextWriter tw)
@@ -359,16 +325,10 @@ abstract class BaseHtmlWriter
 
   public abstract void Write();
 }
-
-view raw
-
-
-Using.Html.cs
-
-hosted with ❤ by GitHub
+```
 
 So you can see, it’s almost like you’re using an IDisposable in a fluent interface. You just keep using the same DisposableWriter over and over again! Internally, it maintains a stack of tags. Whenever you add a new tag to the writer (which happens on each new using), it writes the start tag to the stream and pushes it onto the stack. When the using block ends, Dispose is called on the DisposableWriter – causing it to pop the correct tag off the stack and write the corresponding end tag to the stream. The indentation is determined by the depth of the stack, of course.
 
 Wasn’t that fun? There are other things you could do, too. For instance, I bet you could implement an interpreter for a stack-based language (such as IL) pretty easily. Let each instruction implement IDisposable, pop values off the stack upon instantiation, execute the instruction, optionally push a value back on upon Dispose. Shouldn’t be hard at all.
 
-Now if I could only come up with some neat abuses of foreach…
+Now if I could only come up with some neat abuses of foreach...
