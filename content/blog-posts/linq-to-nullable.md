@@ -13,9 +13,9 @@ It all started when I added a point to the agenda for our backend team meeting s
 
 Now the explanation itself didn’t go half bad, I don’t think. While I’m sure I would have offended mathematicians and possibly some haskellites, they weren’t there. Instead, the room was filled with C# programmers.
 
-I think I said something like the following. Assume you have a parameterized type S<T>, where S defines some structure on top of type T. The obvious example for a C# programmer would be an IEnumerable<T>, but of course there are others, including Task<T> and Nullable<T> and indeed Whatever<T>. Now if you have such an S and a mapping function that given some S<T> and a function from T to U produces an S<U> then you almost have a functor already! In addition to that, you just need to make sure that your mapping is well-behaved in a sense. First, mapping the identity function over a structure shouldn’t change it. So if you map it => it over some structure S, that should just give you the same structure you started with. And second, assume you have a function f from T to U and a function g from U to V. If you map f over S to yield S<U> and then map g over that to yield S<V>, that should give you the same result as mapping the composed function it => g(f(it)) over S<T>.
+I think I said something like the following. Assume you have a parameterized type `S<T>`, where `S` defines some structure on top of type `T`. The obvious example for a C# programmer would be an `IEnumerable<T>`, but of course there are others, including `Task<T>` and `Nullable<T>` and indeed `Whatever<T>`. Now if you have such an `S` and a mapping function that given some `S<T>` and a function from `T` to `U` produces an `S<U>` then you almost have a functor already! In addition to that, you just need to make sure that your mapping is well-behaved in a sense. First, mapping the identity function over a structure shouldn’t change it. So if you map `it => it` over some structure `S`, that should just give you the same structure you started with. And second, assume you have a function `f` from `T` to `U` and a function `g` from `U` to `V`. If you map `f` over `S` to yield `S<U>` and then map `g` over that to yield `S<V>`, that should give you the same result as mapping the composed function `it => g(f(it))` over `S<T>`.
 
-To illustrate, I explained that Nullable<T> is a functor – or at least it should be. And it would be, if we defined the appropriate mapping function for Nullable<T>. So I wrote the following on the whiteboard:
+To illustrate, I explained that `Nullable<T>` is a functor – or at least it should be. And it would be, if we defined the appropriate mapping function for `Nullable<T>`. So I wrote the following on the whiteboard:
 
 ```csharp
 public static class NullableExtensions {
@@ -30,7 +30,7 @@ public static class NullableExtensions {
 }
 ```
 
-So this is our mapping function, even though I named it Select, which is the name used in the C# and LINQ world. A benefit of this function is that you no longer have to manually handle the mundane issues of worrying about whether or not some Nullable<T> is null. So instead of writing code like this, which resembles something from our code base:
+So this is our mapping function, even though I named it `Select`, which is the name used in the C# and LINQ world. A benefit of this function is that you no longer have to manually handle the mundane issues of worrying about whether or not some `Nullable<T>` is null. So instead of writing code like this, which resembles something from our code base:
 
 ```csharp
 Duration? duration = null;
