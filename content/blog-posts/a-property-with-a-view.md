@@ -187,7 +187,39 @@ For each of the view model types, we need to make sure that the type implements 
 
 Silver.Needle tries to play nicely with a complete or partial hand-written implementation of INotifyPropertyChanged. It’s not too hard to do, the main complicating matter being that we need to consider inheritance. The type might inherit from another type (say, ViewModelBase) that implements the interface. Obviously, we shouldn’t do anything in that case. We should only inject implementation code for types that do not already implement the interface, either directly or in a base type. To do this, we need to walk the inheritance chain up to System.Object before we can conclude that the interface is indeed missing and proceed to inject code for the implementation.
 
-TODO: Inline this https://gist.github.com/2340074
+```csharp
+private bool ReallyTamperWith()
+{
+  EnsureTypeImplementsInterface();
+  TamperWithPropertySetters();
+  return true;
+}
+
+private void EnsureTypeImplementsInterface()
+{
+  if (!TypeAlreadyImplementsInterface())
+  {
+    InjectInterfaceImplementation();
+  }
+  IdentifyNotificationMethod();
+}
+
+private static bool TypeImplementsInterface(TypeDefinition typeDef)
+{
+  return 
+    typeDef.Interfaces.Any(
+      it => it.Name == "INotifyPropertyChanged") 
+    ||
+    (typeDef.BaseType != null 
+      && TypeImplementsInterface(typeDef.BaseType.Resolve()));
+}
+
+private void InjectInterfaceImplementation()
+{
+  InjectInterfaceDeclaration();
+  InjectEventHandler();
+}
+```
 
 This is still pretty self-explanatory. The most interesting method is TypeImplementsInterface, which calls itself recursively to climb up the inheritance ladder until it either finds a type that implements INotifyPropertyChanged or a type whose base type is null (that would be System.Object).
 

@@ -180,9 +180,69 @@ You’ll notice that I got a bit carried away and implemented IComparable<Number
 
 A completely different, but equally simple way to create an infinite sequence is to repeat the same finite sequence over and over again. You could do that completely generically, by repeating an IEnumerable<T>. Like so:
 
-TODO: Inline Gist.
+```csharp
+public class BrokenRecord<T> : IEnumerable<T>
+{
+  private readonly IEnumerable<T> _seq;
 
-https://gist.github.com/1263173
+  public BrokenRecord(IEnumerable<T> seq)
+  {
+    _seq = seq;
+  }
+
+  public IEnumerator<T> GetEnumerator()
+  {
+    var e = _seq.GetEnumerator();
+    return new BrokenRecordEnumerator<T>(e);
+  }
+
+  IEnumerator IEnumerable.GetEnumerator()
+  {
+    return GetEnumerator();
+  }
+}
+
+public class BrokenRecordEnumerator<T> : IEnumerator<T>
+{
+  private readonly IEnumerator<T> _seq;
+
+  public BrokenRecordEnumerator(IEnumerator<T> seq)
+  {
+    _seq = seq;
+  }
+
+  public void Dispose() {}
+
+  private bool ResetAndMoveNext()
+  {
+    Reset();
+    return _seq.MoveNext();
+  }
+
+  public bool MoveNext()
+  {
+    return _seq.MoveNext() || ResetAndMoveNext();
+  }
+
+  public void Reset()
+  {
+    _seq.Reset();
+  }
+
+  public T Current
+  {
+    get
+    {
+      return _seq.Current;
+    }
+  }
+
+  object IEnumerator.Current
+  {
+    get { return Current; }
+  }
+}
+```
 
 So you could write code like this:
 
