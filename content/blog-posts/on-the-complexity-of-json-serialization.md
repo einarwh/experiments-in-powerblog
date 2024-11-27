@@ -1,9 +1,9 @@
-:page/title On the wonders of climbing
+:page/title On the complexity of JSON serialization
 :blog-post/tags [:climbing :nature]
 :blog-post/author {:person/id :einarwh}
 :page/body
 
-# On the wonders of climbing
+# On the complexity of JSON serialization
 
 I vented a bit on Twitter the other day about my frustrations with JSON serialization in software development.
 
