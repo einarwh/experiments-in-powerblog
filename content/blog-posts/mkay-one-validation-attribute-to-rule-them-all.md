@@ -1,9 +1,11 @@
 :page/title Mkay: One validation attribute to rule them all
-:blog-post/tags [:tech]
+:blog-post/tags [:tech :dotnet :aspnet :csharp :meta-programming :javascript]
 :blog-post/author {:person/id :einarwh}
 :page/body
 
 # Mkay: One validation attribute to rule them all
+
+Posted: February 15, 2013
 
 If you’ve ever created an ASP.NET MVC application, chances are you’ve used data annotation validators to validate user input to your models. They’re nice, aren’t they? They’re so easy to use, they’re almost like magic. You simply annotate your properties with some declarative constraint, and the good djinns of the framework provide both client-side validation and server-side validation for you. Out of thin air! The client-side validation is implemented in JavaScript and gives rapid feedback to the user during data entry, whereas the server-side validation is implemented in .NET and ensures that the data is valid even if the user should circumvent the client-side validation somehow (an obvious approach would be to disable JavaScript in the browser). Magical.
 

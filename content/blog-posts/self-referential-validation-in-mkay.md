@@ -5,7 +5,9 @@
 
 # Self-referential validation in Mkay
 
-…so I implemented eval for Mkay. That sentence doesn’t have a first half, because I couldn’t think of any good reasons for doing so. I happen to think that’s a perfectly valid reason in and by itself, but I fear that’s a minority stance. But it doesn’t really matter. The second half of the sentence is true in any case. I implemented eval for Mkay.
+Posted: February 22, 2013
+
+...so I implemented eval for Mkay. That sentence doesn’t have a first half, because I couldn’t think of any good reasons for doing so. I happen to think that’s a perfectly valid reason in and by itself, but I fear that’s a minority stance. But it doesn’t really matter. The second half of the sentence is true in any case. I implemented eval for Mkay.
 
 It might be unclear to you exactly what I mean by that, though. What I mean is that Mkay now has a function (called eval) that you can call inside an Mkay expression. That function will take another Mkay expression as a string parameter and produce a boolean result when called. That result will then be used within the original Mkay expression. Still opaque? A concrete example should make it entirely transparent.
 public class Guardian

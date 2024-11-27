@@ -5,6 +5,8 @@
 
 # Donkey code
 
+Posted: January 21, 2017
+
 _This is an attempt to write down a very simple example I’ve been using to explain the profound impact the language we use has on thought, discussion and ultimately code._
 
 Imagine you have a computer system, and that you’re one of the programmers working on that system (not too hard, is it?). The system is called, oh I don’t know, eQuest. It has to do with horses. So it typically works with entities of this kind:

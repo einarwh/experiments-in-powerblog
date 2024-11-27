@@ -5,6 +5,8 @@
 
 # Launch as admin
 
+Posted: September 27, 2011
+
 Ignorance can hurt you for weeks and months, by forcing you to go through inefficient, mundane and – here’s the main thing – unnecessary hoops to accomplish every-day, common-place things. Like launching Visual Studio with administrative rights.
 
 First off, I use Launchy to do pretty much anything (and you should too). Certainly I use it to launch Visual Studio. Every day. Thanks to Launchy, I don’t have to take my spidery fingers off my lovely keyboard at all. No feeding that gluttenous RSI monster by entering mouse-pointing mode. I just hit ALT+SPACE (to bring up Launchy), type “10”, press ENTER and Visual Studio is on its way. (Launchy has figured out that when I type “10” I really mean Visual Studio 2010.) Total of five keystrokes. Good stuff, not much room for improvement there.

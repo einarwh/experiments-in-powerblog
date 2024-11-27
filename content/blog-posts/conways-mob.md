@@ -5,6 +5,8 @@
 
 # Conway's mob
 
+Posted: September 15, 2020
+
 Is there anything interesting happening at the intersection between Conway’s law and mob programming? Yes! What? Read on!
 
 As you may know, the term “Conway’s law” comes from a 1968 paper by Mel Conway called “How do committes invent?“. If you haven’t already, I really recommend taking the time to read the paper. It’s just four pages! Granted, it’s four pages in a really tiny, downright miniscule font, yes, but still just four pages. It’s also very readable, very approachable, very understandable. I bet you could work through it in half an hour with a good cup of coffee. And if you do that, you’ll get a much richer understanding of what Mel Conway is trying to say, the argument that he is making. If nothing else, you can use that understanding to call out people who write blog posts or do talks at conferences when they’re misrepresenting Conway. It’s a win-win.

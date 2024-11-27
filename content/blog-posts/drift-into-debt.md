@@ -5,6 +5,8 @@
 
 # Drift into debt
 
+Posted: April 25, 2023
+
 Kent Beck recently published a blog post called ["Friction >> Debt"](https://www.mechanical-orchard.com/post/friction-over-debt), where he suggests that the “technical debt” metaphor has outlived its usefulness and suggests "friction" as a replacement. The problem, according to Beck, is that “the business folks” are prone to interpret “technical debt” as a weak excuse for wanting to spend time fixing stupid mistakes that could have been avoided in the first place. Why would they want to pay for that?
 
 This is certainly a problem. I’m not sure how to react to the fact that even Kent Beck still finds himself in the situation where he needs to explain to the business people that software development by its very nature involves spending some time and effort on development activities that don’t directly result in new or changed features. Is it heartening (same boat)? Or depressing (it’s sinking)?

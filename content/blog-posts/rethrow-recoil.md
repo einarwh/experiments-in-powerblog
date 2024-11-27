@@ -5,6 +5,8 @@
 
 # Rethrow recoil
 
+Posted: June 30, 2014
+
 The closure-based exception handling scheme in the previous blog post works almost perfectly, and it would have worked entirely perfectly if a catch block were an ordinary block of code. But alas, it is not. Not quite. A catch block is special in that there is one statement that you can make inside a catch block that you cannot make anywhere else in your program. Unfortunately, it is also a fairly common statement to use inside catch blocks: the rethrow statement – that is, a throw statement with no operand. We cannot simply use a throw statement with an operand instead, since that has different semantics. In fact, it’s not a rethrow at all, it’s a brand new throw (even when we’re using the exception we just caught). The consequence is that the original stack trace is lost. In other words, we lose trace of where the exception originally occurred, which is almost never what we want.
 
 So that’s unfortunate. Unacceptable even. Can we fix it? Of course we can fix it! We’re programmers, we can fix anything!

@@ -5,6 +5,8 @@
 
 # Optimus Prime
 
+Posted: October 5, 2011
+
 Iterators, man. They’re so much fun.
 
 I’ve messed about with IEnumerable<T> a little bit before, even in the short history of this blog, but I don’t feel like I can say I’ve done so in anger. Sort of the litmus test to see if you’ve grokked lazy evaluation is to implement an infinite sequence of some sort, wouldn’t you agree? Until you do that it’s all talk and no walk. So I thought I’d rectify that, to be a certified IEnumerable<T>-grokker. You in?

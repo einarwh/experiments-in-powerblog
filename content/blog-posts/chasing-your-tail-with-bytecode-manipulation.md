@@ -5,6 +5,8 @@
 
 # Chasing your tail with bytecode manipulation
 
+Posted: November 5, 2013
+
 Last week I was at the TDC conference in Trondheim to do a talk entitled “Bytecode for beginners”. In one of my demos, I showed how you might do a limited form of tail call elimination using bytecode manipulation. To appreciate what (recursive) tail calls are and why you might want to eliminate them, consider the following code snippet:
 
 

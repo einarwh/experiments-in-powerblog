@@ -5,6 +5,8 @@
 
 # NO! Programming as other
 
+Posted: April 18, 2021
+
 A year ago I was reading the CfP for HAPOP 2020, the 5th symposium on the History and Philosophy of Programming, and there it was again, the quasi-philosophical question that keeps haunting our industry. In fact, it was listed as the very first question in a long list of potential questions of relevance for the conference:
 
 > Can/has been/should be programming understood as an art, a craft and/or a science?

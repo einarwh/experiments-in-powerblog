@@ -5,6 +5,8 @@
 
 # Dragging a dead priest: programs and programmers in time
 
+Posted: February 5, 2023
+
 A fundamental challenge we face as programmers is that the world is alive, but the programs we write, alas, are not. When we deploy our dead programs to operate in the living world, it presents an immediate maintenance problem. Or, if you like, a matter of keeping up appearances.
 
 In the movie Night on Earth, Roberto Benigni plays an exuberant and eccentric taxi driver working the night shift in Rome. You might be able to see the movie clip on YouTube. If you can, you should.

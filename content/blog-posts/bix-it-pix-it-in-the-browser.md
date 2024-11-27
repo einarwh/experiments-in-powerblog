@@ -5,6 +5,8 @@
 
 # Bix-it: pix-it in the browser
 
+Posted: November 6, 2011
+
 The previous blog post introduced PixItHandler, a custom HTTP handler for ASP.NET. The handler responds to HTTP POST requests containing a JSON description of a 8-bit style image with an actual PNG image. Provided you know the expected JSON format, it’s pretty easy to use a tool like Fiddler (or cURL for that matter) to generate renderings of your favorite retro game characters. However, while you might (and should) find those tools on the machine of a web developer, they have somewhat limited penetration among more conventional users. Web browsers have better reach, if you will.
 
 So a challenge remains before the PixItHandler is ready to take over the world. Say we wanted to include a pix-it image in a regular HTML page? That is, we would like the user to make the request from a plain ol’ web browser, and use it to display the resulting image to the user. We can’t just use an HTML img tag as we normally would, since it issues an HTTP GET request for the resource specified in the src attribute. Moreover, we lack a way of including the JSON payload with the request. We can use another approach though. Using JQuery, we can issue the appropriate POST request with the JSON payload to the HTTP handler. So that means we’re halfway there.

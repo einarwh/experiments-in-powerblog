@@ -5,6 +5,8 @@
 
 # Something for nothing
 
+Posted: January 17, 2017
+
 I thought I’d jot down some fairly obvious things about values in programs.
 
 Say you have some value in your program. For instance, it could be a String, or a Thing. Then conceptually, each String belongs to the set of possible Strings, and each Thing belongs to the set of possible Things. Right?

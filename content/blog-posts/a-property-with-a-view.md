@@ -5,6 +5,8 @@
 
 # A property with a view
 
+Posted: May 1, 2012
+
 I’ve never been much of an early adopter, so now that Silverlight is dead and cold and has been for a while, it seems appropriate for me to blog about it. More specifically, I’d like to write about the chore that is INotifyPropertyChanged and how to make practically all the grunt work go away.
 
 (Actually, I’m not sure that Silverlight is completely dead yet. It may be that Microsoft won’t be pumping much fresh blood into its veins, but that’s not quite the same thing as being dead. A technology isn’t dead as long as there’s a market for it and all that jazz. Assuming that there are some kinds of applications (such as rich line-of-business applications) that are easier to build with Silverlight than HTML5 given the toolsets that are available, I think we’ll find that Silverlight hangs around to haunt us for quite a while. But that’s sort of a side issue. It doesn’t really matter if Silverlight is dead or not, the issue of tackling INotifyPropertyChanged is interesting in and of itself.)

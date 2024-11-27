@@ -5,6 +5,8 @@
 
 # Inspirational math
 
+Posted: May 20, 2023
+
 It’s pretty cute that self-help people have discovered exponential functions. Just improve 1% every day, and you will have improved almost 38-fold by the end of the year! Because you see, 1.01^365 is 37.78. Wow! So inspirational!
 
 But what does it mean? What does it mean for me to improve 1%? What is it that I improve? My creativity? My output? My writing? My talks? My interpersonal skills? Something else? Is it everything I do? Because that sounds like a lot, to get 1% better in total, across everything I do. I’d spread myself thin, wouldn’t I? So I guess I must choose, but what will happen to my other skills then? Because skills in general need to be maintained, right? Will they somehow stay unchanged? Or will they drop 1% per day? But that would be terrible – an accumulated skill loss of more than 97% by the end of the year!

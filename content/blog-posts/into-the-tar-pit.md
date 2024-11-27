@@ -5,6 +5,8 @@
 
 # Into the tar pit
 
+Posted: May 19, 2020
+
 I recently re-read the “Out of the Tar Pit” paper by Ben Moseley and Peter Marks for a Papers We Love session at work. It is a pretty famous paper. You can find it at the Papers We Love repository at GitHub for the simple reason that lots of people love it. Reading the paper again triggered some thoughts, hence this blog post.
 
 The title of the paper is taken from Alan Perlis (epigram #54):

@@ -5,6 +5,8 @@
 
 # On the complexity of JSON serialization
 
+Posted: May 8, 2020
+
 I vented a bit on Twitter the other day about my frustrations with JSON serialization in software development.
 
 > I hate configuring JSON serializers.

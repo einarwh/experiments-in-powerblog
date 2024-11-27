@@ -5,6 +5,8 @@
 
 # Diamond mirrors
 
+Posted: February 10, 2015
+
 My friend Bjørn Einar did a nice write-up about the Diamond code kata in F# the other day. He did so in the context of TDD-style evolutionary design vs up-front thinking away from the keyboard. Apparently he has this crazy idea that it might be worthwhile to do a bit of conceptual problem-solving and thinking about properties of the domain before you start typing. Very out of vogue, I know.
 
 Anyways, he ended up with an interesting implementation centered on exploiting something called the taxicab norm. (I hadn’t heard of it either, which makes it all the more interesting.) I really like that approach: cast your problem as an instance of an existing, well-understood problem for which there exists a well-understood solution. It replaces ad-hoc code with a mathematical idea, and is rather a far step away from typical implementations that get heavy on string manipulations and where the solution to the problem in general is swamped with things related to outputting the diamond to the console.

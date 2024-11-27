@@ -5,6 +5,8 @@
 
 # Another wild tail chase
 
+Posted: December 19, 2013
+
 It appears I’ve been waiting in vain! It’s been more than a month since my last blog post, and still no pull requests for TailCop! In particular, no pulls requests that implement rewriting of recursive calls to loops for instance methods. I don’t know why.
 
 I guess it’s up to me, then.

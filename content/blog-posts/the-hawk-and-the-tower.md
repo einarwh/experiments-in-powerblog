@@ -5,6 +5,8 @@
 
 # The hawk and the tower
 
+Posted: August 24, 2012
+
 Book-tower-w400
 
 Behold the tower of good intentions!

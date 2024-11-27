@@ -5,6 +5,8 @@
 
 # Strings dressed in tags
 
+Posted: June 20, 2012
+
 In a project I’m working on, we needed a simple way of wrapping strings in tags in a custom grid in our ASP.NET MVC application. The strings should only be wrapped given certain conditions. We really wanted to avoid double if checks, you know, once for the opening tag and one for the closing tag?
 
 We ended up using a Func from string to string to perform wrapping as appropriate. By default, the Func would just be the identify function; that is, it would return the string unchanged. When the right conditions were fulfilled, though, we’d replace it with a Func that would create a new string, where the original one was wrapped in the appropriate tag.

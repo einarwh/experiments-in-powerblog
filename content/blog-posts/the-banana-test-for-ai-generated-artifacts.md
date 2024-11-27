@@ -5,6 +5,8 @@
 
 # The banana test for AI-generated artifacts
 
+Posted: October 3, 2024
+
 Do you like bananas? I do – sort of. It’s more precise to say I like banana. That is, one banana, not multiple.
 
 I suspect many people are like me. We enjoy eating a banana, very few eat two bananas in a row, no-one in the history of mankind has ever eaten three.

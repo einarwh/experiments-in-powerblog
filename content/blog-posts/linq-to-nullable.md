@@ -5,6 +5,8 @@
 
 # LINQ to Nullable
 
+Posted: September 27, 2017
+
 Things got a bit out of hand today.
 
 It all started when I added a point to the agenda for our backend team meeting saying I’d explain real quick what a functor is – or at least what my understanding of what a functor is is. And so I did.

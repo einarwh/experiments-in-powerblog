@@ -5,6 +5,8 @@
 
 # Thinging names
 
+Posted: May 10, 2015 
+
 The other night I made a tweet. It was this:
 
 > Programmers are always chasing proximate causes. This is why naming things is considered hard, not finding the right abstractions to name.

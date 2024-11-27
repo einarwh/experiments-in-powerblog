@@ -5,6 +5,8 @@
 
 # Pix-it war!
 
+Posted: November 4, 2011
+
 So-called custom HTTP handlers can be incredibly useful. It’s almost laughably easy to write your own handler, and it enables some scenarios that might be difficult, cumbersome or inelegant to support otherwise. It’s definitely something you’ll want in your repertoire if you’re an ASP.NET programmer.
 
 In essence, what a custom HTTP handler gives you is the ability to respond to an HTTP request by creating arbitrary content on the fly and have it pushed out to the client making the request. This content could be any type of file you like. In theory it could be HTML for the browser to render, but it typically won’t be (you have regular ASP.NET pages for that, remember?). Rather, you’ll have some way of magically conjuring up some binary artefact, such as an image or a PDF document. You could take various kinds of input to your spell, such as data submitted with the request, data from a database, the phase of the moon or what have you.

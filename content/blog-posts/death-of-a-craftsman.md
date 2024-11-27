@@ -5,7 +5,9 @@
 
 # Death of a craftsman
 
-This is a transcript of a talk I did at KanDDDinsky 2019 in Berlin.
+Posted: April 5, 2020
+
+_This is a transcript of a talk I did at KanDDDinsky 2019 in Berlin._
 
 Hi! My name is Einar. I design and write software for a living, presumably like you. You could call me a software developer, a coder, a programmer, and also a software designer, I guess. Those are all things I do and labels that I’m comfortable with. I am not, however, a software craftsman. This blog post is about why.
 

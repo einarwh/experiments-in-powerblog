@@ -5,6 +5,8 @@
 
 # Proper JSON and property bags
 
+Posted: May 13, 2020
+
 I recently wrote a blog post where I argued that “JSON serialization” as commonly practiced in the software industry is much too ambitious. This is the case at least in the .NET and Java ecosystems. I can’t really speak to the state of affairs in other ecosystems, although I note that the amount of human folly appears to be a universal constant much like gravity.
 
 The problem is that so-called “JSON serializers” handle not just serialization and deserialization of JSON, they tend to support arbitrary mapping between the JSON model and some other data model as well. This additional mapping, I argued, causes much unnecessary complexity and pain. Whereas serialization and deserialization of JSON is a “closed” problem with bounded complexity, arbitrary mapping between data models is an “open” problem with unbounded complexity. Hence JSON serializers should focus on the former and let us handle the latter by hand.

@@ -5,6 +5,8 @@
 
 # Aspects without aspects
 
+Posted: July 5, 2014
+
 In the previous blog posts, we saw that we could hide the problematic concrete exception type from the C# compiler by tucking it inside a transformation from a closure of type Func<TR> to another closure of the same type. But of course we can use such transformations for many things besides exception handling. Any old behaviour that we would like to throw on top of the business logic, we can apply in layers using this approach.
 
 This capability is so cool that I took a break from writing this blog post to share my enthusiasm with my wife. She was like, “what are you blogging about?”, and I was like “there’s this really cool thing you can do, where you apply this transformation to some method call, and then you can like, do additional stuff with it, entirely transparently!”, and she was like “like what?”, and I was like “like anything!”, and she was like “like what?”, and I was like “anything you want!”, but she was still like “like what though?” and then I turned more like “uh… uh… like say you had this method that returned a string – you could easily transform that into a method that looked exactly the same, but returned the reversed string instead”, and she was like “…the reversed string? why?” and I was like “or-or-or maybe you could return the uppercase string instead…?”, and she was like “uppercase?” with totally uppercase eyebrows and I was like “nonono! I got it! say you had this method that did a really expensive and slow computation, you could turn that into a method that would keep along the result that computation, so you didn’t have to do the actual computation all the time”, and she was like “oh, that’s cool” and I was like “phew! I’m never talking to her about blogging again!”.

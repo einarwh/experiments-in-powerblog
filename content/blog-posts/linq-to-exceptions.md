@@ -5,6 +5,8 @@
 
 # LINQ to Exceptions
 
+Posted: June 28, 2014
+
 Lately I’ve been thinking about the mundane task of exception handling. Remarkably unsexy, and yet completely mandatory. There’s no escape from handling the exceptions that may (and therefore will) occur in your application, unless you want it to crash or misbehave regularly.
 
 Proper exception handling can be a chore anywhere in your application, but in particular at integration points. Whenever your application needs to communicate with some external service, any number of things can go wrong, at various levels in the stack – from application level errors to network problems. We need to be able to cope with all these different kinds of errors, and hence we surround each service call with a veritable flood of exception handlers. That sort of works, but there are problems – first, the actual service is drowning amidst all the exception handling, and second, we get a lot of code duplication, since we tend to handle many kinds of exceptions in the same way for all service calls.

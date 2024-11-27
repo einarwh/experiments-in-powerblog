@@ -5,6 +5,8 @@
 
 # Telepathic computer control with Launchy
 
+Posted: September 25, 2011
+
 You’d think that, as a professional computer user, I’d have all kinds of fancy tricks up my sleeve to help me command the dang thing. But I don’t. Maybe I should, but I don’t. In fact, using Launchy is my one claim to power-user-dom.
 
 Launchy is a magical software artifact that allows you to translate thoughts to computer commands. The thoughts travel at light speed through my hands directly into the CPU. No kidding.

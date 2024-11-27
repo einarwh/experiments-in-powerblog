@@ -5,6 +5,8 @@
 
 # Pragmatism is poison
 
+Posted: March 10, 2016
+
 _Yesterday I gave a lightning talk called “Pragmatism is Poison” at the Booster Conference in Bergen. This blog post is essentially that talk in written form._
 
 The basic idea of the talk, and therefore of this blog post, is to launch a public attack on perhaps the most fundamental virtue of the software craftsman: pragmatism. The reason is that I think pragmatism has turned toxic, to the point where it causes more harm than good.

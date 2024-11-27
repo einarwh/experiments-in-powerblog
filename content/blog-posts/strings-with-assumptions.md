@@ -5,6 +5,8 @@
 
 # Strings with assumptions
 
+Posted: January 29, 2016
+
 _TL;DR Strings always come with strings attached._
 
 I had a little rant about strings on Twitter the other day. It started like this:

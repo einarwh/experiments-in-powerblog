@@ -5,7 +5,9 @@
 
 # Technical debt isn’t technical
 
-TL;DR
+Posted: December 5, 2015
+
+## TL;DR
 
 Technical debt is not primarily caused by clumsy programming, it is a third-order effect of poor communication. Technical debt is a symptom of an underlying lack of appropriate abstractions, which in turn stems from insufficient modelling of the problem domain. This means that necessary communication has not taken place: discussions and decisions to resolve ambiguity and make informed trade-offs have been swept under the rug. Technical debt is the reification of this lack of resolution in code.
 The technical debt meme
@@ -21,13 +23,13 @@ This is certainly true in some cases; we have all written code like that, and fo
 
 This makes the code extraordinarily difficult to reason about. Hence, it would seem that the so-called technical debt really stems from modelling debt; the code lacks the higher-level concepts of a rich domain model that would make it possible to express the use cases more directly.
 
-    The currency of technical debt is knowledge. — @sarahmei
+> The currency of technical debt is knowledge. — @sarahmei
 
 In DDD terms, modelling debt indicates that insufficient knowledge crunching has taken place. Knowledge crunching involves learning about the problem domain and capturing that knowledge in a suitable domain model. This is a communication-driven process that involves identifying and resolving ambiguity in the problem domain, and expressing the domain as clearly as possible. Most of all, it is a chaotic and messy process that involves people and discussion. Insufficient knowledge crunching in turn points towards the ultimate cause of technical debt: poor communication.
 
-    Communication is the principal portion of the “technical debt.” Messy code is just the ever-increasing interest. — @nycplayer
+> Communication is the principal portion of the “technical debt.” Messy code is just the ever-increasing interest. — @nycplayer
 
-Why technical debt is misrepresented
+## Why technical debt is misrepresented
 
 So if technical debt isn’t really technical – or at least not ultimately caused by technical issues – why do we keep referring to it as technical debt? Unfortunately, it seems to me that developers have a tendency to look for technical solutions to soft problems.
 
@@ -38,13 +40,14 @@ And so, even as widespread as the meme technical debt is, it seems to be poorly 
 Again we see the focus on the technical aspects, as if technical debt were caused by clumsy, unskilled programmers with nagging, incompetent project leaders – and hence as if it were fixable by some virtuous programmer – a master craftsman, no less! – using generic, context-free principles like SOLID, dependency injection and patterns. It is not! Code hygiene is certainly a virtue, but it is no substitute for modelling, just like frantically washing your hands is not sufficient for successful surgery. Getting lost in code hygiene discussions is like arguing about the optimal kinds of soap and water temperature while the patient is dying on the operating table.
 
 And yet it is indirectly true: a developer who doesn’t know the importance of understanding the problem domain, of proper modelling, will certainly fail to write elegant code. Elegance of the implementation can only stem from an elegant model that reflects a deep understanding of the problem addressed.
-Down payment
 
-This has deep ramifications, in particular in how we address technical debt. Refactoring is another successful meme in software development, and we often use it to describe the process of making down payments on technical debt. But if technical debt isn’t just clumsy code, if instead it is clumsy code caused by unresolved ambiguity in the problem domain, then it is poorly addressed by rearranging code. We need to start in the other end, with a better understanding of the problem we are trying to solve, and with modelling concepts permeating the code instead of branches and booleans. This is what Eric Evans calls “refactoring towards deeper insight”. Unless we have a model to drive our efforts, there is no reason to believe that we will be able to do much better than before. Refactoring without an improved domain model is just hubris.
+## Paying off debt
 
-    A rewrite will end up with the same problems as the original unless you close the understanding gap. — @sarahmei
+This has deep ramifications, in particular in how we address technical debt. Refactoring is another successful meme in software development, and we often use it to describe the process of paying off technical debt. But if technical debt isn’t just clumsy code, if instead it is clumsy code caused by unresolved ambiguity in the problem domain, then it is poorly addressed by rearranging code. We need to start in the other end, with a better understanding of the problem we are trying to solve, and with modelling concepts permeating the code instead of branches and booleans. This is what Eric Evans calls “refactoring towards deeper insight”. Unless we have a model to drive our efforts, there is no reason to believe that we will be able to do much better than before. Refactoring without an improved domain model is just hubris.
 
-To conclude
+> A rewrite will end up with the same problems as the original unless you close the understanding gap. — @sarahmei
+
+## To conclude
 
 That’s what I wanted to say about technical debt. It’s not very technical at all. It’s about code that gets bad because humans fail to communicate when trying to solve problems in some business domain using software. It usually is.
 

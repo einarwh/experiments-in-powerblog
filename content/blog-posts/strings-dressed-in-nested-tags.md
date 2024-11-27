@@ -5,22 +5,18 @@
 
 # Strings dressed in nested tags
 
+Posted: June 20, 2012
+
 If you read the previous blog post, you might wonder if you can wrap a string in nested tags, you know, something like this:
 
-
+```csharp
 Func<string, string> nested = 
   s => s.Tag("td").Colspan("2")
                   .Width("100")
         .Tag("tr")
         .Tag("table").Cellpadding("10")
                      .Border("1");
-
-view raw
-
-
-NestedFunc.cs
-
-hosted with ❤ by GitHub
+```
 
 And the answer is no. No, you can’t. Well you can, but it’s not going to give you the result you want. For instance, if you apply the transform to the string “Hello”, you’ll get this:
 Bad-nesting-round

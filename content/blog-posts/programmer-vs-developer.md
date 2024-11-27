@@ -5,6 +5,8 @@
 
 # Programmer vs developer
 
+Posted: February 11, 2021
+
 I read this tweet today:
 
 > More and more, I don't particularly like the label "programmer." We are developers, not programmers. We develop systems that help people. Those systems may or may not involve programming. All too often, programming is a hammer in search of a nail.

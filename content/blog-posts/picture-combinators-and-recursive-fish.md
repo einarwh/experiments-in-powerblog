@@ -5,6 +5,8 @@
 
 # Picture combinators and recursive fish
 
+Posted: July 22, 2017
+
 On February 9th 2017, I was sitting in an auditorium in Krakow, listening to Mary Sheeran and John Hughes give the opening keynote at the Lambda Days conference. It was an inspired and inspiring keynote, that discussed some of the most influential ideas in some of the most interesting papers written on functional programming. You should absolutely check it out.
 
 One of the papers that was mentioned was Functional Geometry by Peter Henderson, written in 1982. In it, Henderson shows a deconstruction of an Escher woodcut called Square Limit, and how he can elegantly reconstruct a replica of the woodcut by using functions as data. He defines a small set of picture combinators – simple functions that operate on picture functions – to form complex pictures out of simple ones.

@@ -5,6 +5,8 @@
 
 # Recursion for kids
 
+Posted: January 19, 2012
+
 Consider the following problem:
 
 The field vole can have up to 18 litters (batches of offspring) each year, each litter contains up to 8 children. The newborn voles may have offspring of their own after 25 days. How many field voles can a family grow to during the course of a year?

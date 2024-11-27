@@ -5,6 +5,8 @@
 
 # Don't settle for a playground
 
+Posted: March 29, 2023
+
 _This is a transcript of a talk I did at Booster 2023 in Bergen._
 
 Here’s a scene. Imagine we’re having a stand-up meeting. A stand-up meeting, as you will be aware, is a ritual where a team of software developers stands in a circle in the hope of summoning the spirit known as agility. If a sufficient number of teams performs this ritual, it brings about a digital transformation in the organization, and everyone becomes happy and productive.

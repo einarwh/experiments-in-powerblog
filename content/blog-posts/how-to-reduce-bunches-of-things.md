@@ -5,6 +5,8 @@
 
 # How to reduce bunches of things
 
+Posted: October 5, 2017
+
 So there you are, a pragmatic C# programmer out to provide business value for your end users and all that stuff. That’s great.
 
 One of the (admittedly many) things you might want to do is reduce a bunch of things of some type into a single thing of that type. For instance, you might want to add a bunch of numbers together, or concatinate a bunch of strings and so on. How would you do that? (Assuming there’s no built-in Aggregate method available, that is.) Well, you’d write a Reduce function, right? And since we haven’t specified in advance what kinds of things we should reduce, we better make it generic. So it could work on an IEnumerable<T> of things.

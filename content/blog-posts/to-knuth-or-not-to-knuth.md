@@ -1,9 +1,11 @@
 :page/title To Knuth or not to Knuth
-:blog-post/tags [:tech]
+:blog-post/tags [:tech :programming :books]
 :blog-post/author {:person/id :einarwh}
 :page/body
 
 # To Knuth or not to Knuth
+
+Posted: July 8, 2012
 
 I received an email with an interesting question a while back. The question was this:
 
