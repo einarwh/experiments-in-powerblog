@@ -15,6 +15,7 @@ I wondered if I could come up with an alternative approach, and hence I got to t
 
 To illustrate the approach, consider a sample diamond built from five letters, A through E. It should look like the following:
 
+```
 ....A....
 ...B.B...
 ..C...C..
@@ -24,22 +25,27 @@ E.......E
 ..C...C..
 ...B.B...
 ....A....
+```
 
 The mirroring is fairly obvious. One way to look at the diamond is to consider it as a pyramid mirrored along the E-row. But at the same time, it is also a pyramid mirrored along the A-column. So it goes both ways. This means that we could rather easily build our pyramid from just a quarter of the diamond, by mirroring it twice. We would start with just this:
 
+```
 A....
 .B...
 ..C..
 ...D.
 ....E
+```
 
 We could then proceed by mirroring along the A-column to produce this:
 
+```
 ....A....
 ...B.B...
 ..C...C..
 .D.....D.
 E.......E
+```
 
 And then we could complete the diamond by mirroring along the E-row, and it would look like the diamond we wanted.
 
@@ -47,7 +53,7 @@ So far so good. But we need the first quarter. How could we go about producing t
 
 Assume we start with a list ['A' .. 'E']. We would like to use that to produce this list:
 
-
+```fsharp
 [ 
   ['A'; '.'; '.'; '.'; '.']; 
   ['.'; 'B'; '.'; '.'; '.']; 
@@ -55,59 +61,35 @@ Assume we start with a list ['A' .. 'E']. We would like to use that to produce t
   ['.'; '.'; '.'; 'D'; '.']; 
   ['.'; '.'; '.'; '.'; 'E']; 
 ]
-
-view raw
-
-
-quarter-diamond-list.fs
-
-hosted with ❤ by GitHub
+```
 
 But that’s rather easy. Each inner list is just the original list ['A' .. 'E'] with all letters except one replaced by ‘.’. That’s a job for map. Say I want to keep only the ‘B’:
 
-
+```fsharp
 List.map (fun x -> if x = 'B' then x else '.') ['A' .. 'E'] 
-
-view raw
-
-
-map-to-dots.fs
-
-hosted with ❤ by GitHub
+```
 
 And so on and so forth for each letter in the original list. We can use a list comprehension to generate all of them for us. For convenience, we’ll create a function genLists:
 
-
+```fsharp
 let genLists lst =
   [ for e in lst do List.map (fun x -> if x = e then x else '.') lst ]
-
-view raw
-
-
-genLists.fs
-
-hosted with ❤ by GitHub
+````
 
 This gives us the first quarter. Now for the mirroring. That’s easy too:
 
-
+```fsharp
 let mirror lst = 
   match lst with 
     | [] -> []
     | h::t -> List.rev t @ lst
-
-view raw
-
-
-mirror.fs
-
-hosted with ❤ by GitHub
+```
 
 (We’ll never actually call mirror with an empty list, but I think it’s better form to include it anyway.)
 
 So now we can map the mirror function over the quarter diamond to produce a half diamond:
 
-
+```fsharp
 [ 
   ['.'; '.'; '.'; '.'; 'A'; '.'; '.'; '.'; '.']; 
   ['.'; '.'; '.'; 'B'; '.'; 'B'; '.'; '.'; '.']; 
@@ -115,63 +97,39 @@ So now we can map the mirror function over the quarter diamond to produce a half
   ['.'; 'D'; '.'; '.'; '.'; '.'; '.'; 'D'; '.']; 
   ['E'; '.'; '.'; '.'; '.'; '.'; '.'; '.'; 'E']; 
 ]
-
-view raw
-
-
-half-diamond.fs
-
-hosted with ❤ by GitHub
+```
 
 Excellent. Now we’re almost ready to do the second mirroring. The only problem is that the mirror function uses the head element as the pivot for mirroring, so we would end up with an X instead of a diamond!
 
 That’s trivial to fix though. We’ll just reverse the list first, and then do the mirroring. I’m not even going to write up the result for that – it is obviously the completed diamond. Instead, here’s the complete diamond function, built from the parts we’ve seen so far:
 
-
+```fsharp
 let diamond letters =
   letters |> genLists 
           |> List.map (fun a -> mirror a) 
           |> List.rev 
           |> mirror 
-
-view raw
-
-
-diamond-fun.fs
-
-hosted with ❤ by GitHub
+```
 
 Could I speed up things by reversing my lists before the first mapping instead of after? No, because the (outer) list has the same number of elements before and after the first mirroring. Plus it’s easier to explain this way. And really, perf optimization for a code kata? Come on!
 
 Now for rendering:
 
-
+```fsharp
 let toStr d =
   d |> List.map (fun a -> new string(Array.ofList(a))) 
     |> String.concat "\n"
-
-view raw
-
-
-tostr.fs
-
-hosted with ❤ by GitHub
+```
 
 And to run everything (for a full-sized diamond, because why not):
 
-
+```fsharp
 ['A' .. 'Z'] |> diamond |> toStr |> printfn "%s"
-
-view raw
-
-
-run-diamond.fs
-
-hosted with ❤ by GitHub
+```
 
 And that’s all there is to it. The entire code looks like this:
 
-
+```fsharp
 open System
 
 let genLists lst =
@@ -193,10 +151,4 @@ let toStr d =
     |> String.concat "\n"
 
 ['A' .. 'Z'] |> diamond |> toStr |> printfn "%s"
-
-view raw
-
-
-diamond-mirror.fs
-
-hosted with ❤ by GitHub 
+```

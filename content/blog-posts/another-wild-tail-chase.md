@@ -17,7 +17,7 @@ First, we need to make sure that the instance method is non-virtual, that is, th
 
 Say you decided to make Add virtual and rewrote it using TailCop. A few months pass by. Along comes your enthusiastic, dim-witted co-worker, ready to redefine the semantics of Add. He’s been reading up on object-orientation and is highly motivated to put all his hard-won knowledge to work. Unfortunately, he didn’t quite get to the Liskov thing, and so he ends up with this:
 
-
+```csharp
 class Adder
 {
   virtual int Add(int x, int y)
@@ -33,13 +33,7 @@ class BlackAdder : Adder
     return base.Add(x, x > 0 ? y + 1 : y);
   }
 }
-
-view raw
-
-
-Add.virtual.subclassing.cs
-
-hosted with ❤ by GitHub
+```
 
 So while he overrides the Add method in a subclass, he doesn’t replace it wholesale – he still invokes the original Add method as well. But then we have a problem. Due to dynamic dispatch, the recursive Add call in Adder will invoke BlackAdder.Add which will then invoke Adder.Add and so forth. Basically we’re taking the elevator up and down in the inheritance hierarchy. If we rewrite Adder.Add to use a loop, we will never be allowed to take the elevator back down to BlackAdder.Add. Obviously, then, the rewrite is not safe. Running BlackAdder.Add(30, 30) yields 90 with the original recursive version of Adder.Add and 61 with the rewritten version. Long story short: we will not rewrite virtual methods.
 
@@ -47,7 +41,7 @@ Our second constraint is that, obviously, the recursive call has to be made on t
 
 While the first constraint is trivial to check for, the second one is a bit more involved. What we have at hand is a data-flow problem, which is a big thing in program analysis. In our case, we need to identify places in the code where this references are pushed onto the stack, and emulate how the stack changes when different opcodes are executed. To model the flow of data in a method (in particular: flow of this references), we first need to construct a control flow graph (CFG for short). A CFG shows (statically) the different possible execution paths through the method. It consists of nodes that represents blocks of instructions and edges that represents paths from one such block to another. A method without branching instructions has a trivial CFG, consisting of a single node representing a block with all the instructions in the method. Once we have branching instructions, however, things become a little more interesting. For instance, consider the code below:
 
-
+```csharp
 public static int Loop(int x, int y)
 {
   while (x > 0)
@@ -57,17 +51,11 @@ public static int Loop(int x, int y)
   }
   return y;
 }
-
-view raw
-
-
-Loop.Add.cs
-
-hosted with ❤ by GitHub
+```
 
 The CFG for (the IL representation of) that code looks like this:
 
-cfg
+TODO: cfg
 
 As you can see, some nodes now have multiple inbound edges. This matters when we try to describe how data flows through the method. Let’s see if we can sketch it out by looking at what happens inside a single node first. A node represents a block of n instructions. Each instruction can be thought of as a function f : S -> S' that accepts a stack as input and produces a stack as output. We can then produce an aggregated stack transformation function for an entire node in the CFG by composing such functions. Since each node represents a block of n instructions, we have a corresponding sequence of functions f0, f1, ..., fn-1 of stack transformations. We can use this sequence to compose a new function g : S -> S' by applying each function fi in order, as follows: g(s) = fn-1(...(f1(f0(s)))). In superior languages, this is sometimes written g = fn-1 o ... o f1 o f0, where o is the composition operator.
 
@@ -75,7 +63,7 @@ Each node in the CFG is associated with such a transformation function g. Now th
 
 This gives us the following pseudocode for processing a node in the CFG, given a set S of stacks as input:
 
-
+```
 def process S
   if exists s in S where not I contains s
     I = I union S
@@ -85,13 +73,7 @@ def process S
     end
   end
 end
-
-view raw
-
-
-pseudo-process.txt
-
-hosted with ❤ by GitHub
+```
 
 Initially, I and O for all nodes will be empty sets. We start processing at the entry node, with S containing just the empty stack. When we’re done, each node will have their appropriate sets I and O.
 
@@ -99,7 +81,7 @@ So now we have the theory pretty much in place. We still need a way to dermine t
 
 Now we should be in good shape to tackle the practicalities of our implementation. One thing we obviously need is a data type to represent our evaluation stack – after all, our description above is littered with stack instances. The stack can be really simple, in that it only needs to distinguish between two kinds of values: this and anything else. So it’s easy, we’ll just use the plain ol’ Stack<bool>, right? Unfortunately we can’t, since Stack<bool> is mutable (in that push and pop mutates the stack they operate on). That’s definitely not going to work. When producing the stack instances in O, we don’t want the g function to mutate the actual stack instances in I in the process. We might return later on with stack instances we’ll want to compare to the instances in I, so we need to preserve those as-is. Hence we need an immutable data structure. So we should use ImmutableStack<bool> from the Immutable Collections, right? I wish! Unfortunately, ImmutableStack<bool>.Equals has another problem (which Stack<bool> also has) – it implements reference equality, whereas we really need value equality (so that two distinct stack instances containing the same values are considered equal). So I ended up throwing together my own EvalStack class instead, highly unoptimized and probably buggy, but still serving our needs.
 
-
+```csharp
 class EvalStack
 {
   private const char YesThis = '1';
@@ -159,13 +141,7 @@ class EvalStack
     return "[" + _ + "]";
   }
 }
-
-view raw
-
-
-EvalStack.cs
-
-hosted with ❤ by GitHub
+```
 
 I’m particularly happy about the way the code for the ToString method ended up.
 
@@ -185,7 +161,7 @@ Mono.Cecil does try to make our implementation task as simple as possible, thoug
 
 Here’s how we compose such f-functions for consumer instructions in TailCop:
 
-
+```csharp
 public Func<EvalStack, EvalStack> CreateConsumerF(int pops, int pushes)
 {
   Func<EvalStack, EvalStack> pop = stack => stack.Pop();
@@ -203,19 +179,13 @@ public Func<EvalStack, EvalStack> CreateConsumerF(int pops, int pushes)
   }
   return result;
 }
-
-view raw
-
-
-CreateConsumerF.cs
-
-hosted with ❤ by GitHub
+```
 
 Notice the two fresh variables, which are there to avoid problems related to closure modification. Eric Lippert explains the problem here and here. TL;DR is: we need a fresh variable to capture each intermediate result closure.
 
 We’ll call the CreateConsumerF method from the general CreateF method which also handles generators and propagators. The simplest possible version looks like this:
 
-
+```csharp
 private Func<EvalStack, EvalStack> CreateF(Instruction insn)
 {
   var op = insn.OpCode;
@@ -233,19 +203,13 @@ private Func<EvalStack, EvalStack> CreateF(Instruction insn)
  
   return CreateConsumerF(insn);
 }
-
-view raw
-
-
-CreateF.cs
-
-hosted with ❤ by GitHub
+```
 
 You’ll note that I’ve only included a single generator and a single propagator! I might add more later on. The minimal CreateF version is sufficient to handle our naïve Add method though.
 
 Now that we have a factory that produces f-functions for us, we’re all set to compose g-functions for each node in the CFG.
 
-
+```csharp
 private Func<EvalStack, EvalStack> CreateG()
 {
   return CreateComposite(_first, _last);
@@ -267,17 +231,11 @@ private Func<EvalStack, EvalStack> CreateComposite(
 
   return fun;
 }
-
-view raw
-
-
-CreateG.cs
-
-hosted with ❤ by GitHub
+```
 
 Once we have the g-function for each node, we can proceed to turn the pseudocode for processing nodes into actual C# code. In fact the C# code looks remarkably similar to the pseudocode.
 
-
+```csharp
 public void Process(ImmutableHashSet<EvalStack> set)
 {
   var x = set.Except(_I);
@@ -291,17 +249,11 @@ public void Process(ImmutableHashSet<EvalStack> set)
     }
   }
 }
-
-view raw
-
-
-Node.Process.cs
-
-hosted with ❤ by GitHub
+```
 
 We process the nodes in the CFG, starting at the root node, until the I-sets of input stacks and the O-sets of output stacks stabilize. At that point, we can determine the stack state (with respect to this references) for any given instruction in the method – including for any recursive method call. We determine whether or not it is safe to rewrite a recursive call to a loop like this:
 
-
+```csharp
 public bool SafeToRewrite(Instruction call, 
   Dictionary<Instruction, Node> map)
 {
@@ -325,17 +277,11 @@ public bool SafeToRewrite(Instruction call,
       return st;
     }).All(s => s.Peek());
 }
-
-view raw
-
-
-SafeToRewrite.cs
-
-hosted with ❤ by GitHub
+```
 
 We find the node that the call instruction belongs to, find the possible stack states at the call site, pop off any values intended to be passed as arguments to the method, and verify that we find a this reference at the top of each stack. Simple! To find the possible stack states, we need to compose the h-function for the call, but that’s easy at this point.
 
-
+```csharp
 ImmutableHashSet<EvalStack> GetPossibleStacksAt(Instruction call)
 {
   var h = CreateH(call);
@@ -346,12 +292,6 @@ Func<EvalStack, EvalStack> CreateH(Instruction call)
 {
   return CreateComposite(_first, call.Previous);
 }
-
-view raw
-
-
-CreateH.cs
-
-hosted with ❤ by GitHub
+```
 
 And with that, we’re done. Does it work? It works on my machine. You’ll have to download TailCop and try for yourself. 

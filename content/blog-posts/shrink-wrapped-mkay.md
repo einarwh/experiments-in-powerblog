@@ -13,7 +13,7 @@ When you install the nuget package in your ASP.NET MVC Application, you’ll fin
 
 Of course, you must remember to reference the Mkay JavaScript bundle in your view somehow, as well as the jQuery validation bundle. You might want to add them to the layout used by your view, for instance. Here’s an example:
 
-
+```csharp
 <!DOCTYPE html>
 <html>
 <head>
@@ -31,13 +31,7 @@ Of course, you must remember to reference the Mkay JavaScript bundle in your vie
     @RenderSection("scripts", required: false)
 </body>
 </html>
-
-view raw
-
-
-_Layout.cshtml
-
-hosted with ❤ by GitHub
+```
 
 And then you can start using Mkay for your own validation needs. Wee! World domination!
 

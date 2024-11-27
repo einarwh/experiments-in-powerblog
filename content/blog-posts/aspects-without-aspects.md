@@ -13,7 +13,7 @@ This capability is so cool that I took a break from writing this blog post to sh
 
 So that was a close call. But yes, you can totally use this for caching. All we need is a suitable transformation thing.
 
-
+```csharp
 public static Func<T> Caching<T>(this Func<T> f) 
 {
   bool cached = false;
@@ -25,19 +25,13 @@ public static Func<T> Caching<T>(this Func<T> f)
     return t;
   };
 }
-
-view raw
-
-
-Caching.cs
-
-hosted with ❤ by GitHub
+```
 
 Here, we’re taking advantage of the fact that C# has mutable closures – that is, that we can write to cached and t from inside the body of the lambda expression.
 
 To verify that it works, we need a suitable example – something that’s really expensive and slow to compute. And as we all know, one of the most computationally intensive things we can do in a code example is to sleep:
 
-
+```csharp
 Func<string> q = () => {
   Thread.Sleep(2000);
   return "Hard-obtained string";
@@ -52,13 +46,7 @@ q = q.Caching();
 Console.WriteLine(q());
 Console.WriteLine(q());
 Console.WriteLine(q());
-
-view raw
-
-
-SleepCache.cs
-
-hosted with ❤ by GitHub
+```
 
 Well, what kind of behaviour should we expect from this code? Obviously, the first three q calls will be slow. But what about the three last? The three last execute the caching closure instead. When we execute the forth call, cached is false, and so the if test fails, and we proceed to evaluate the original, non-caching q (which is slow), tuck away the result value for later, set the cached flag to true, and return the computed result – the hard-obtained string. But the fifth and sixth calls should be quick, since cached is now true, and we have a cached result value to return to the caller, without ever having to resort to the original q.
 
@@ -70,7 +58,7 @@ Why a poor man’s aspects? What’s cheap about them? Well, we will be applying
 
 Let’s consider wrapping some closure f in a hypothetical try-finally-block, and see where we might want to add behaviour.
 
-
+```csharp
 // 1. Before calling f.
 try {
   f();
@@ -79,17 +67,11 @@ try {
 finally {
   // 3. After any call to f.
 }
-
-view raw
-
-
-TryFinallyAop.cs
-
-hosted with ❤ by GitHub
+```
 
 So we’ll create extension methods to add behaviour in those three places. We’ll call them Before, Success and After, respectively.
 
-
+```csharp
 public static class AspectExtensions {
 
   public static Func<T> Before<T>(this Func<T> f, Action a) {
@@ -134,19 +116,13 @@ public static class AspectExtensions {
     };
   } 
 }
-
-view raw
-
-
-AspectExtensions.cs
-
-hosted with ❤ by GitHub
+```
 
 Note that we have two options for each of the join points that occur after the call to the original f closure. In some cases you might be interested in the value returned by f, in others you might not be.
 
 How does it work in practice? Let’s look at a contrived example.
 
-
+```csharp
 static void Main (string[] args)
 {
   Func<Func<string>, Func<string>> wrap = fn => fn
@@ -179,23 +155,17 @@ static void Call(string name, Func<string> m) {
   }			
   Console.WriteLine();
 }
-
-view raw
-
-
-AspectExample.cs
-
-hosted with ❤ by GitHub
+```
 
 So here we have a transformation thing that takes a Func<string> closure and returns another Func<string> closure, with several pieces of advice applied. Can you work out when the different closures will be executed?
 
 We start with some closure fn, but before fn executes, the first Before must execute (that’s why we call it Before!). Assuming both of these execute successfully (without throwing an exception), the Success will execute. But before all these things, the second Before must execute! And finally, regardless of how the execution turns out with respect to exceptions, the After should execute.
 
-In the case of m1, no exception occurs, so we should see the message “Successfully obtained: Hello Kiczales!” in between “Executing m1…” and “What did I get? Hello Kiczales!”. In the case of m2, on the other hand, we do get an exception, so the Success closure is never executed.
+In the case of m1, no exception occurs, so we should see the message “Successfully obtained: Hello Kiczales!” in between “Executing m1...” and “What did I get? Hello Kiczales!”. In the case of m2, on the other hand, we do get an exception, so the Success closure is never executed.
 
 A screenshot of my console verifies this:
 
-Screen Shot 2014-07-04 at 10.59.07 PM
+TODO: Screen Shot 2014-07-04 at 10.59.07 PM
 
 So we’ve seen that we can do fluent exception handling, caching and aspects without aspects using the same basic idea: we take something of type Func<TR> and produce something else of the same type. Of course, this means that we’re free to mix and match all of these things if we wanted to, and compose them all using Linq’s Aggregate method! For once, though, I think I’ll leave that as an exercise for the reader.
 

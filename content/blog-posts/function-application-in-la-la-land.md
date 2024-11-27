@@ -1,9 +1,9 @@
-:page/title Functional application in la-la land
+:page/title Function application in la-la land
 :blog-post/tags [:tech :functional-programming]
 :blog-post/author {:person/id :einarwh}
 :page/body
 
-# Functional application in la-la land
+# Function application in la-la land
 
 Here’s a familiar scenario for a programmer: You have some useful function that you would like to apply to some values. It could be concat that concatinates two strings, or add that adds two integers, or cons which prepends an element to a list, or truncate which cuts off a string at the specified length, or indeed any old function f you come up with which takes a bunch of arguments and produces some result.
 
@@ -15,28 +15,37 @@ Since la-la lands are so pervasive in our programs, clearly we need to be able t
 
 What alternatives do we have? Well, one idea that springs to mind is partial application. If we had a curried function, we could apply it to the la-la land values one by one, producing intermediate functions until we have the final result. For instance, say we have a curried version of add which looks like this:
 
+```csharp
 Func<int, Func<int, int>> add = a => b => a + b;
+```
 
 Now we have a single-argument function that returns a single-argument function that returns a value. So we can use it like this:
 
+```csharp
 Func<int, Func<int, int&gt> add = a => b => a + b;
 Func<int, int> incr = add(1);
 int four = incr(3);
+```
 
 Unfortunately, this still won’t work with Map. What would happen if we passed the curried add to Map? We would get an incr function stuck inside of la-la land! And then we’d be stuck too. But what if we replaced Map with something that could work with functions living in la-la land? Something like this:
 
+```csharp
 Lala<TR> Apply<T, TR>(Lala<Func<T, TR>> f, Lala<T> v);
+```
 
 What Apply needs to do is teleport both the function and the value out of la-la land, apply the function to the value, and teleport the result back into la-la land.
 
 How would this work with our curried add function? Well, first we’d need to teleport the function itself into la-la land. For this, we need a function, which we’ll call Pure. It looks like this:
 
+```csharp
 Lala<T> Pure<T>(T val);
+```
 
 In other words, Pure is a one-way portal to la-la land.
 
 Let’s see how this would work for our curried add function:
 
+```csharp
 static Lala<int> AddLalaIntegers(Lala<int> a, Lala<int> b) 
 {
     Func<int, Func<int, int>> add = a => b => a + b;
@@ -45,6 +54,7 @@ static Lala<int> AddLalaIntegers(Lala<int> a, Lala<int> b)
     Lala<int> lalaResult = Lala.Apply(lalaPartial, b);
     return lalaResult;    
 }
+```
 
 Success! Who would have thought?
 
@@ -54,6 +64,7 @@ But there are still questions worth asking, such as: How do we implement these f
 
 First, consider the la-la land known as Task<T>.
 
+```csharp
 public static class TaskApplicative 
 {
     public static Task<T> Pure(T val) 
@@ -70,6 +81,7 @@ public static class TaskApplicative
         return fun(val);
     }
 }
+```
 
 Awaiting the tasks bring them out of Task-land, and the return value is automatically transported back by the async machinery.
 
@@ -79,6 +91,7 @@ Mayhaps has two possible values, Indeed and Sorry. Indeed holds a value, Sorry d
 
 Here are Pure and Apply for Mayhaps:
 
+```csharp
 public static class MayhapsApplicative
 {
     public static Mayhaps<TR> Pure<TR>(TR v)
@@ -102,6 +115,7 @@ public static class MayhapsApplicative
         }
     }
 }
+```
 
 The semantics of Mayhaps is to propagate Sorry – you can only get a new Indeed if you have both a function and a value.
 
@@ -111,21 +125,26 @@ But I’ll admit that we’re currently in a situation where calling a function 
 
 We can start by writing functions to curry Funcs, which should reduce the awkward. There are quite a few of them; here’s an example that curries a Func with four input parameters:
 
+```csharp
 public static Func<T1, Func<T2, Func<T3, Func<T4, TR>>>> Curry<T1, T2, T3, T4, TR>(
     this Func<T1, T2, T3, T4, TR> f)
 {
     return a => b => c => d => f(a, b, c, d);
 }
+```
 
 We can use it like this:
 
+```csharp
 Func<int, int, int, int, int> sirplusalot = 
     (a, b, c, d) => a + b + c + d; 
 Func<int, Func<int, Func<int, Func<int, int>>>> = 
     sirplusalot.Curry();
+```
 
 A little less awkward. What about involved? We’ll define some helper functions to reduce the boilerplate. The idea is to use a function Lift to handle pretty much everything for us. Here is one that can be used with sirplusalot:
 
+```csharp
 public static Lala<TR> Lift<T1, T2, T3, T4, TR>(
     this Func<T1, T2, T3, T4, TR> f,
     Lala<T1> v1,
@@ -135,11 +154,13 @@ public static Lala<TR> Lift<T1, T2, T3, T4, TR>(
 {
     return Pure(f.Curry()).Apply(v1).Apply(v2).Apply(v3).Apply(v4);
 }
+```
 
 Note that all Lift functions will have the same structure, regardless of which la-la land they operate in. Only the implementations of Pure and Apply will vary.
 
 And now we can implement functions that look like this:
 
+```csharp
 private async static Task<int> Plus(
     Task<int> ta, 
     Task<int> tb, 
@@ -161,5 +182,6 @@ private static Mayhaps<int> Plus(
         (a, b, c, d) => a + b + c + d;
     return sirplusalot.Lift(ma, mb, mc, md);
 }
+```
 
 Which is quite nice? Yes?

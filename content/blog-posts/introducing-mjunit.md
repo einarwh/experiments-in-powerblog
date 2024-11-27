@@ -27,7 +27,7 @@ One feature that got axed in the .NET micro framework is custom attributes, and 
 
 Here’s the Fixture class that all test classes must inherit from:
 
-
+```csharp
 namespace Mjunit
 {
     public abstract class Fixture
@@ -37,19 +37,13 @@ namespace Mjunit
         public virtual void Teardown() {}
     }
 }
-
-view raw
-
-
-Fixture.cs
-
-hosted with ❤ by GitHub
+```
 
 As you can see, Fixture defines empty virtual methods for set-up and tear-down, named SetUp and TearDown, respectively. Test classes can override these to make something actually happen before and after a test method is run. Conventional stuff.
 
 The task of identifying test methods to run is handler by the TestFinder class.
 
-
+```csharp
 namespace Mjunit
 {
     public class TestFinder
@@ -91,19 +85,13 @@ namespace Mjunit
         }
     }
 }
-
-view raw
-
-
-TestFinder.cs
-
-hosted with ❤ by GitHub
+```
 
 You might wonder why I’m using the feeble, untyped ArrayList, giving the code that unmistakeable old-school C# 1.1 tinge? The reason is simple: the .NET micro framework doesn’t have generics. But we managed to get by in 2003, we’ll manage now.
 
 What the code does is pretty much what we outlined above: fetch all the types in the assembly, identify the ones that inherit from Fixture, and proceed to create a TestGroup for each test class we find. A TestGroup is just a thin veneer on top of the test class:
 
-
+```csharp
 namespace Mjunit
 {
     class TestGroup : IEnumerable
@@ -142,17 +130,11 @@ namespace Mjunit
         }
     }
 }
-
-view raw
-
-
-TestGroup.cs
-
-hosted with ❤ by GitHub
+```
 
 The TestFinder is used by the TestRunner, which does the bulk of the work in μnit, really. Here it is:
 
-
+```csharp
 namespace Mjunit
 {
     public class TestRunner
@@ -316,13 +298,7 @@ namespace Mjunit
         }
     }
 }
-
-view raw
-
-
-TestRunner.cs
-
-hosted with ❤ by GitHub
+```
 
 That’s a fair amount of code, and quite a few new concepts that haven’t been introduced yet. At a high level, it’s not that complex though. It works as follows. The user of a test runner will typically be interested in notification during the test run. Hence TestRunner exposes three events that fire when the test run starts, when it completes, and when each test has been run respectively. To receive notifications, the user can either hook up to those events directly or register one or more so-called test clients. We’ll look at some examples of test clients later on. To avoid blocking test clients and support cancellation of the test run, the tests run in their own thread.
 
@@ -330,7 +306,7 @@ As you can see from the RunTest method, each test results in a SingleTestResult,
 
 The SingleTestResult instances are aggregated into TestClassResult instances, which in turn are aggregated into a single TestGroupResult instance representing the entire test run. All of these classes implement ITestResult, which looks like this:
 
-
+```csharp
 namespace Mjunit
 {
     public interface ITestResult
@@ -346,19 +322,13 @@ namespace Mjunit
         int NumberOfTestsFailed { get; }
     }
 }
-
-view raw
-
-
-ITestResult.cs
-
-hosted with ❤ by GitHub
+```
 
 Now for a SingleTestResult, the NumberOfTests will obviously be 1, whereas for a TestClassResult it will match the number of SingleTestResult instances contained by the TestClassResult, and similarly for the TestGroupResult.
 
 So that pretty much wraps it up for the core of μnit. Let’s take a look at how it looks at the client side, for someone who might want to use μnit to write some tests. The most convenient thing to do is probably to register a test client; that is, some object that implements ITestClient. ITestClient looks like this:
 
-
+```csharp
 namespace Mjunit
 {
     public interface ITestClient
@@ -373,13 +343,7 @@ namespace Mjunit
             TestRunEventHandlerArgs args);
     }
 }
-
-view raw
-
-
-ITestClient.cs
-
-hosted with ❤ by GitHub
+```
 
 The registered test client will then receive callbacks as appropriate when the tests are running.
 
@@ -387,7 +351,7 @@ In order to be useful, test clients typically need to translate notifications in
 
 For the Game of Life implementation (which can be browsed here if you’re interested) I implemented two test clients interacting with elements of the FEZ Spider kit: a DisplayTestClient that shows test results on a small display, and a LedTestClient that simply uses a multicolored LED light to give feedback to the user. Here’s the code for the latter:
 
-
+```csharp
 namespace Mjunit.Clients.GHI
 {
     public class LedTestClient : ITestClient
@@ -447,13 +411,7 @@ namespace Mjunit.Clients.GHI
         }
     }
 }
-
-view raw
-
-
-LedTestClient.cs
-
-hosted with ❤ by GitHub
+```
 
 As you can see, it starts the test run by turning the LED light off. Then, as individual test results come in, the LED light starts blinking. On the first passing test, it will start blinking green. It will continue to do so until a failing test result comes in, at which point it will switch to blinking red instead. Once it has started blinking red, it will stay red, regardless of subsequent results. So the LedTestClient doesn’t actually tell you which test failed, it just tells you if some test failed. Useful for a sanity check, but not much else. That’s where the DisplayTestClient comes in, since it actually shows the names of the tests as they pass or fail.
 

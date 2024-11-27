@@ -11,9 +11,9 @@ _TL;DR Strings always come with strings attached._
 
 I had a little rant about strings on Twitter the other day. It started like this:
 
-    I hate string.
-
-    — Einar W. Høst (@einarwh) January 28, 2016
+> I hate string.
+> 
+> — Einar W. Høst (@einarwh) January 28, 2016
 
 This blog post is essentially the same rant, with a bit of extra cheese.
 
@@ -23,7 +23,7 @@ Well, the problem is that we don’t want our types to be flexible like that –
 
 So to be very explicit about it: if you have a string in your program, it could be anything – anything! You’re communicating to the computer that you’re willing to accept any and all of the following fine string specimen as data in your program:
 
-
+```
 Hello World
 
 (╯°□°）╯︵ ┻━┻
@@ -53,13 +53,7 @@ author: &id001
     </script>
   </body>
 </html>
-
-view raw
-
-
-Some strings
-
-hosted with ❤ by GitHub
+```
 
 Your program does not distinguish between them, they’re all equally good. When you declare a string in your program, you’re literally saying that I’m willing to accept – I’m expecting! – any and all of those as a value. (I should point out that you’re expecting very big strings too, but I didn’t feel like putting any of them in here, because they’re so unwieldy. Not to mention the door is open to that mirage doppelganger of a string, null, as well – but that’s a general problem, not limited to string.)
 
@@ -73,7 +67,7 @@ Unsurprisingly, the good people who care about security (which should be all of 
 
 To make our assumptions explicit, we need to use types that are not strings. But it’s perfectly fine for them to carry strings along. Here’s a class to represent a phone number in C#:
 
-
+```csharp
 public sealed class PhoneNumber
 {
   private readonly string _;
@@ -106,13 +100,7 @@ public sealed class PhoneNumber
     return _;
   }
 }
-
-view raw
-
-
-PhoneNumber.cs
-
-hosted with ❤ by GitHub
+```
 
 Nothing clever, perfectly mundane. You create your PhoneNumber and use it whenever you’d use “string with assumption: valid phone number”. As you can see, the class does nothing more than hold on to a string value, but it does make sure that the string belongs to that small subset of strings that happen to be valid phone numbers as well. It will reject all the other strings. When you need to speak string (at the edges of your program, you just never do it internally), you call ToString() and shed the protection of your type – but at least at that point you know you have a valid phone number.
 

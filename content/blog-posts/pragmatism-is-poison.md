@@ -29,11 +29,11 @@ So the underlying problem is that the definition relies heavily on subjective ju
 
 Here are some quick considerations to -uh- consider:
 
-#1 laws of nature change
-#2 bomb hits data center
-#3 cloud providers go down
-#4 servers are hacked
-#5 unlikely timing of events
+1. Laws of nature change
+2. Bomb hits data center
+3. Cloud providers go down
+4. Servers are hacked
+5. Unlikely timing of events
 
 I suppose we can agree that #1 is of theoretical interest only. What about the others? If #2 happens, maybe we have more serious problems that your service going down, but it depends on how critical that service is. The same goes for #3. With respect to #4, a lot of people seem surprised when their servers are hacked – as if they hadn’t thought it possible! And #5 depends on whether or not you’d like luck to be a part of your architecture. I’ve been on projects where people would tell me that scenarios I asked about were so unlikely that they were practically impossible. Which to me just means they’ll be hard to debug and reproduce when they happen in production.
 
@@ -49,7 +49,7 @@ Here’s how it works. Because of the false dilemma, a claim to be pragmatic is 
 
 A related strategy is to use pragmatism as a diversion or a smoke bomb, offering the confronted part with an easy exit and effectively ending the discussion. The reason is that it takes a lot of guts and perseverance to call someone’s bluff when they’re claiming to be pragmatic. You might approach your co-worker with a concern like “hey, I was looking at the code, and it seems like we’re blocking in our streaming API, which sort of defeats the purpose of a streaming API in the first place”. It sounds like a valid concern until your co-worker says the magic words “I was just being pragmatic” and vanishes in a puff of smoke, like so:
 
-puffanimate
+TODO: puffanimate
 
 What we should do instead is accept the complexity we’re faced with and resist the urge to trivialize it. There’s always a need for thinking and discussion, and spurious claims of pragmatism don’t help.
 
@@ -59,6 +59,7 @@ Because the approach sounds rather dubious when written out like that, we use th
 
 Here’s an obviously made-up example of this approach:
 
+```javascript
 function square(x) = {
     if (x == 1) then return 1;
     if (x == 2) then return 4;
@@ -68,14 +69,17 @@ function square(x) = {
     // Should never happen.
     return -1;
  }
+```
 
 This is a function that computes the square of the integers 1-5, not by reflecting any understanding of what it means to square a number, but rather by emulating correct behavior. It has a small bug for the input number 4, but that doesn’t matter much, we rarely get that value, and the result isn’t too far off. It’s a perfectly pragmatic solution if you can assume that x will always be in the range 1-5.
 
 A more general solution would be this:
 
+```javascript
 function square(x) = {
     return x * x;
 }
+```
 
 Which solves the general case of calculating the square of integers – sort of! Unfortunately, integers themselves are deeply pragmatic. (What happens when x * x is greater than the maximum value for integers?)
 
@@ -89,7 +93,7 @@ Finally, pragmatism is sometimes used to create outright logical contradictions.
 
 To illustrate, here’s (a reproduction of) a funny meme I found on the Internet.
 
-batman-rest
+TODO: batman-rest
 
 I think it’s funny because a lot of people seem to get annoyed when someone points out that their self-proclaimed RESTful APIs aren’t really RESTful because they violate some property of REST or other – typically the hypermedia constraint. People get annoyed because they don’t want to think about that, they’d rather be pragmatic and get on with stuff.
 
@@ -97,7 +101,7 @@ But for some reason they still want to keep that word, REST. Maybe they think it
 
 Here’s another meme. I made this one myself. Unfortunately it’s not funny.
 
-batman-secure
+TODO: batman-secure
 
 Why isn’t it funny? It looks a lot like the previous one.
 
@@ -107,7 +111,7 @@ Now we have the strange situation that it’s apparently OK for some words in so
 
 Here’s a third meme. I made this one too.
 
-batman-tea
+TODO: batman-tea
 
 It’s a bit strange, I’ll admit that. But bear with me. It’s the last one, I promise.
 

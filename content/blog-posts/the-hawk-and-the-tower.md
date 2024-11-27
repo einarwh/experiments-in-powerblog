@@ -17,7 +17,7 @@ As you can see, the tower is made up of completely awesome, jaw-drop-inducing bo
 
 Now the weird thing is that somewhat pathetically, I’ve always associated a bit of pride with my tower of books – as if merely owning these great books would somehow cause some of their greatness to rub off on me. The notion is clearly absurd – it makes no sense – but that’s the way it has been. Lately though, I can’t really look at the tower without thinking of my favorite Whitman quote, from Song of Myself:
 
-The spotted hawk swoops down and accuses me, he complains of my gab and my loitering.
+> The spotted hawk swoops down and accuses me, he complains of my gab and my loitering.
 
 Gab and loitering indeed! I read about books, I purchase books, I write blog posts about books – what about actually reading them?
 
@@ -47,9 +47,9 @@ This brings me to the scary part, which I call topic skipping. The problem is th
 
 Now according to Wikipedia, that trustworthy workhorse of information that may or may not be trustworthy, a user can do the following to alleviate disk thrashing:
 
-    Increase the amount of RAM in the computer.
-    Adjust the size of the swap file.
-    Decrease the amount of programs being run on the computer.
+* Increase the amount of RAM in the computer.
+* Adjust the size of the swap file.
+* Decrease the amount of programs being run on the computer.
 
 In terms of reading, this translates roughly to increasing the size of your brain (a good idea, but requires significant advances in medicine), increasing the amount of time available for reading (I’d like to, but cannot conjure up any more hours in the day) and decreasing the number of books you’re trying to read at once (excellent advice!).
 

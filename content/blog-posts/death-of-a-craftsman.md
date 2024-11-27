@@ -41,7 +41,7 @@ I was back where I started. I once again faced the problem that I wanted to be a
 
 And that’s an important question to answer, because it enables you to answer the even more important question: am I a good developer? Because this has to do with sense of worth. Am I valuable? Am I a good egg? We all want to be good eggs.
 
-Roberto Benigni in Down By Law
+![Roberto Benigni in Down By Law](/images/i-ham-a-good-egg.jpg)
 
 And that was the original lure of software craftsmanship for me – it provided simple and clear answers to these questions.
 

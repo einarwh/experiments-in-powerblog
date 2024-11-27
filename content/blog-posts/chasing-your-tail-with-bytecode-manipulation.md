@@ -9,18 +9,12 @@ Posted: November 5, 2013
 
 Last week I was at the TDC conference in Trondheim to do a talk entitled “Bytecode for beginners”. In one of my demos, I showed how you might do a limited form of tail call elimination using bytecode manipulation. To appreciate what (recursive) tail calls are and why you might want to eliminate them, consider the following code snippet:
 
-
+```csharp
 static int Add(int x, int y)
 {
   return x > 0 ? Add(x – 1, y + 1) : y;
 }
-
-view raw
-
-
-Add.cs
-
-hosted with ❤ by GitHub
+```
 
 As you can see, it’s a simple recursive algorithm to add two (non-negative) integers together. Yes, I am aware that there is a bytecode operation available for adding integers, but let’s forget about such tedious practicalities for a while. It’s just there to serve as a minimal example of a recursive algorithm. Bear with me.
 
@@ -33,7 +27,7 @@ So basically we just decrement x and increment y until we run out of x, and then
 
 This algorithm works really well for lots of integers, but the physical world of the computer puts a limit on how big x can be. The problem is this: each time we call Add, the .NET runtime will allocate a bit of memory known as a stack frame for the execution of the method. To illustrate, consider the addition of two small numbers, 6 + 6. If we imagine the stack frames -uh- stacked on top of each other, it might look something like this:
 
-add-call-stack
+TODO: add-call-stack
 
 So we allocate a total of 7 stack frames to perform the calculation. The .NET runtime will handle that just fine, but 6 is a pretty small number. In general we allocate x + 1 stack frames, and at some point that becomes a problem. The .NET runtime can only accommodate so many stack frames before throwing in the towel (where the towel takes on the physical form of a StackOverflowException).
 
@@ -47,7 +41,7 @@ In this blog post, we’ll implement a poor man’s tail call elimination by tra
 
 First, we’ll take a look at the original bytecode, the one that does the recursive tail call.
 
-
+```
 .method private hidebysig static 
   int32 Add(
     int32 x,
@@ -69,17 +63,11 @@ First, we’ll take a look at the original bytecode, the one that does the recur
   IL_0012: call int32 Program::Add(int32,int32)
   IL_0013: ret
 } // end of method Program::Add
-
-view raw
-
-
-Add.il
-
-hosted with ❤ by GitHub
+```
 
 So the crucial line is at IL_0012, that’s where the recursive tail call happens. We’ll eliminate the call instruction and replace it with essentially a goto. In terms of IL we’ll use a br.s opcode (where “br” means branch), with the first instruction (IL_0000) as target. Prior to jumping to IL_0000, we need to update the argument values for the method. The way method calls work in IL is that the argument values have been pushed onto the execution stack prior to the call, with the first argument deepest down in the stack, and the last argument at the top. Therefore we already have the necessary values on the execution stack, it is merely a matter of writing them to the right argument locations. All we need to do is starg 1 and starg 0 in turn, to update the value of y and x respectively.
 
-
+```
 .method private hidebysig static 
   int32 Add (
     int32 x,
@@ -104,17 +92,11 @@ So the crucial line is at IL_0012, that’s where the recursive tail call happen
   IL_0011: starg 0
   IL_0012: br.s IL_0000
 } // end of method Program::Add
-
-view raw
-
-
-AddLoop.il
-
-hosted with ❤ by GitHub
+```
 
 If we reverse engineer this code into C# using a tool like ILSpy, we’ll see that we’ve indeed produced a loop.
 
-
+```csharp
 private static int Add(int x, int y)
 {
   while (x != 0)
@@ -125,13 +107,7 @@ private static int Add(int x, int y)
   }
   return y;
 }
-
-view raw
-
-
-AddLoopReverse.cs
-
-hosted with ❤ by GitHub
+```
 
 You may wonder where the arg_0F_0 variable comes from; I do too. ILSpy made it up for whatever reason. There’s nothing in the bytecode that mandates a local variable, but perhaps it makes for simpler reverse engineering.
 
@@ -141,7 +117,7 @@ TailCop is a simple command line utility I wrote that rewrites some tail calls i
 
 The first thing we need to do is find all the recursive tail calls.
 
-
+```csharp
 private IList<Instruction> FindTailCalls(MethodDefinition method) 
 {
   var calls = new List<Instruction>();
@@ -161,19 +137,13 @@ private IList<Instruction> FindTailCalls(MethodDefinition method)
   }
   return calls;
 }
-
-view raw
-
-
-FindTailCalls.cs
-
-hosted with ❤ by GitHub
+```
 
 So as you can see, there’s nothing mystical going on here. We’re simply selecting call instructions from method bodies where the invoked method is the same as the method we’re in (so it’s recursive) and the following instruction is a ret instruction.
 
 The second (and final) thing is to do the rewriting described above.
 
-
+```csharp
 private void TamperWith(
   MethodDefinition method, 
   IEnumerable<Instruction> calls)
@@ -194,13 +164,7 @@ private void TamperWith(
     il.Remove(call);
   }
 }
-
-view raw
-
-
-TamperWith.cs
-
-hosted with ❤ by GitHub
+```
 
 As you can see, we consistently inject new instructions before the recursive call. There are three things to do:
 
@@ -212,7 +176,7 @@ That’s all there is to it. If you run TailCop on an assembly that contains the
 
 To convince ourselves (or at least make it plausible) that TailCop works in general, not just for the Add example, let’s consider another example. It looks like this:
 
-
+```csharp
 private static int Sum(List<int> numbers, int result = 0)
 {
   int size = numbers.Count();
@@ -225,13 +189,7 @@ private static int Sum(List<int> numbers, int result = 0)
   numbers.RemoveAt(last);
   return Sum(numbers, n + result);
 }
-
-view raw
-
-
-Sum.cs
-
-hosted with ❤ by GitHub
+```
 
 So once again we have a tail recursive algorithm, this time to compute the sum of numbers in a list. It would be sort of nice and elegant if it were implemented in a functional language, but we’ll make do. The idea is to exploit two simple facts about sums of lists of integers:
 
@@ -240,7 +198,7 @@ So once again we have a tail recursive algorithm, this time to compute the sum o
 
 The only complicating detail is that we use an accumulator (the result variable) in order to make the implementation tail-recursive. That is, we pass the partial result of summing along until we run out of numbers to sum, and then the result is complete. But of course, this algorithm is now just a susceptible to stack overflows as the recursive Add method was. And so we run TailCop on it to produce this instead:
 
-
+```csharp
 private static int Sum(List<int> numbers, int result = 0)
 {
   while (true)
@@ -259,12 +217,6 @@ private static int Sum(List<int> numbers, int result = 0)
   }
   return result;
 }
-
-view raw
-
-
-SumLoopReverse.cs
-
-hosted with ❤ by GitHub
+```
 
 And we’re golden. You’ll note that ILSpy is just about as skilled at naming things as that guy you inherited code from last month, but there you go. You’re not supposed to look at reverse engineered code, you know.

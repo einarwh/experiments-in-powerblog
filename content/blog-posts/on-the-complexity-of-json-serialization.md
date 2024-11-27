@@ -11,7 +11,7 @@ I vented a bit on Twitter the other day about my frustrations with JSON serializ
 
 > I hate configuring JSON serializers.
 >
-> — Einar W. Høst (@einarwh) May 7, 2020
+> — Einar W. Høst (@einarwh), May 7, 2020
 
 I thought I’d try to write it out in a bit more detail.
 
@@ -27,19 +27,19 @@ But I’m looking at the wrong problem of course. The real problem is something 
 
 This is actual JSON serialization:
 
-Actual JSON serialization.
+![Actual JSON serialization](/images/json-serialization.png)
 
 This problem has some very nice properties! It is well-defined. It is closed. It has bounded complexity. There are no sources of new complexity unless the JSON specification itself is changed. It is an eminent candidate for a black box magical solution – some highly tuned, fast, low footprint enterprise-ready library or other. Great.
 
 This, however, is “JSON serialization” as we practice it:
 
-JSON serialization as practised
+![JSON serialization as practised](/images/json-serialization-in-air-quotes.png)
 
 “JSON serialization” is not about mapping to or from a text string a single, canonical, well-defined object model. It is much more ambitious! It is about mapping to or from a text string containing JSON and some arbitrarily complex data model that we invented using a programming language of our choice. The reason, of course, is that we don’t want to work with a JSON representation in our code, we want to work with our own data structure. We may have a much richer type system, for instance, that we would like to exploit. We may have business rules that we want to enforce. But at the same it it’s so tedious to write the code to map between representations. Boilerplate, we call it, because we don’t like it. It would be very nice if the “JSON serializer” could somehow produce our own, custom representation directly! Look ma, no boilerplate! But now the original problem has changed drastically.
 
 It now includes this:
 
-Generic data model mapping
+![Generic data model mapping](/images/data-model-mapping.png)
 
 The sad truth is that it belongs to a class of problems that is both boring and non-trivial. They do exist. It is general data model mapping, where only one side has fixed properties. It could range from very simple (if the two models are identical) to incredibly complex or even unsolvable. It depends on your concrete models. And since models are subject to change, so is the complexity of your problems. Hence the endless stream of pain and bugs mentioned above.
 
@@ -57,9 +57,8 @@ So what am I suggesting? I’m suggesting letting JSON serialization be about JS
 
 It looks like this:
 
-JSON serialization and mapping by hand
+![JSON serialization decoupled from mapping by hand](/images/json-serialization-decoupled-from-mapping.png)
 
 There is still potentially arbitrary complexity involved of course, in the mapping between JSON and your own model. But it is visible, transparent complexity that you can address with very simple means. So simple that we call it boilerplate.
 
 There is a famous paper by Fred Brooks Jr kalled “No Silver Bullet“. In it, Brooks distinguishes between “essential” and “accidental” complexity. That’s an interesting distinction, worthy of a discussion of its own. But I think it’s fair to say that for “JSON serialization”, we’re deep in the land of the accidental. There is nothing inescapable about the complexity of serializing and deserializing JSON.
-

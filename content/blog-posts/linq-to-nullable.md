@@ -17,6 +17,7 @@ I think I said something like the following. Assume you have a parameterized typ
 
 To illustrate, I explained that Nullable<T> is a functor – or at least it should be. And it would be, if we defined the appropriate mapping function for Nullable<T>. So I wrote the following on the whiteboard:
 
+```csharp
 public static class NullableExtensions {
   public static TTarget? Select<TSource, TTarget>(
       this TSource? t, 
@@ -27,19 +28,24 @@ public static class NullableExtensions {
     return t.HasValue ? (TTarget?) selector(t.Value) : null;
   }
 }
+```
 
 So this is our mapping function, even though I named it Select, which is the name used in the C# and LINQ world. A benefit of this function is that you no longer have to manually handle the mundane issues of worrying about whether or not some Nullable<T> is null. So instead of writing code like this, which resembles something from our code base:
 
+```csharp
 Duration? duration = null;
 if (thing.Frames.HasValue)
 {
   var ms = thing.Frames.Value * 40;
   duration = Duration.FromMilliseconds(ms);
 }
+```
 
 You can write this instead:
 
+```csharp
 Duration? duration = thing.Frames.Select(fs => Duration.FromMilliseconds(fs * 40));
+```
 
 I think it is quite nice – at least if you can get comfortable calling an extension method on something that might be null. But from this point on, things started to go awry. But it wasn’t my fault! They started it!
 
@@ -47,12 +53,15 @@ See, some of the people in the meeting said they kind of liked the approach, but
 
 So as I left the meeting, I started wondering. I suspected that there really was nothing particular that tied LINQ and the query syntax to IEnumerable<T>, which would mean you could use it for other things. Other functors. And so I typed the following into LinqPad:
 
+```csharp
 DateTime? maybeToday = DateTime.Today;
 var maybeTomorrow = from dt in maybeToday select dt.AddDays(1);
 maybeTomorrow.Dump();
+```
 
 And it worked, which I thought was pretty cool. I consulted the C# specification and found that as long as you implement methods of appropriate names and signatures, you can use the LINQ query syntax. And so I decided to let functors be functors and just see what I could do with Nullables using LINQ. So I wrote this:
 
+```csharp
 public static TSource? Where<TSource>(
     this TSource? t, 
     Func<TSource, bool> predicate)
@@ -60,9 +69,11 @@ public static TSource? Where<TSource>(
   {
     return t.HasValue && predicate(t.Value) ? t : null;
   }
+```
 
 Which allowed me to write
 
+```csharp
 DateTime? MaybeSaturday(DateTime? maybeDateTime)
 {
   return
@@ -70,11 +81,13 @@ DateTime? MaybeSaturday(DateTime? maybeDateTime)
     where dt.DayOfWeek == DayOfWeek.Friday
     select dt.AddDays(1);
 }
+```
 
 Which will return null unless it’s passed a Nullable that wraps a DateTime representing a Friday. Useful.
 
 It should have stopped there, but the C# specification is full of examples of expressions written in query syntax and what they’re translated into. For instance, I found that implementing this:
 
+```csharp
 public static TTarget? SelectMany<TSource, TTarget>(
     this TSource? t, 
     Func<TSource, TTarget?> selector)
@@ -95,9 +108,11 @@ public static TResult? SelectMany<TSource, TIntermediate, TResult>(
   return t.SelectMany(selector)
           .Select(it => resultSelector(t.Value, it));
 }
+```
 
 I could suddenly write this, which is actually quite nice:
 
+```csharp
 TimeSpan? Diff(DateTime? maybeThis, DateTime? maybeThat)
 {
   return
@@ -105,6 +120,7 @@ TimeSpan? Diff(DateTime? maybeThis, DateTime? maybeThat)
     from dt2 in maybeThat
     select (dt2 - dt1);
 }
+```
 
 It will give you a wrapped TimeSpan if you pass it two wrapped DateTimes, null otherwise. How many checks did you write? None.
 
@@ -114,6 +130,7 @@ What I find amusing is that you can usually find a reasonable interpretation and
 
 Finally, as an exercise for the reader: what extension methods would you write to enable this?
 
+```csharp
 static async Task Greet()
 {
   var greeting =
@@ -123,3 +140,4 @@ static async Task Greet()
 
   Console.WriteLine(await greeting);
 }
+```

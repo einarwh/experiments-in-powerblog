@@ -20,7 +20,7 @@ It’s an interesting question, though, with some pretty deep repercussions. In 
 Anyways. In case you’re unfamiliar with Knuth, we’re talking about this guy:
 Knuth
 
-Professor Donald Knuth
+TODO: Image: Professor Donald Knuth
 
 Knuth received the ACM Turing award in 1974 (a year before I was born) for his work on the analysis of algorithms and data structures. That work is captured in the first three volumes of a series of books known as The Art of Computer Programming or TAOCP for short. “Reading Knuth” refers to reading those books.
 
@@ -38,7 +38,7 @@ I feel like it’s an important question to try to answer, though. It’s kind o
 
 Anyways, the opening goes like this:
 
-There is but one truly serious philosophical problem, and that is suicide. Judging whether life is or is not worth living amounts to answering the fundamental question of philosophy. All the rest – whether or not the world has three dimensions, whether the mind has nine or twelve categories – comes afterwards. These are games; one must first answer. And if it is true, as Nietzsche claims, that a philosopher, to deserve our respect, must preach by example, you can appreciate the importance of that reply, for it will precede the definitive act. These are facts the heart can feel; yet they call for careful study before they become clear to the intellect.
+> There is but one truly serious philosophical problem, and that is suicide. Judging whether life is or is not worth living amounts to answering the fundamental question of philosophy. All the rest – whether or not the world has three dimensions, whether the mind has nine or twelve categories – comes afterwards. These are games; one must first answer. And if it is true, as Nietzsche claims, that a philosopher, to deserve our respect, must preach by example, you can appreciate the importance of that reply, for it will precede the definitive act. These are facts the heart can feel; yet they call for careful study before they become clear to the intellect.
 
 Isn’t it just grand? Who cares about girls when you can read stuff like that.
 
@@ -51,7 +51,8 @@ So far in my career, I’ve sort of dogded the issue of Knuth and TAOCP. I’ve 
 But that’s me, not necessarily you. What about you? Should you read Knuth? I dunno.
 
 In my mind, reading Knuth is similar to choosing to walk three years by foot to some remote location in the mountains, in order to study with some famous zen monk (a thought that is somehow made more amusing by the fact that Knuth bears a certain resemblance to Yoda). Once you’ve made up your mind to study with this monk, you don’t really question why he does things this way or that way – you just do as you’re told. Wax on, wax off, if you like.
-Paro-taktsang-tigers-nest-monastery-bhutan-500x375
+
+TODO: Image: Paro-taktsang-tigers-nest-monastery-bhutan-500x375
 
 Taktshang – the Tiger’s Nest monastery
 

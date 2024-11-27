@@ -13,6 +13,7 @@ One of the (admittedly many) things you might want to do is reduce a bunch of th
 
 Now how should the actual reduction take place? An obvious idea is to do it stepwise. It’s both a good problem solving strategy in general, and kind of necessary when dealing with an IEnumerable. For that to work, though, you need some way of taking two values and combining them to produce a single value. So Reduce needs to be a higher-order function. The caller should pass in a combine function, as well as some initial value to combine with the first element. And then the completed function might look something like this:
 
+```csharp
 public static T Reduce(this IEnumerable<T> things, 
   Func<T, T, T> combine, 
   T initialValue) 
@@ -24,14 +25,18 @@ public static T Reduce(this IEnumerable<T> things,
   }
   return result;
 }
+```
 
 And now if you have a bunch of integers, say, you can add them all up like this:
 
+```csharp
 var integers = new [] { 1, 2, 3, 4 };
 var sum = integers.Reduce((a, b) => a + b, 0);
+```
 
 If, on the other hand, you have a bunch of lists, you’d do something like this instead:
 
+```csharp
 var lists = new [] {
   new List { 1 },
   new List { 2, 3 }
@@ -44,6 +49,7 @@ var sum = lists.Reduce((a, b) =>
     return list;
   },
   new List());
+```
 
 And this would give you the list of elements 1, 2, 3. Great.
 
@@ -51,7 +57,9 @@ Now there are other things you might wonder about with respect to the combine fu
 
 Assume you have three values t1, t2, t3. Your combine function is associative if the following holds:
 
+```csharp
 combine(t1, combine(t2, t3)) == combine(combine(t1, t2), t3)
+```
 
 Unfortunately there is nothing in the C# type system that lets us specify and verify that a function is associative, so we need to rely on documentation and discipline for that.
 
@@ -59,13 +67,16 @@ Alternatively, we can turn to mathematics. It turns out that mathematicians have
 
 To represent a semigroup in our program, we can introduce an interface:
 
+```csharp
 public interface ISemigroup<T>
 {
   T Combine(T a, T b);
 }
+```
 
 And we can modify our Reduce function to work with semigroups, which by definition guarantees that the Combine function is associative.
 
+```csharp
 public static T Reduce<T>(this IEnumerable<T> things, 
   ISemigroup<T> semigroup, 
   T initialValue)
@@ -77,9 +88,11 @@ public static T Reduce<T>(this IEnumerable<T> things,
   }
   return result;
 }
+```
 
 And we can introduce a bunch of concrete implementations of this interface, like:
 
+```csharp
 class IntegerUnderAdditionSemigroup : ISemigroup<int>
 {
   public int Combine(int a, int b)
@@ -122,6 +135,7 @@ class FuncSemigroup<T> : ISemigroup<Func<T, T>>
     return it => g(f(it));
   }
 }
+```
 
 So that’s quite nice. We can rely on meaningful and precise abstractions to give us some guarantees in our programs.
 
@@ -129,41 +143,50 @@ There is still a small problem when working with semigroups for reduction though
 
 One approach, I guess, would be to just pick the first value and then perform reduce on the rest.
 
+```csharp
 public static T Reduce(this IEnumerable<T> things, 
   ISemigroup<T> semigroup)
 {
   return things.Skip(1).Reduce(semigroup, things.First();
 }
+```
 
 This would work for non-empty bunches of things. But that means we’d have to check for that in some way before calling Reduce. That’s quite annoying.
 
 What would be useful is some sort of harmless value that we could combine with any other value and just end up with the other value. So we could just use that magical value as the initial value for our Reduce.
 
-Luckily, it turns out that there are such magical values for all the semigroups we’ve looked at. In fact, we’ve seen two such values already. For integers under addition, it’s zero. For lists, it’s the empty list. But there are others. For integers under multiplication, it’s one. For strings, it’s the empty string. And for functions it’s the identity function, which just returns whatever value you hand it. Now if you can provide such a value, which is called the unit value, for your semigroup, you get what the mathematicians call a monoid. It’s another intensely unfamiliar-sounding name, but again the meaning is very precise.
+Luckily, it turns out that there are such magical values for all the semigroups we’ve looked at. In fact, we’ve seen two such values already. For integers under addition, it’s zero. For lists, it’s the empty list. But there are others. For integers under multiplication, it’s one. For strings (under concatination), it’s the empty string. And for functions (under composition) it’s the identity function, which just returns whatever value you hand it. Now if you can provide such a value, which is called the unit value, for your semigroup, you get what the mathematicians call a monoid. It’s another intensely unfamiliar-sounding name, but again the meaning is very precise.
 
 We can represent monoids in our programs by introducing another interface:
 
+```csharp
 public interface IMonoid<T> : ISemigroup<T> 
 {
   T Unit { get; }
 }
+```
 
 So there is nothing more to a monoid than exactly this: it’s a semigroup with a unit value. And the contract that the unit value operates under is this:
 
+```csharp
 Compose(Unit, t) == Compose(t, Unit) == t
+```
 
 This just says that the unit value is magical in the sense we outlined. We can combine it with any value t any way we want, and we end up with t.
 
 Now we can write a new Reduce function that works on monoids:
 
+```csharp
 public static T Reduce(this IEnumerable<T> things, 
   IMonoid<T> monoid)
 {
   return things.Reduce(monoid, monoid.Unit);
 }
+```
 
 This is quite nice, because we don’t have to worry any more about whether or not the bunch of things is empty. We can proceed to implement concrete monoids that we might want to use.
 
+```csharp
 class IntegerUnderAdditionMonoid 
   : IntegerUnderAdditionSemigroup, IMonoid<int>
 {
@@ -206,9 +229,11 @@ class FuncMonoid<T> : FuncSemigroup<T>, IMonoid<Func<T, T>>
     get { return it => it; }
   }
 }
+```
 
 And we might write a small test program to see if they work as intended.
 
+```csharp
 public static void Main(string[] args)
 {
   var integers = new[] { 1, 2, 4, 8 };
@@ -238,6 +263,7 @@ public static void Main(string[] args)
   Console.WriteLine(strFun("hello world"));
   Console.WriteLine(strFun(str));
 }
+```
 
 Can you work out what the program will print? If not, you might want to try to run it.
 

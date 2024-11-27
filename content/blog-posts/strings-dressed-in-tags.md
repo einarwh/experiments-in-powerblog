@@ -13,28 +13,22 @@ We ended up using a Func from string to string to perform wrapping as appropriat
 
 The code I came up with lets you write transforms such as this:
 
-
+```csharp
 Func<string, string> transform =
   s => s.Tag("a")
         .Href("http://einarwh.posterous.com&quot;)
         .Style("font-weight: bold");
-
-view raw
-
-
-TagDressedString.cs
-
-hosted with ❤ by GitHub
+```
 
 Which is pretty elegant and compact, don’t you think? Though perhaps a bit unusual. In particular, you might be wondering about the following:
 
-    How come there’s a Tag method on the string?
-    Where do the other methods come from?
-    How come the return value is a string?
+1. How come there’s a Tag method on the string?
+2. Where do the other methods come from?
+3. How come the return value is a string?
 
 So #1 is easy, right? It has to be an extension method. As you well know, an extension method is just an illusion created by the C# compiler. But it’s a neat illusion that allows for succinct syntax. The extension method looks like this:
 
-
+```csharp
 public static class StringExtensions
 {
     public static dynamic Tag(this string content, string name)
@@ -42,13 +36,7 @@ public static class StringExtensions
         return new Tag(name, content);
     }
 }
-
-view raw
-
-
-StringExtensions.cs
-
-hosted with ❤ by GitHub
+```
 
 So it simply creates an instance of the Tag class, passing in the string to be wrapped and the name of the tag. That’s all. So that explains #2 as well, right? Href and Style must be methods defined on the Tag class? Well no. That would be tedious work, since we’d need methods for all possible HTML tag attributes. I’m not doing that.
 
@@ -56,13 +44,13 @@ If you look closely at the signature of the Tag method, you’ll see that it ret
 
 We don’t have to deal with all of that, though. Long story short, Tag inherits from DynamicObject, a built-in building block for creating types with potensially interesting dynamic behaviour. DynamicObject exposes several virtual methods that are called during run-time method dispatch. So basically when the run-time is trying to figure out which method to invoke and to invoke it, you’ve got these nice hooks where you can insert your own stuff. Tag, for instance, implements its own version of TryInvokeMember, which is invoked by the run-time to, uh, you know, try to invoke a member? It takes the following arguments:
 
-    An instance of InvokeMemberBinder (a subtype of CallSiteBinder) which provides run-time binding information.
-    An array of objects containing any arguments passed to the method.
-    An out parameter which should be assigned the return value for the method.
+* An instance of InvokeMemberBinder (a subtype of CallSiteBinder) which provides run-time binding information.
+* An array of objects containing any arguments passed to the method.
+* An out parameter which should be assigned the return value for the method.
 
 Here is Tag‘s implementation of TryInvokeMember:
 
-
+```csharp
 public override bool TryInvokeMember(
     InvokeMemberBinder binder,
     object[] args,
@@ -85,13 +73,7 @@ private string GetValue(object[] args)
     }
     return null;
 }
-
-view raw
-
-
-TryInvokeMember.cs
-
-hosted with ❤ by GitHub
+```
 
 What does it do? Well, not a whole lot, really. Essentially it just hamsters values from the method call (the method name and its first argument) in a dictionary. So for instance, when trying to call the Href method in the example above, it’s going to store the value “http://einarwh.posterous.com&#8221; for the key “href”. Simple enough. And what about the return value from the Href method call? We’ll just return the Tag instance itself. That way, we get a nice fluent composition of method calls, all of which end up in the Tag‘s internal dictionary. Finally we return true from TryInvokeMember to indicate that the method call succeeded.
 
@@ -99,7 +81,7 @@ Of course, you’re not going to get any IntelliSense to help you get the attrib
 
 Finally, Tag defines an implicit cast to string, which explains #3. The implicit cast just invokes the ToString method on the Tag instance.
 
-
+```csharp
 public static implicit operator string(Tag tag)
 {
     return tag.ToString();
@@ -128,19 +110,13 @@ public override string ToString()
 
     return sb.ToString();
 }
-
-view raw
-
-
-ImplicitCastToString.cs
-
-hosted with ❤ by GitHub
+```
 
 The ToString method is responsible for actually wrapping the original string in opening and closing tags, as well as injecting any hamstered dictionary entries into the opening tag as attributes.
 
 And that’s it, really. That’s all there is. Here’s the complete code:
 
-
+```csharp
 namespace DynamicTag
 {
     class Program
@@ -230,4 +206,4 @@ namespace DynamicTag
         }
     }
 }
-
+```

@@ -13,7 +13,7 @@ I’ve never been much of an early adopter, so now that Silverlight is dead and 
 
 So INotifyPropertyChanged is the hoop you have to jump through to enable Silverlight views to update themselves as the view models they bind to change. It’s hard to envision not wanting the view to update when the view model changes. So typically you’ll want all the properties you bind to, to automatically cause the view to refresh itself. The problem is that this doesn’t happen out of the box. Instead, there’s this cumbersome and tiresome ritual you have to go through where you implement INotifyPropertyChanged, and have all the setters in your view model holler “hey, I’ve changed” by firing the PropertyChanged event. Brains need not apply to do this kind of work; it’s just mind-numbing, repetitive plumbing code. It would be much nicer if the framework would just be intelligent enough to provide the necessary notifications all by itself. Unfortunately, that’s not the case.
 
-Solution: IL weaving
+## Solution: IL weaving
 
 Silver.Needle is the name I use for some code I wrote to do fix that. The basic idea is to use IL manipulation to automatically turn the plain vanilla .NET properties on your view models into view-update-triggering properties with the boring but necessary plumbing just magically *there*. Look ma, no hands!
 
@@ -23,41 +23,29 @@ Of course, since I rarely have original thoughts, Silver.Needle isn’t unique. 
 
 Disclaimer: it is fairly easy to shoot yourself in the foot when you’re meddling with IL directly. I accept no liability if you try to run any of the code included in this blog post and end up injecting IL into your cat, or causing your boss to fail spectacularly at runtime, or encountering any other unfortunate and grotesque mishap as a result of doing so. You have been warned.
 
-Viewable properties
+## Viewable properties
 
 To do the IL manipulation, we need a way to distinguish between properties to tamper with and properties to leave alone. We’ll refer to the former as viewable properties because, you know, they’re able to work with a view?
 
 Silver.Needle gives you two options for indicating that a property is viewable. The first option is to opt-in for individual properties on a class, by annotating each property with the Viewable attribute. The second option is to annotate the entire class as Viewable, and optionally opt-out for individual properties on that class using the Opaque attribute. In either case, the class is considered to be a “view model”, with one or more viewable properties that notify the view of any changes.
 
-
+```csharp
 public class ViewableAttribute: Attribute {}
-
-view raw
-
-
-ViewableAttribute.cs
-
-hosted with ❤ by GitHub
+```
 
 So the task solved by Silver.Needle is to perform the IL voodoo necessary to make sure that the output of the C# compiler of this pretty lean and neato code:
 
-
+```csharp
 public class PersonViewModel
 {
   [Viewable]
   public string Name { get; set; }
 }
+```
 
-view raw
+...is the same as the output generated directly when compiling this cumbersome and clumsy mess:
 
-
-PersonViewModel.cs
-
-hosted with ❤ by GitHub
-
-…is the same as the output generated directly when compiling this cumbersome and clumsy mess:
-
-
+```csharp
 public class PersonViewModel : INotifyPropertyChanged
 {
   private string _name;
@@ -87,17 +75,11 @@ public class PersonViewModel : INotifyPropertyChanged
     }
   }
 }
-
-view raw
-
-
-PersonViewModelByHand.cs
-
-hosted with ❤ by GitHub
+```
 
 We start by using Mono.Cecil to look for types that contain such properties. It’s a simple matter of 1) loading the assembly with Mono.Cecil, 2) iterating over the types in the assembly and 3) iterating over the properties defined for each type. Of course, if we find one or more “view model” types with properties that should perform view notification, we must proceed to do the necessary IL manipulation and write the changed assembly to disk afterwards. The meat of the matter is in scanning an individual type and doing the IL manipulation. We’ll come to that shortly. The surrounding bureaucracy is handled by the NotificationTamperer class.
 
-
+```csharp
 public class NotificationTamperer : ITamperer
 {
   private readonly string _assemblyOutputFileName;
@@ -142,13 +124,7 @@ public class NotificationTamperer : ITamperer
     return result;
   }
 }
-
-view raw
-
-
-NotificationTamperer.cs
-
-hosted with ❤ by GitHub
+```
 
 There’s not much going on here worth commenting upon, it’s just the stuff outlined above. I guess the only thing worth noting is that we need to add a reference to the Silverlight assemblies, so that Mono.Cecil can resolve type dependencies as necessary later on. (For simplicity, I just hard-coded the path to the assemblies on my system. Did I mention it’s not quite ready for the enterprise yet?)
 
@@ -158,7 +134,7 @@ The TypeTamperer does two things. First, it looks for any viewable properties. S
 
 Let’s see how the identification happens:
 
-
+```csharp
 public bool MaybeTamperWith()
 {
   return _typeDef.IsClass 
@@ -198,49 +174,37 @@ private static bool HasAttribute(ICustomAttributeProvider item,
   return item.CustomAttributes.Any(
     a => a.AttributeType.Name == attributeName);
 }
-
-view raw
-
-
-MaybeTamperWith.cs
-
-hosted with ❤ by GitHub
+```
 
 As you can see, the code is very straight-forward. We just make sure that the type we’re inspecting is a class (as opposed to an interface), and look for viewable properties. If we find a viewable property, the HandlePropertyToNotify method is called. We’ll look at that method in detail later on. For now though, we’ll just note that the property will end up in an IDictionary named _map, so that the ReallyTamperWith method is called, tr
 iggering the IL manipulation.
 
 For each of the view model types, we need to make sure that the type implements INotifyPropertyChanged. From an IL manipulation point of view, this entails three things:
 
-    Adding interface declaration as needed.
-    Adding event declaration as needed.
-    Adding event trigger method as needed.
+* Adding interface declaration as needed.
+* Adding event declaration as needed.
+* Adding event trigger method as needed.
 
 Silver.Needle tries to play nicely with a complete or partial hand-written implementation of INotifyPropertyChanged. It’s not too hard to do, the main complicating matter being that we need to consider inheritance. The type might inherit from another type (say, ViewModelBase) that implements the interface. Obviously, we shouldn’t do anything in that case. We should only inject implementation code for types that do not already implement the interface, either directly or in a base type. To do this, we need to walk the inheritance chain up to System.Object before we can conclude that the interface is indeed missing and proceed to inject code for the implementation.
 
-https://gist.github.com/2340074
+TODO: Inline this https://gist.github.com/2340074
 
 This is still pretty self-explanatory. The most interesting method is TypeImplementsInterface, which calls itself recursively to climb up the inheritance ladder until it either finds a type that implements INotifyPropertyChanged or a type whose base type is null (that would be System.Object).
 
-Implementing the interface
+## Implementing the interface
 
 Injecting code to implement the interface consists of two parts, just as if you were implementing the interface by writing source code by hand: 1) injecting the declaration of the interface, and 2) injecting the code to fulfil the contract defined by the interface, that is, the declaration of the PropertyChanged event handler.
 
-
+```csharp
 private void InjectInterfaceDeclaration()
 {
   _typeDef.Interfaces.Add(_types.INotifyPropertyChanged);
 }
-
-view raw
-
-
-InjectInterfaceDeclaration.cs
-
-hosted with ❤ by GitHub
+```
 
 The code to add the interface declaration is utterly trivial: you just add the appropriate type to the TypeDefinition‘s Interfaces collection. You get a first indication of the power of Mono.Cecil right there. You do need to obtain the proper TypeReference (another Mono.Cecil type) though. I’ve created a helper class to make this as simple as I could as well. The code looks like this:
 
-
+```csharp
 public class TypeResolver
 {
   private readonly TypeDefinition _typeDef;
@@ -326,13 +290,7 @@ public class TypeResolver
     return _typeRefs[t];
   }
 }
-
-view raw
-
-
-TypeResolver.cs
-
-hosted with ❤ by GitHub
+```
 
 Mono.Cecil comes with a built-in TypeSystem type that contains TypeReference objects for the most common types, such as Object and String. For other types, though, you need to use Mono.Cecil’s assembly resolver to get the appropriate TypeReference objects. For convenience, TypeResolver defines properties with TypeReference objects for all the types used by TypeTamperer.
 
@@ -342,13 +300,13 @@ Herein lies a potential hickup which might lead to problems in case the implemen
 
 Adding the event handler is a bit more work than you might expect. If you inspect the IL, it becomes abundantly clear that C# provides a good spoonful of syntactic sugar for events. At the IL level, you’ll find that the simple event declaration expands to this:
 
-    A field for the event handler.
-    An event, which hooks up the field with add and remove methods.
-    Implementation for the add and remove methods.
+* A field for the event handler.
+* An event, which hooks up the field with add and remove methods.
+* Implementation for the add and remove methods.
 
 It’s quite a bit of IL:
 
-
+```
 field private class [System]System.ComponentModel.PropertyChangedEventHandler PropertyChanged
 
 event [System]System.ComponentModel.PropertyChangedEventHandler PropertyChanged
@@ -428,17 +386,11 @@ event [System]System.ComponentModel.PropertyChangedEventHandler PropertyChanged
   // end loop
   IL_0028: ret
 } // end of method PersonViewModel::remove_PropertyChanged
-
-view raw
-
-
-gistfile1.txt
-
-hosted with ❤ by GitHub
+```
 
 The bad news is that it’s up to us to inject all that goo into our type. The good news is that Mono.Cecil makes it fairly easy to do. We’ll get right to it:
 
-
+```csharp
 private void InjectEventHandler()
 {
   InjectPropertyChangedField();
@@ -472,19 +424,13 @@ private void InjectEventDeclaration()
   _typeDef.Methods.Add(eventDef.RemoveMethod);
   _typeDef.Events.Add(eventDef);
 }
-
-view raw
-
-
-InjectEventHandler.cs
-
-hosted with ❤ by GitHub
+```
 
 Here we add the field for the event handler, and we create an event which hooks up to two methods for adding and removing event handlers, respectively. We’re still not done, though – in fact, the bulk of the nitty gritty work remains.
 
 That bulk is the implementation of the add and remove methods. If you examine the IL, you’ll see that the implementations are virtually identical, except for a single method call in the middle somewhere (add calls a method called Combine, remove calls Remove). We can abstract that out, like so:
 
-
+```csharp
 private MethodDefinition CreateAddPropertyChangedMethod()
 {
   return CreatePropertyChangedEventHookupMethod(
@@ -602,19 +548,13 @@ private MethodDefinition CreatePropertyChangedEventHookupMethod(
     
   return methodDef;
 }
-
-view raw
-
-
-EventHandlerHookupMethods.cs
-
-hosted with ❤ by GitHub
+```
 
 It looks a little bit icky at first glance, but it’s actually quite straightforward. You just need to accurately and painstakingly reconstruct the IL statement by statement. As you can see, I’ve left the original IL in the source code as comments, to make it clear what we’re trying to reproduce. It takes patience more than brains.
 
 The final piece of the implementation puzzle is to implement a method for firing the event. Again, Silver.Needle tries to play along with any hand-written code you have. So if you have implemented a method so-and-so to do view notification, it’s quite likely that Silver.Needle will discover it and use it. Basically it will scan all methods in the inheritance chain for your view model, and assume that a method which accepts a single string parameter, returns void and calls PropertyChangedEventHandler.Invoke somewhere in the method body is indeed a notification method.
 
-
+```csharp
 private static MethodDefinition FindNotificationMethod(
   TypeDefinition typeDef, 
   bool includePrivateMethods = true)
@@ -659,19 +599,13 @@ private static bool IsProbableNotificationMethodWithBody(
   }
   return false;
 }
-
-view raw
-
-
-FindNotificationMethod.cs
-
-hosted with ❤ by GitHub
+```
 
 Should Silver.Needle fail to identify an existing notification method, though, there is no problem. After all, it’s perfectly OK to have more than one method that can be used to fire the event. Hence if no notification method is found, one is injected. No sleep lost.
 
 In case no existing notification method was found, we need to provide one. We’re getting used to this kind of code by now:
 
-
+```csharp
 private MethodDefinition CreateNotificationMethodDefinition()
 {
   const string MethodName = "NotifyViewableProperty";
@@ -733,17 +667,11 @@ private MethodDefinition CreateNotificationMethodDefinition()
   il.Append(jumpTargetInsn);
   return methodDef;
 }
-
-view raw
-
-
-CreateNotificationMethodDefinition.cs
-
-hosted with ❤ by GitHub
+```
 
 This produces IL for a NotifyViewableProperty method just like the one we wrote in C# in the “hand-implemented” PersonViewModel above.
 
-Injecting notification
+## Injecting notification
 
 With the interface implementation and notification method in place, we finally come to the fun part – injecting the property notification itself!
 
@@ -751,7 +679,7 @@ Unless you’re the kind of person who use ILSpy or ILDasm regularly, you might 
 
 What about get-only properties? That is, properties that have getters but no setters? Well, first of all, can they change? Even if they’re get-only? Sure they can. Say you have a property which derives its value from another property. For instance, you might have an Age property which depends upon a BirthDate property, like so:
 
-
+```csharp
 private DateTime _birthDate;
 
 public DateTime BirthDate
@@ -765,17 +693,11 @@ public int Age
 { 
   get { return DateTime.Now.Years – BirthDate.Years; }
 }
-
-view raw
-
-
-BirthDate.cs
-
-hosted with ❤ by GitHub
+```
 
 In the (admittedly unlikely) scenario that the BirthDate changes, the Age will change too. And if Age is a property on a view model that a view will bind to, you’ll want any display of Age to update itself automatically whenever BirthDate changes. How can we do that? Well, if we implemented this by hand, we could add a notification call in BirthDate‘s setter to say that Age changed.
 
-
+```csharp
 private DateTime _birthDate;
 
 public DateTime BirthDate
@@ -787,13 +709,7 @@ public DateTime BirthDate
         Notify("Age");
     }
 }
-
-view raw
-
-
-BirthDateNotify.cs
-
-hosted with ❤ by GitHub
+```
 
 It feels a little iffy, since it sort of goes the wrong way – the observed knowing about the observer rather than the other way around. But that’s how you’d do it.
 
@@ -805,7 +721,7 @@ So, first we identify dependencies between properties. In the normal case of a p
 
 The code to register the dependencies between properties is as follows:
 
-
+```csharp
 private void HandlePropertyToNotify(PropertyDefinition prop)
 {
   foreach (var affector in FindAffectingProperties(prop, new List<string>()))
@@ -871,13 +787,7 @@ private List<PropertyDefinition> FindAffectingPropertiesFromGetter(
   }
   return result;
 }
-
-view raw
-
-
-HandlePropertyToNotify.cs
-
-hosted with ❤ by GitHub
+```
 
 So you can see that it’s a recursive process to walk the dependency graph for a get-only property. You’ll notice that there is some code there to recognize that we’ve seen a certain property before, to avoid infinite loops when walking the graph. Of course, it might happen that we don’t find any setters to inject notification into. For instance, it may turn out that a viewable property actually depends on constant values only. In that case, Silver.Needle will simply give up, since there is no place to inject the notification.
 
@@ -898,7 +808,7 @@ A third alternative would be to wrap the body of the setter in a try block and p
 So, implementation-wise, we need to support two scenarios: with or without refactoring. In either case, we end up with a setter that has a single return point preceeded by notification calls. As usual, it’s pretty straight-forward to do the necessary alternations to the body of the setter using Mono.Cecil. Here’s
 the code:
 
-
+```csharp
 private void InjectNotification(MethodDefinition methodDef, 
   IEnumerable<string> propNames)
 {
@@ -968,13 +878,7 @@ private void InjectNotificationDirectly(MethodDefinition methodDef,
     il.InsertBefore(returnInsn, callMethod);
   }
 }
-
-view raw
-
-
-InjectNotificationCalls.cs
-
-hosted with ❤ by GitHub
+```
 
 The code isn’t too complicated. The MethodDefinition passed to InjectionNotification is the setter method for the property, and propNames contains the names of properties to notify change for when the setter is called. In case of multiple return points from the setter, we perform a bit of crude surgery to separate the method body from the method declaration. We provide a new method definition for the body, with a name derived from the name of the property. While in Dr Frankenstein mode, we proceed to assemble a new method body for the setter. That body consists of three instructions: push the this reference onto the stack, push the value passed to the setter onto the stack, and invoke the new method we just created out of the original method body.
 
