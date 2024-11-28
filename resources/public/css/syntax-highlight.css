@@ -3,9 +3,13 @@
 .codehilite code,
 .codelike {
   background: var(--code-bg);
+  border-style: solid;
+  border-width: 1.5px;
+  border-color: #D3D3D3;
+  color: var(--code-fg);
   display: block;
   padding: 1rem;
-  overflow: scroll;
+  /* overflow: scroll; */
 }
 
 code, .code, .codehilite {
