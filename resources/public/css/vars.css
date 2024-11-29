@@ -4,12 +4,15 @@
     --hillary: #adaa8a;
     --dawn-pink: #f1eadf;
     --alizarin: #e23128;
+    --active-link-red: #ca1e00;
+    --passive-link-red: #8B0000;
     --olive: #5a7800;
     --venice: #075a78;
     --astral: #338ba3;
     --spring-wood: #f9f6f1;
     --botticelli: #d4e7ec;
     --mysterio: hsl(38, 40%, 96%);
+    --text-light: #6c6c6c;
   
     --fg-color: var(--smoky);
     --section-bg: #fff;
@@ -63,5 +66,7 @@
     --hl-boolean: var(--olive);
     --hl-character: var(--venice);
     --hl-conditional: var(--olive);
+
+    --standard-border-radius: 4px;
   }
   

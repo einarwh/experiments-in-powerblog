@@ -16,10 +16,32 @@ html {
   }
   
   a:link, a:visited {
-    color: #2563eb;
-    text-decoration: underline;
+    color: var(--active-link-red);
+    /* font-weight: bold; */
+    text-decoration: underline dotted;
   }
   
   a:hover {
-    text-decoration: none;
+    color: var(--active-link-red);
+    text-decoration: underline;
+  }
+
+  img,
+  video {
+    max-width: 95%;
+    height: auto;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: var(--standard-border-radius);
+  }
+
+  blockquote {
+    max-width: 90%;
+    /* margin-inline-start: 2rem; */
+    margin-inline-end: 0;
+    margin-block: 2rem;
+    /* padding: 0.4rem 0.8rem; */
+    border-inline-start: 0.35rem solid var(--accent);
+    color: var(--text-light);
+    font-style: italic;
   }

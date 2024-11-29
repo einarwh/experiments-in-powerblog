@@ -9,9 +9,11 @@ Posted: February 5, 2023
 
 A fundamental challenge we face as programmers is that the world is alive, but the programs we write, alas, are not. When we deploy our dead programs to operate in the living world, it presents an immediate maintenance problem. Or, if you like, a matter of keeping up appearances.
 
-In the movie Night on Earth, Roberto Benigni plays an exuberant and eccentric taxi driver working the night shift in Rome. You might be able to see the movie clip on YouTube. If you can, you should.
+In the movie [Night on Earth](https://www.imdb.com/title/tt0102536/), Roberto Benigni plays an exuberant and eccentric taxi driver working the night shift in Rome. You might be able to see [the movie clip](https://www.imdb.com/title/tt0102536/) on YouTube. If you can, you should.
 
 As night turns into early morning, the taxi driver picks up a priest. During the ride, the talkative driver starts confessing his many sins of the flesh to the priest – including affairs with a pumpkin, a sheep named Lola, and his brother’s wife. The priest listens in increasing disbelief and discomfort. Apparently he has a weak heart. By the time the taxi driver has finished his confessions, the poor priest is long dead.
+
+![The taxi driver and the dead priest](/images/night-on-earth-dead-priest.jpg)
 
 What should the taxi driver do? He decides to try to make it look as if the priest has not in fact died, but rather just fallen asleep on a bench. Unfortunately, the priest’s body is unwieldy and heavy, which makes the task cumbersome. (As the taxi driver puts it, “he is only a priest, but he weighs enough to be a cardinal”.) He drags the priest out of his taxi, and with much effort manages to place him on a bench. But dead people are not good at sitting upright. The priest repeatedly slides down. After several tries, however, he succeeds in placing the priest in a reasonable sitting position. He immediately notices another problem: the priest’s eyes are wide open. It’s not a natural look. He tries to close his eyelids, but they spring back open. The solution? The sunglasses he has been wearing while driving taxi at night. He puts the sunglasses on the priest, and drives away. As he does so, the priest slumps to the side.
 

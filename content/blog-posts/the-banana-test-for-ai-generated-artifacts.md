@@ -11,7 +11,7 @@ Do you like bananas? I do – sort of. It’s more precise to say I like banana.
 
 I suspect many people are like me. We enjoy eating a banana, very few eat two bananas in a row, no-one in the history of mankind has ever eaten three.
 
-![Human enjoyment as a function of bananas consumed.](/images/human-banana-enjoyment-scale.png)
+![Human enjoyment as a function of bananas consumed.](/images/banana-enjoyment-scale.png)
 
 To really drive the point home, I have created a pseudo-scientific graph showing the typical banana enjoyment rate for humans as a function of the number of bananas consumed. As you can see, eating bananas starts out as highly enjoyable, but then plunges into the abyss somewhere halfway into banana number two. If we actually finish the second banana that we enthusiastically started eating based on the success of the first one, we rarely enjoy it. It’s a chore.
 

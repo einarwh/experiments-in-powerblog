@@ -6,6 +6,7 @@
   border-style: solid;
   border-width: 1.5px;
   border-color: #D3D3D3;
+  border-radius: var(--standard-border-radius);
   color: var(--code-fg);
   display: block;
   padding: 1rem;
