@@ -30,7 +30,7 @@ public static class NullableExtensions {
 }
 ```
 
-So this is our mapping function, even though I named it `Select`, which is the name used in the C# and LINQ world. A benefit of this function is that you no longer have to manually handle the mundane issues of worrying about whether or not some `Nullable<T>` is null. So instead of writing code like this, which resembles something from our code base:
+So this is our mapping function, even though I named it `Select`, which is the name used in the C# and LINQ world. A benefit of this function is that you no longer have to manually handle the mundane issues of worrying about whether or not some `Nullable<T>` is `null`. So instead of writing code like this, which resembles something from our code base:
 
 ```csharp
 Duration? duration = null;
@@ -49,9 +49,9 @@ Duration? duration = thing.Frames.Select(fs => Duration.FromMilliseconds(fs * 40
 
 I think it is quite nice – at least if you can get comfortable calling an extension method on something that might be null. But from this point on, things started to go awry. But it wasn’t my fault! They started it!
 
-See, some of the people in the meeting said they kind of liked the approach, but argued that Map would be a better name because it would avoid confusion with Select, which is associated with LINQ and IEnumerable<T>. In some sense, this was the opposite argument I used for choosing Select over Map in the first place! I thought it would make sense to call it Select precisely because that’s the name for the exact same thing for another kind of structure.
+See, some of the people in the meeting said they kind of liked the approach, but argued that Map would be a better name because it would avoid confusion with `Select`, which is associated with LINQ and `IEnumerable<T>`. In some sense, this was the opposite argument I used for choosing `Select` over `Map` in the first place! I thought it would make sense to call it `Select` precisely because that’s the name for the exact same thing for another kind of structure.
 
-So as I left the meeting, I started wondering. I suspected that there really was nothing particular that tied LINQ and the query syntax to IEnumerable<T>, which would mean you could use it for other things. Other functors. And so I typed the following into LinqPad:
+So as I left the meeting, I started wondering. I suspected that there really was nothing particular that tied LINQ and the query syntax to `IEnumerable<T>`, which would mean you could use it for other things. Other functors. And so I typed the following into LinqPad:
 
 ```csharp
 DateTime? maybeToday = DateTime.Today;
@@ -59,7 +59,7 @@ var maybeTomorrow = from dt in maybeToday select dt.AddDays(1);
 maybeTomorrow.Dump();
 ```
 
-And it worked, which I thought was pretty cool. I consulted the C# specification and found that as long as you implement methods of appropriate names and signatures, you can use the LINQ query syntax. And so I decided to let functors be functors and just see what I could do with Nullables using LINQ. So I wrote this:
+And it worked, which I thought was pretty cool. I consulted the C# specification and found that as long as you implement methods of appropriate names and signatures, you can use the LINQ query syntax. And so I decided to let functors be functors and just see what I could do with `Nullable`s using LINQ. So I wrote this:
 
 ```csharp
 public static TSource? Where<TSource>(
@@ -83,7 +83,7 @@ DateTime? MaybeSaturday(DateTime? maybeDateTime)
 }
 ```
 
-Which will return null unless it’s passed a Nullable that wraps a DateTime representing a Friday. Useful.
+Which will return `null` unless it’s passed a `Nullable` that wraps a `DateTime` representing a Friday. Useful.
 
 It should have stopped there, but the C# specification is full of examples of expressions written in query syntax and what they’re translated into. For instance, I found that implementing this:
 
@@ -122,11 +122,11 @@ TimeSpan? Diff(DateTime? maybeThis, DateTime? maybeThat)
 }
 ```
 
-It will give you a wrapped TimeSpan if you pass it two wrapped DateTimes, null otherwise. How many checks did you write? None.
+It will give you a wrapped `TimeSpan` if you pass it two wrapped `DateTime`s, `null` otherwise. How many checks did you write? None.
 
-And as I said, it sort of got a bit out of hand. Which is why I now have implementations of Contains, Count, Any, First, FirstOrDefault, even Aggregate, and I don’t seem to be stopping. You can see the current state of affairs here.
+And as I said, it sort of got a bit out of hand. Which is why I now have implementations of `Contains`, `Count`, `Any`, `First`, `FirstOrDefault`, even `Aggregate`, and I don’t seem to be stopping. You can see the current state of affairs [here](https://gist.github.com/einarwh/ce264d577d13a7a76a1f2c861d19c411).
 
-What I find amusing is that you can usually find a reasonable interpretation and implementation for each of these functions. Count, for instance, will only ever return 0 or 1, but that sort of makes sense. First means unwrapping the value inside the Nullable<T> without checking that there is an actual value there. Any answers true if the Nullable<T> holds a value. And so on and so forth.
+What I find amusing is that you can usually find a reasonable interpretation and implementation for each of these functions. Count, for instance, will only ever return `0` or `1`, but that sort of makes sense. `First` means unwrapping the value inside the `Nullable<T>` without checking that there is an actual value there. Any answers true if the `Nullable<T>` holds a value. And so on and so forth.
 
 Finally, as an exercise for the reader: what extension methods would you write to enable this?
 

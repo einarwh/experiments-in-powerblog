@@ -7,40 +7,40 @@
 
 Posted: July 22, 2017
 
-On February 9th 2017, I was sitting in an auditorium in Krakow, listening to Mary Sheeran and John Hughes give the opening keynote at the Lambda Days conference. It was an inspired and inspiring keynote, that discussed some of the most influential ideas in some of the most interesting papers written on functional programming. You should absolutely check it out.
+On February 9th 2017, I was sitting in an auditorium in Krakow, listening to Mary Sheeran and John Hughes give the opening keynote at the [Lambda Days](http://www.lambdadays.org/) conference. It was an inspired and inspiring keynote, that discussed some of the most influential ideas in some of the most interesting papers written on functional programming. You should absolutely [check it out](https://www.youtube.com/watch?v=1qBHf8DrWR8).
 
-One of the papers that was mentioned was Functional Geometry by Peter Henderson, written in 1982. In it, Henderson shows a deconstruction of an Escher woodcut called Square Limit, and how he can elegantly reconstruct a replica of the woodcut by using functions as data. He defines a small set of picture combinators – simple functions that operate on picture functions – to form complex pictures out of simple ones.
+One of the papers that was mentioned was _Functional Geometry_ by Peter Henderson, written in 1982. In it, Henderson shows a deconstruction of an Escher woodcut called Square Limit, and how he can elegantly reconstruct a replica of the woodcut by using functions as data. He defines a small set of picture combinators – simple functions that operate on picture functions – to form complex pictures out of simple ones.
 
-Escher’s original woodcut looks like this:
+Escher's original woodcut looks like this:
 
 ![Escher's "Square Limit" woodcutting"](/images/escher-square-limit.png)
 
 Which is pretty much a recursive dream. No wonder Henderson found it so fascinating – any functional programmer would.
 
-As I was listening the keynote, I recalled that I had heard about the paper before, in the legendary SICP lectures by Abelson and Sussman (in lecture 3A, in case you’re interested). I figured it was about time I read the paper first hand. And so I did. Or rather, I read the revised version from 2002, because that’s what I found online.
+As I was listening the keynote, I recalled that I had heard about the paper before, in the legendary SICP lectures by Abelson and Sussman (in lecture 3A, in case you're interested). I figured it was about time I read the paper first hand. And so I did. Or rather, I read the revised version from 2002, because that's what I found online.
 
-And of course one thing led to another, and pretty soon I had implemented my own version in F#. Which is sort of why we’re here. Feel free to tag along as I walk through how I implemented it.
+And of course one thing led to another, and pretty soon I had implemented my own version in F#. Which is sort of why we're here. Feel free to tag along as I walk through how I implemented it.
 
 A key point in the paper is to distinguish between the capability of rendering some shape within a bounding box onto a screen on the one hand, and the transformation and composition of pictures into more complex pictures on the other. This is, as it were, the essence of decoupling through abstraction.
 
-Our basic building block will be a picture. We will not think of a picture as a collection of colored pixels, but rather as something that is capable of scaling and fitting itself with respect to a bounding box. In other words, we have this:
+Our basic building block will be a _picture_. We will _not_ think of a picture as a collection of colored pixels, but rather as something that is capable of scaling and fitting itself with respect to a bounding box. In other words, we have this:
 
 ```fsharp
 type Picture : Box -> Shape list
 ```
 
-A picture is a function that takes a box and creates a list of shapes for rendering.
+A picture is a _function_ that takes a box and creates a list of shapes for rendering.
 
-What about the box itself? We define it using three vectors a, b and c.
+What about the box itself? We define it using three vectors **a**, **b** and **c**.
 
 ```fsharp
 type Vector = { x : float; y : float }
 type Box = { a : Vector; b : Vector; c : Vector}
 ```
 
-The vector a denotes the offset from the origin to the bottom left corner of the box. The vectors b and c span out the bounding box itself. Each vector is defined by its magnitude in the x and y dimensions.
+The vector **a** denotes the offset from the origin to the bottom left corner of the box. The vectors **b** and **c** span out the bounding box itself. Each vector is defined by its magnitude in the **x** and **y** dimensions.
 
-For example, assume we have a picture F that will produce the letter F when given a bounding box. A rendering might look like this:
+For example, assume we have a picture **F** that will produce the letter F when given a bounding box. A rendering might look like this:
 
 TODO: basic-f
 
@@ -52,7 +52,7 @@ So, how do we create and render such a magical, self-fitting picture?
 
 We can decompose the problem into three parts: defining the basic shape, transforming the shape with respect to the bounding box, and rendering the final shape.
 
-We start by defining a basic shape relative to the unit square. The unit square has sides of length 1, and we position it such that the bottom left corner is at (0, 0) and top right corner is at (1, 1). Here’s a definition that puts a polygon outlining the F picture inside the unit square:
+We start by defining a basic shape relative to the unit square. The unit square has sides of length 1, and we position it such that the bottom left corner is at (0, 0) and top right corner is at (1, 1). Here's a definition that puts a polygon outlining the F picture inside the unit square:
 
 ```fsharp
 let fShape = 
@@ -70,16 +70,16 @@ let fShape =
   Polygon { points = pts }
 ```
 
-To make this basic shape fit the bounding box, we need a mapping function. That’s easy enough to obtain:
+To make this basic shape fit the bounding box, we need a mapping function. That's easy enough to obtain:
 
 ```fsharp
 let mapper { a = a; b = b; c = c } { x = x; y = y } =
    a + b * x + c * y
 ```
 
-The mapper function takes a bounding box and a vector, and produces a new vector adjusted to fit the box. We’ll use partial application to create a suitable map function for a particular box.
+The **mapper** function takes a bounding box and a vector, and produces a new vector adjusted to fit the box. We'll use partial application to create a suitable **map** function for a particular box.
 
-As you can see, we’re doing a little bit of vector arithmetic to produce the new vector. We’re adding three vectors: a, the vector obtained by scaling b by x, and the vector obtained by scaling c by y. As we proceed, we’ll need some additional operations as well. We implement them by overloading some operators for the Vector type:
+As you can see, we're doing a little bit of vector arithmetic to produce the new vector. We're adding three vectors: **a**, the vector obtained by scaling **b** by **x**, and the vector obtained by scaling **c** by **y**. As we proceed, we'll need some additional operations as well. We implement them by overloading some operators for the **Vector** type:
 
 ```fsharp
 static member (+) ({ x = x1; y = y1 }, { x = x2; y = y2 }) =
@@ -100,7 +100,7 @@ static member (/) (v, f) = v * (1 / f)
 
 This gives us addition, negation, subtraction, scalar multiplication and scalar division for vectors.
 
-Finally we need to render the shape in some way. It is largely an implementation detail, but we’ll take a look at one possible simplified rendering. The code below can be used to produce an SVG image of polygon shapes using the NGraphics library.
+Finally we need to render the shape in some way. It is largely an implementation detail, but we'll take a look at one possible simplified rendering. The code below can be used to produce an SVG image of polygon shapes using the [NGraphics](https://github.com/praeclarum/NGraphics) library.
 
 ```fsharp
 type PolygonShape = { points : Vector list }
@@ -134,7 +134,7 @@ let renderSvg width height filename shapes =
   canvas.Graphic.WriteSvg(writer)
 ```
 
-When we create the picture, we use the mapShape function to apply our mapping function to all the points in the polygon that makes up the F. The renderSvg is used to do the actual rendering of the shapes produced by the picture function.
+When we create the picture, we use the **mapShape** function to apply our mapping function to all the points in the polygon that makes up the F. The **renderSvg** function is used to do the actual rendering of the shapes produced by the picture function.
 
 Once we have the picture abstraction in place, we can proceed to define combinators that transform or compose pictures. The neat thing is that we can define these combinators without having to worry about the rendering of shapes. In other words, we never have to pry open our abstraction, we will trust it to do the right thing. All our work will be relative, with respect to the bounding boxes.
 
@@ -144,9 +144,9 @@ We start with some basic one-to-one transformations, that is, functions with thi
 type Transformation = Picture -> Picture
 ```
 
-The first transformation is turn, which rotates a picture 90 degrees counter-clockwise around its center (that is, around the center of its bounding box).
+The first transformation is **turn**, which rotates a picture 90 degrees counter-clockwise around its center (that is, around the center of its bounding box).
 
-The effect of turn looks like this:
+The effect of **turn** looks like this:
 
 TODO: turn-f
 
@@ -161,7 +161,7 @@ Note that turning four times produces the original picture. We can formulate thi
 The vector arithmetic to turn the bounding box 90 degrees counter-clockwise is as follows:
 
 ```fsharp
-(a’, b’, c’) = (a + b, c, -b)
+(a', b', c') = (a + b, c, -b)
 ```
 
 And to reiterate: the neat thing is that this is all we need to consider. We define the transformation using nothing but this simple arithmetic. We trust the picture itself to cope with everything else.
@@ -177,9 +177,9 @@ let turn p = turnBox >> p
 
 The overloaded operators we defined above makes it very easy to translate the vector arithmetic into code. It also makes the code very easy to read, and hopefully convince yourself that it does the right thing.
 
-The next transformation is flip, which flips a picture about the center vertical axis of the bounding box.
+The next transformation is **flip**, which flips a picture about the center vertical axis of the bounding box.
 
-Which might sound a bit involved, but it’s just this:
+Which might sound a bit involved, but it's just this:
 
 TODO: flip-f
 
@@ -192,7 +192,7 @@ Flipping twice always produces the same picture, so the following property shoul
 The vector arithmetic is as follows:
 
 ```fsharp
-(a’, b’, c’) = (a + b, -b, c)
+(a', b', c') = (a + b, -b, c)
 ```
 
 Which translates neatly to:
@@ -204,18 +204,18 @@ let flipBox { a = a; b = b; c = c } =
 let flip p = flipBox >> p
 ```
 
-The third transformation is a bit peculiar, and quite particular to the task of mimicking Escher’s Square Limit, which is what we’re building up to. Henderson called the transformation rot45, but I’ll refer to it as toss, since I think it resembles light-heartedly tossing the picture up in the air:
+The third transformation is a bit peculiar, and quite particular to the task of mimicking Escher's Square Limit, which is what we're building up to. Henderson called the transformation **rot45**, but I'll refer to it as **toss**, since I think it resembles light-heartedly tossing the picture up in the air:
 
 TODO: toss-f
 
-What’s going on here? Its a 45 degree counter-clockwise rotation around top left corner, which also shrinks the bounding box by a factor of √2.
+What's going on here? Its a 45 degree counter-clockwise rotation around top left corner, which also shrinks the bounding box by a factor of √2.
 
-It’s not so easy to define simple properties that should hold for toss. For instance, tossing twice is not the same as turning once. So we won’t even try.
+It's not so easy to define simple properties that should hold for **toss**. For instance, tossing twice is not the same as turning once. So we won't even try.
 
 The vector arithmetic is still pretty simple:
 
 ```fsharp
-(a’, b’, c’) = (a + (b + c) / 2, (b + c) / 2, (c − b) / 2)
+(a', b', c') = (a + (b + c) / 2, (b + c) / 2, (c − b) / 2)
 ```
 
 And it still translates very directly into code:
@@ -230,7 +230,7 @@ let tossBox { a = a; b = b; c = c } =
 let toss p = tossBox >> p
 ```
 
-That’s all the transformations we’ll use. We can of course combine transformations, e.g:
+That's all the transformations we'll use. We can of course combine transformations, e.g:
 
 ```fsharp
 (turn >> turn >> flip >> toss)
@@ -240,13 +240,13 @@ Which produces this:
 
 TODO: turn-turn-flip-toss
 
-We proceed to compose simple pictures into more complex ones. We define two basic functions for composing pictures, above and beside. The two are quite similar. Both functions take two pictures as arguments; above places the first picture above the second, whereas beside places the first picture to the left of the second.
+We proceed to compose simple pictures into more complex ones. We define two basic functions for composing pictures, **above** and **beside**. The two are quite similar. Both functions take two pictures as arguments; **above** places the first picture above the second, whereas **beside** places the first picture to the left of the second.
 
 TODO: above-beside.png
 
 Here we see the F placed above the turned F, and the F placed beside the turned F. Notice that each composed picture forms a square, whereas each original picture is placed within a half of that square. What happens is that the bounding box given to the composite picture is split in two, with each original picture receiving one of the split boxes as their bounding box. The example shows an even split, but in general we can assign a fraction of the bounding box to the first argument picture, and the remainder to the second.
 
-For implementation details, we’ll just look at above:
+For implementation details, we'll just look at **above**:
 
 ```fsharp
 let splitHorizontally f box =
@@ -288,7 +288,7 @@ above (beside (turn (turn (flip p))) (turn (turn p)))
       (beside (flip p) p)
 ```
 
-With this, our basic toolset is complete. Now it is time to lose the support wheels and turn our attention to the original task: creating a replica of Henderson’s replica of Escher’s Square Limit!
+With this, our basic toolset is complete. Now it is time to lose the support wheels and turn our attention to the original task: creating a replica of Henderson's replica of Escher's Square Limit!
 
 We start with a basic picture that is somewhat more interesting than the F we have been using so far.
 
@@ -296,23 +296,23 @@ According to the paper, Henderson created his fish from 30 bezier curves. Here i
 
 TODO: Henderson's fish
 
-You’ll notice that the fish violates the boundaries of the unit square. That is, some points on the shape has coordinates that are below zero or above one. This is fine, the picture isn’t really bound by its box, it’s just scaled and positioned relative to it.
+You'll notice that the fish violates the boundaries of the unit square. That is, some points on the shape has coordinates that are below zero or above one. This is fine, the picture isn't really _bound_ by its box, it's just scaled and positioned relative to it.
 
-We can of course turn, flip and toss the fish as we like.
+We can of course **turn**, **flip** and **toss** the fish as we like.
 
 TODO: Henderson's fish (turned, flipped and tossed)
 
-But there’s more to the fish than might be immediately obvious. After all, it’s not just any fish, it’s an Escher fish. An interesting property of the fish is shown if we overlay it with itself turned twice.
+But there's more to the fish than might be immediately obvious. After all, it's not just any fish, it's an Escher fish. An interesting property of the fish is shown if we overlay it with itself turned twice.
 
-We define a combinator over that takes two pictures and places both pictures with respect to the same bounding box. And voila:
+We define a combinator **over** that takes two pictures and places _both_ pictures with respect to the same bounding box. And voila:
 
 TODO: overlay-fish
 
-As we can see, the fish is designed so that it fits together neatly with itself. And it doesn’t stop there.
+As we can see, the fish is designed so that it fits together neatly with itself. And it doesn't stop there.
 
 TODO: The t tile
 
-This shows the tile t, which is one of the building blocks we’ll use to construct Square Limit. The function ttile creates a t tile when given a picture:
+This shows the tile **t**, which is one of the building blocks we'll use to construct Square Limit. The function **ttile** creates a t-tile when given a picture:
 
 ```fsharp
 let ttile f = 
@@ -321,9 +321,9 @@ let ttile f =
    over f (over fishN fishE)
 ```
 
-Here we see why we needed the toss transformation defined earlier, and begin to appreciate the ingenious design of the fish.
+Here we see why we needed the **toss** transformation defined earlier, and begin to appreciate the ingenious design of the fish.
 
-The second building block we’ll need is called tile u. It looks like this:
+The second building block we'll need is called tile **u**. It looks like this:
 
 TODO: The u tile
 
@@ -339,11 +339,11 @@ let utile (f : Picture) =
        (over fishE fishS)
 ```
 
-To compose the Square Limit itself, we observe that we can construct it from nine tiles organized in a 3×3 grid. We define a helper function nonet that takes nine pictures as arguments and lays them out top to bottom, left to right. Calling nonet with pictures of the letters H, E, N, D, E, R, S, O, N produces this result:
+To compose the Square Limit itself, we observe that we can construct it from nine tiles organized in a 3×3 grid. We define a helper function **nonet** that takes nine pictures as arguments and lays them out top to bottom, left to right. Calling **nonet** with pictures of the letters H, E, N, D, E, R, S, O, N produces this result:
 
 TODO: H-E-N-D-E-R-S-O-N
 
-The code for nonet looks like this:
+The code for **nonet** looks like this:
 
 ```fsharp
 let nonet p q r s t u v w x =
@@ -352,23 +352,23 @@ let nonet p q r s t u v w x =
                         (besideRatio 1 2 v (beside w x)))
 ```
 
-Now we just need to figure out the appropriate pictures to pass to nonet to produce the Square Limit replica.
+Now we just need to figure out the appropriate pictures to pass to **nonet** to produce the Square Limit replica.
 
-The center tile is the easiest: it is simply the tile u that we have already constructed. In addition, we’ll need a side tile and a corner tile. Each of those will be used four times, with the turn transformation applied 0 to 3 times.
+The center tile is the easiest: it is simply the tile u that we have already constructed. In addition, we'll need a side tile and a corner tile. Each of those will be used four times, with the **turn** transformation applied 0 to 3 times.
 
-Both side and corner have a self-similar, recursive nature. We can think of both tiles as consisting of nested 2×2 grids. Similarly to nonet, we define a function quartet to construct such grids out of four pictures:
+Both **side** and **corner** have a self-similar, recursive nature. We can think of both tiles as consisting of nested 2×2 grids. Similarly to **nonet**, we define a function **quartet** to construct such grids out of four pictures:
 
 ```fsharp
 let quartet p q r s = above (beside p q) (beside r s)
 ```
 
-What should we use to fill our quartets? Well, first off, we need a base case to terminate the recursion. To help us do so, we’ll use a degenerate picture blank that produces nothing when given a bounding box.
+What should we use to fill our quartets? Well, first off, we need a base case to terminate the recursion. To help us do so, we'll use a degenerate picture **blank** that produces _nothing_ when given a bounding box.
 
-We’ll discuss side first since it is the simplest of the two, and also because corner uses side. The base case should look like this:
+We'll discuss **side** first since it is the simplest of the two (and also because **corner** uses **side**). The base case should look like this:
 
 TODO: side 1 fish
 
-For the recursive case, we’ll want self-similar copies of the side-tile in the top row instead of blank pictures. So the case one step removed from the base case should look like this:
+For the recursive case, we'll want self-similar copies of the side-tile in the top row instead of blank pictures. So the case one step removed from the base case should look like this:
 
 TODO: side 2 fish
 
@@ -383,7 +383,7 @@ let rec side n p =
 
 This gives us the side tile that should be used as the “north” tile in the nonet function. We obtain “west”, “south” and “east” as well by turning it around once, twice or thrice.
 
-Creating a corner is quite similar to creating a side. The base case should be a quartet consisting of three blank pictures, and a u tile for the final, bottom right picture. It should look like this:
+Creating a corner is quite similar to creating a side. The base case should be a **quartet** consisting of three **blank** pictures, and a **u** tile for the final, bottom right picture. It should look like this:
 
 TODO: corner 1 fish
 
@@ -391,7 +391,7 @@ The recursive case should use self-similar copies of both the corner tile (for t
 
 TODO: corner 2 fish
 
-Here’s how we can write it in code:
+Here's how we can write it in code:
 
 ```fsharp
 let rec corner n p = 
@@ -401,7 +401,7 @@ let rec corner n p =
   quartet c s (s |> turn) u
 ```
 
-This gives us the top left corner for our nonet function, and of course we can produce the remaining corners by turning it a number of times.
+This gives us the top left corner for our **nonet** function, and of course we can produce the remaining corners by turning it a number of times.
 
 Putting everything together, we have:
 
@@ -425,19 +425,19 @@ Calling `squareLimit 3 fish` produces the following image:
 
 TODO: sqlimit-3.png
 
-Which is a pretty good replica of Henderson’s replica of Escher’s Square Limit, to a depth of 3. Sweet!
+Which is a pretty good replica of Henderson's replica of Escher's Square Limit, to a depth of 3. Sweet!
 
 Misson accomplished? Are we done?
 
 Sort of, I suppose. I mean, we could be.
 
-However, if you take a look directly at Escher’s woodcut (or, more likely, the photos of it that you can find online), you’ll notice a couple of things. 1) Henderson’s basic fish looks a bit different from Escher’s basic fish. 2) Escher’s basic fish comes in three hues: white, grey and black, whereas Henderson just has a white one. So it would be nice to address those issues.
+However, if you take a look directly at Escher's woodcut (or, more likely, the photos of it that you can find online), you'll notice a couple of things. 1) Henderson's basic fish looks a bit different from Escher's basic fish. 2) Escher's basic fish comes in three hues: white, grey and black, whereas Henderson just has a white one. So it would be nice to address those issues.
 
-Here’s what I came up with.
+Here's what I came up with.
 
 TODO: escher-fish-all.png
 
-To support different hues of the same fish requires a bit of thinking – we can’t just follow Henderson’s instructions any more. But we can use exactly the same approach! In addition to transforming the shape of the picture, we need to be able to transform the coloring of the picture. For this, we introduce a new abstraction, that we will call a Lens.
+To support different hues of the same fish requires a bit of thinking – we can't just follow Henderson's instructions any more. But we can use exactly the same approach! In addition to transforming the shape of the picture, we need to be able to transform the _coloring_ of the picture. For this, we introduce a new abstraction, that we will call a **Lens**.
 
 ```fsharp
 type Hue = Blackish | Greyish | Whiteish
@@ -445,7 +445,7 @@ type Hue = Blackish | Greyish | Whiteish
 type Lens = Box * Hue
 ```
 
-We redefine a picture to accept a lens instead of just a box. That way, the picture can take the hue (that is, the coloring) into account when figuring out what to draw. Now we can define a new combinator rehue that changes the hue given to a picture:
+We redefine a picture to accept a lens instead of just a box. That way, the picture can take the hue (that is, the coloring) into account when figuring out what to draw. Now we can define a new combinator **rehue** that changes the hue given to a picture:
 
 ```fsharp
 let rehue p =
@@ -462,11 +462,11 @@ Changing hue three times takes us back to the original hue:
 (rehue >> rehue >> rehue) p = p
 ```
 
-We need to revise the tiles we used to construct the Square Limit to incorporate the rehue combinator. It turns out we need to create two variants of the t tile.
+We need to revise the tiles we used to construct the Square Limit to incorporate the **rehue** combinator. It turns out we need to create two variants of the **t** tile.
 
 TODO: ttile-shades
 
-But of course it’s just the same old t tile with appropriate calls to rehue for each fish:
+But of course it's just the same old **t** tile with appropriate calls to **rehue** for each fish:
 
 ```fsharp
 let ttile hueN hueE f = 
@@ -480,11 +480,11 @@ let ttile1 = ttile rehue (rehue >> rehue)
 let ttile2 = ttile (rehue >> rehue) rehue
 ```
 
-For the u tile, we need three variants:
+For the **u** tile, we need three variants:
 
 TODO: utiles.png
 
-Again, we just call rehue to varying degrees for each fish.
+Again, we just call **rehue** to varying degrees for each fish.
 
 ```fsharp
 let utile hueN hueW hueS hueE f = 
@@ -505,7 +505,7 @@ let utile3 =
   utile (rehue >> rehue) id rehue id 
 ```
 
-We use the two variants of the t tile in two side functions, one for the “north” and “south” side, another for the “west” and “east” side.
+We use the two variants of the **t** tile in two side functions, one for the “north” and “south” side, another for the “west” and “east” side.
 
 ```fsharp
 let side tt hueSW hueSE n p = 
@@ -541,7 +541,7 @@ let corner2 =
   corner utile2 side2 side1
 ```
 
-Now we can write an updated squareLimit that uses our new tile functions.
+Now we can write an updated **squareLimit** that uses our new tile functions.
 
 ```
 let squareLimit n picture =
@@ -563,9 +563,9 @@ And now calling `squareLimit 5 fish` produces the following image:
 
 TODO: square-limit-shades-level-5.png
 
-Which is a pretty good replica of Escher’s Square Limit, to a depth of 5.
+Which is a pretty good replica of Escher's Square Limit, to a depth of 5.
 
-The complete code is here.
+The complete code is [here](https://github.com/einarwh/funfish).
 
-Update: I have also written a version using Fable and SAFE that I use for presentations. You can find it here.
+Update: I have also written a version using Fable and SAFE that I use for presentations. You can find it [here](https://github.com/einarwh/safe-fish).
 

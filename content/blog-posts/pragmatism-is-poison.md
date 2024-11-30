@@ -7,7 +7,7 @@
 
 Posted: March 10, 2016
 
-_Yesterday I gave a lightning talk called “Pragmatism is Poison” at the Booster Conference in Bergen. This blog post is essentially that talk in written form._
+_Yesterday I gave a lightning talk called “Pragmatism is Poison” at the [Booster Conference](http://www.boosterconf.no/) in Bergen. This blog post is essentially that talk in written form._
 
 The basic idea of the talk, and therefore of this blog post, is to launch a public attack on perhaps the most fundamental virtue of the software craftsman: pragmatism. The reason is that I think pragmatism has turned toxic, to the point where it causes more harm than good.
 
@@ -19,7 +19,7 @@ Let’s start by having a look at what it means to be pragmatic. The definition 
 
 > Dealing with things sensibly and realistically in a way that is based on practical rather than theoretical considerations.
 
-[A small caveat: this isn’t necessarily the only or “correct” definition of what it means to be pragmatic. But I suppose it’s a sensible and realistic approximation?]
+(A small caveat: this isn’t necessarily the only or “correct” definition of what it means to be pragmatic. But I suppose it’s a sensible and realistic approximation?)
 
 Anyways: this is good by definition! How can it possibly be bad?
 
@@ -43,13 +43,13 @@ So that’s the underlying problem of ambiguity. On to the various forms of abus
 
 The first is that pragmatism is often used to present a false dilemma in software development. We love our dichotomies! I could use cheap rhetoric to imply that it traces back to the 0s and 1s of our computers, but let’s not – I have no evidence for such a claim! Luckily I don’t need it either. Suffice it to say that the world is complex, and it’s always very tempting to see things in black and white instead. And so we pit “pragmatism” on the one hand against “dogmatism” on the other, and it’s really important to stay on the right side of that divide! Sometimes we use different words instead, like “practical” vs “theoretical” or “real world” vs “ivory tower”. It all means the same thing: “good” vs “bad”. Which is a big lie, because we’re not making ethical judgments, we’re trying to assess the pros and cons of different solutions to particular problems in concrete contexts. This isn’t The Lord of the Rings.
 
-The consequences of this polarizing are pretty severe. The false dilemma is often used as a self-defense bluff in discussions between team members. The so-called impostor syndrome is rampant in our industry, and so we reach for tools that help us deal with insecurity. One such tool is pragmatism, which can be abused as a magical spell to turn insecurity on its head.
+The consequences of this polarizing are pretty severe. The false dilemma is often used as a self-defense bluff in discussions between team members. The so-called [impostor syndrome](https://en.wikipedia.org/wiki/Impostor_syndrome) is rampant in our industry, and so we reach for tools that help us deal with insecurity. One such tool is pragmatism, which can be abused as a magical spell to turn insecurity on its head.
 
 Here’s how it works. Because of the false dilemma, a claim to be pragmatic is implicitly an accusation that says that whoever disagrees is dogmatic: they’re not being sensible, they’re not being realistic, they’re just obsessing over theoretical considerations. So while a statement like “I’m being pragmatic” sounds innocuous enough, it’s really not. It leads to stupid, unrefined, pointless discussions where no knowledge is gained. Instead we’re fighting over who’s good and who’s bad. Polarizing does not make discussions more interesting, it makes them degenerate into banality.
 
 A related strategy is to use pragmatism as a diversion or a smoke bomb, offering the confronted part with an easy exit and effectively ending the discussion. The reason is that it takes a lot of guts and perseverance to call someone’s bluff when they’re claiming to be pragmatic. You might approach your co-worker with a concern like “hey, I was looking at the code, and it seems like we’re blocking in our streaming API, which sort of defeats the purpose of a streaming API in the first place”. It sounds like a valid concern until your co-worker says the magic words “I was just being pragmatic” and vanishes in a puff of smoke, like so:
 
-TODO: puffanimate
+![Magician going up in smoke](/images/puffanimate.gif)
 
 What we should do instead is accept the complexity we’re faced with and resist the urge to trivialize it. There’s always a need for thinking and discussion, and spurious claims of pragmatism don’t help.
 
@@ -91,9 +91,9 @@ How do you handle dates and times in your applications? Are you aware of the rel
 
 Finally, pragmatism is sometimes used to create outright logical contradictions. Pragmatism is about compromise, but some compromises cannot be made without compromising the concept itself! For instance, some architectural properties have principles that cannot be violated while still maintaining the properties – they are simply no longer present due to the violation. (A vegetarian cannot eat meat in the weekends and still be a vegetarian, if you will.) Not even pragmatism can fix this, but that doesn’t stop people from trying!
 
-To illustrate, here’s (a reproduction of) a funny meme I found on the Internet.
+To illustrate, here’s (a reproduction of) a funny meme I found [on the Internet](http://www.troyhunt.com/2014/02/your-api-versioning-is-wrong-which-is.html).
 
-TODO: batman-rest
+![Batman slapping Robin for saying "but it's not RESTful if you"](/images/batman-rest.png)
 
 I think it’s funny because a lot of people seem to get annoyed when someone points out that their self-proclaimed RESTful APIs aren’t really RESTful because they violate some property of REST or other – typically the hypermedia constraint. People get annoyed because they don’t want to think about that, they’d rather be pragmatic and get on with stuff.
 
@@ -101,7 +101,7 @@ But for some reason they still want to keep that word, REST. Maybe they think it
 
 Here’s another meme. I made this one myself. Unfortunately it’s not funny.
 
-TODO: batman-secure
+![Batman slapping Robin for saying "but it's not SECURE if you"](/images/batman-secure.png)
 
 Why isn’t it funny? It looks a lot like the previous one.
 
@@ -111,15 +111,15 @@ Now we have the strange situation that it’s apparently OK for some words in so
 
 Here’s a third meme. I made this one too.
 
-TODO: batman-tea
+![Batman slapping Robin for saying "but it's not TEA if you"](/images/batman-tea.png)
 
 It’s a bit strange, I’ll admit that. But bear with me. It’s the last one, I promise.
 
-What would you say if someone offered you hot water and a biscuit and said “have some pragmatic tea”? Would you be content? Would you pay for a cup of pragmatic tea? Or would you take the route of the dogmatist and argue that it’s not really tea if no tea was involved in the preparation? Well, SLAP you! Crazy tea zealot! Hang out with the other ivory tower hipsters, and have your fancy tea! Who drinks tea anyway?!
+What would you say if someone offered you hot water and a biscuit and said “have some pragmatic tea”? Would you be content? Would you _pay_ for a cup of pragmatic tea? Or would you take the route of the dogmatist and argue that it’s not really tea if no tea was involved in the preparation? Well, SLAP you! Crazy tea zealot! Hang out with the other ivory tower hipsters, and have your fancy tea! Who drinks tea anyway?!
 
 At this point you can see I’ve gone absurd – but we’re still just doing variations of the same joke. I didn’t bring the absurdity, it was there all along. The point I’m trying to make is that words do have meaning, whether it’s REST or security or tea. We should respect that meaning instead of using pragmatism as a poor excuse for undermining it. Some properties have principles that cannot be broken while at the same time keeping the properties intact. You can’t have REST without Representational State Transfer, because that’s literally what the acronym means. Secure applications shouldn’t be storing passwords, even if they’re encrypted. Tea should contain tea. (Please don’t get me started on Rooibos.)
 
-I should add that it’s perfectly fine to not care about REST, or to dispute the value of REST – or tea, or security, for that matter. Those are conversations worth having. It’s a free world, and everyone is entitled to choose the properties they care about, based on the context they’re in. Lots of people very vocally don’t care about REST, perhaps even more people than people who know what REST actually is! I have no problem with that. What’s less fine is pretending it has no meaning.
+I should add that it’s perfectly fine to _not care_ about REST, or to _dispute the value_ of REST – or tea, or security, for that matter. Those are conversations worth having. It’s a free world, and everyone is entitled to choose the properties they care about, based on the context they’re in. Lots of people very vocally don’t care about REST, perhaps even more people than people who know what REST actually is! I have no problem with that. What’s less fine is pretending it has no meaning.
 
 This concludes my attack on pragmatism, at least for now! To reiterate: pragmatism is easily abused because it’s hard to tell if someone is genuinely pragmatic or just claiming to be so. The abuse takes various forms: false dilemma, self-defense bluff, smoke bomb, justification for sloppy thinking and undermining of the meaning of words.
 
