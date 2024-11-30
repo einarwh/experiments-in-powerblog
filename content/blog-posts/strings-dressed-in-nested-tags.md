@@ -18,13 +18,13 @@ Func<string, string> nested =
                      .Border("1");
 ```
 
-And the answer is no. No, you can’t. Well you can, but it’s not going to give you the result you want. For instance, if you apply the transform to the string “Hello”, you’ll get this:
+And the answer is no. No, you can’t. Well you _can_, but it’s not going to give you the result you want. For instance, if you apply the transform to the string “Hello”, you’ll get this:
 
-TODO: Image: Bad-nesting-round
+![Useless attempt at tag nesting.](/images/bad-tag-nesting.png)
 
 Which is useless.
 
-The reason is obviously that the Tag method calls following the first one will all be channeled in to the same Tag. Even though there’s an implicit cast to string, there’s nothing in the code triggering that cast. Of course, you could explicitly call ToString on the Tag, like so:
+The reason is obviously that the **Tag** method calls following the first one will all be channeled in to the same **Tag**. Even though there’s an implicit cast to string, there’s nothing in the code triggering that cast. Of course, you could explicitly call **ToString** on the **Tag**, like so:
 
 ```csharp
 Func<string, string> nested = 
@@ -58,9 +58,9 @@ Func<string, string> nested =
 
 Which is kind of neat and yields the desired result:
 
-TODO: Image: Good-nesting-round
+![Better tag nesting with composition.](/images/good-tag-nesting.png)
 
-But we can attack the problem more directly. There’s not a whole lot we can do to prevent our Tag object from capturing the subsequent method calls to Tag. But we are free to respond to those method calls in any ol’ way we like. A trivial change to TryInvokeMember will do just nicely:
+But we can attack the problem more directly. There’s not a whole lot we can do to prevent our **Tag** object from capturing the subsequent method calls to **Tag**. But we are free to respond to those method calls in any ol’ way we like. A trivial change to **TryInvokeMember** will do just nicely:
 
 ```csharp
 public override bool TryInvokeMember(
@@ -85,4 +85,4 @@ public override bool TryInvokeMember(
 }
 ```
 
-So we just single out calls for a method named Tag with a single string parameter. For those method calls, we’re not going to do the regular fluent collection of method names and parameters thing. Instead, we’ll convert the existing Tag to a string, and return a brand new Tag to wrap that string. And now we can go a-nesting tags as much as we’d like, and still get the result we wanted. Win!
+So we just single out calls for a method named **Tag** with a single string parameter. For those method calls, we’re not going to do the regular fluent collection of method names and parameters thing. Instead, we’ll convert the existing **Tag** to a string, and return a brand new **Tag** to wrap that string. And now we can go a-nesting tags as much as we’d like, and still get the result we wanted. Win!
