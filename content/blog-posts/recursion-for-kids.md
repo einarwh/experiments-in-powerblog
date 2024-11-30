@@ -15,11 +15,11 @@ Of course, unless you’re a native English speaker, you might wonder what the h
 
 This a field vole:
 
-TODO: Image: Field-vole-500px-border
+![A field vole up close](/images/field-vole.jpg)
 
-I’m not really sure if it’s technically a mouse or just a really close relative, but for all our intents and purposes, it sure is. A small, very reproductive mouse.
+I’m not really sure if it’s _technically_ a mouse or just a really close relative, but for all our intents and purposes, it sure is. A small, very reproductive mouse.
 
-So, do you have an answer to the problem? No?
+So, do you have an answer to the problem? _No_?
 
 To provide a bit of background: this problem was presented to a class of fifth graders. Does that motivate you? Do you have an answer now?
 
@@ -79,7 +79,7 @@ public class Voles
 }
 ```
 
-The F method calculates the total number of offspring for a female vole as a function of how many days it has lived. If you call F with an input of 365 days, you’ll find that the answer is 55,784,398,225. That’s a lot of voles.
+The **F** method calculates the total number of offspring for a female vole as a function of how many days it has lived. If you call **F** with an input of **365** days, you’ll find that the answer is **55,784,398,225**. That’s a lot of voles.
 
 How does the algorithm work, though? Well, we assume that we start with a single newborn female vole that has 365 days available to produce offspring (with the first litter arriving after 25 days). Then the number of offspring is given by:
 

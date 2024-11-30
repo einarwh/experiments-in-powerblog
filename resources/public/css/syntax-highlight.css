@@ -10,7 +10,7 @@
   color: var(--code-fg);
   display: block;
   padding: 1rem;
-  /* overflow: scroll; */
+  overflow: auto;
 }
 
 code, .code, .codehilite {

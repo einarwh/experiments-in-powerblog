@@ -17,7 +17,7 @@ I feel like I had a reasonable excuse for cheating though: at the time, there we
 
 Now in order to create the illusion of proper craftsmanship in retrospect, I did end up writing tests, and in order to do that, I did have to write my own testing framework. So procrastination didn’t really help all that much. But there you go. Goes to show that the TDD police is on to something, I suppose.
 
-Anyways, the testing framework I wrote is called **μnit**, pronounced \[mju:nit\]. Which is a terribly clever name, I’m sure you’ll agree. First off, the μ looks very much like a u. So in terms of glyphs, it basically reads like unit. At the same time, the μ is used as a prefix signifying “micro” in the metric system of measurement – which is perfect since it’s written for the .NET *micro* framework. So yeah, it just reeks of clever, that name.
+Anyways, the testing framework I wrote is called [μnit](https://github.com/einarwh/mjunit), pronounced \[mju:nit\]. Which is a terribly clever name, I’m sure you’ll agree. First off, the μ looks very much like a u. So in terms of glyphs, it basically reads like unit. At the same time, the μ is used as a prefix signifying “micro” in the metric system of measurement – which is perfect since it’s written for the .NET *micro* framework. So yeah, it just reeks of clever, that name.
 
 Implementation-wise it’s pretty run-of-the-mill, though. You’ll find that μnit works just about like any other xUnit framework out there. While the .NET micro framework is obviously scaled down compared to the full .NET framework, it is not a toy framework. Among the capabilities it shares with its bigger sibling is _reflection_, which is the key ingredient in all the xUnit frameworks I know of. Or at least I suppose it is, I haven’t really looked at the source code of any of them. Guess I should. Bound to learn something.
 
@@ -349,7 +349,7 @@ The registered test client will then receive callbacks as appropriate when the t
 
 In order to be useful, test clients typically need to translate notifications into something that a human can see and act upon if necessary. In the .NET gadgeteer world, it means you need to interact with some hardware.
 
-For the Game of Life implementation (which can be browsed here if you’re interested) I implemented two test clients interacting with elements of the [FEZ Spider kit](https://www.sparkfun.com/products/retired/13306): a **DisplayTestClient** that shows test results on a small display, and a **LedTestClient** that simply uses a multicolored LED light to give feedback to the user. Here’s the code for the latter:
+For the Game of Life implementation (which can be browsed [here](https://github.com/einarwh/life-mf) if you’re interested) I implemented two test clients interacting with elements of the [FEZ Spider kit](https://www.sparkfun.com/products/retired/13306): a **DisplayTestClient** that shows test results on a small display, and a **LedTestClient** that simply uses a multicolored LED light to give feedback to the user. Here’s the code for the latter:
 
 ```csharp
 namespace Mjunit.Clients.GHI

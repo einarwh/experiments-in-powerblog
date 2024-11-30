@@ -11,7 +11,7 @@ So-called custom HTTP handlers can be incredibly useful. It’s almost laughably
 
 In essence, what a custom HTTP handler gives you is the ability to respond to an HTTP request by creating arbitrary content on the fly and have it pushed out to the client making the request. This content could be any type of file you like. In theory it could be HTML for the browser to render, but it typically won’t be (you have regular ASP.NET pages for that, remember?). Rather, you’ll have some way of magically conjuring up some binary artefact, such as an image or a PDF document. You could take various kinds of input to your spell, such as data submitted with the request, data from a database, the phase of the moon or what have you.
 
-I’m sure you can imagine all kinds of useful things you might do with a custom HTTP handler. On a recent project, I used it to generate a so-called bullet graph to represent the state of a project. If you use ASP.NET’s chart control, you’ll notice that it too is built around a custom HTTP handler. Any time you need a graphical representation that changes over time, you should think of writing a custom HTTP handler to do the job.
+I’m sure you can imagine all kinds of useful things you might do with a custom HTTP handler. On a recent project, I used it to generate a so-called [bullet graph](http://en.wikipedia.org/wiki/Bullet_graph) to represent the state of a project. If you use ASP.NET’s chart control, you’ll notice that it too is built around a custom HTTP handler. Any time you need a graphical representation that changes over time, you should think of writing a custom HTTP handler to do the job.
 
 Of course, you can use custom HTTP handlers to do rather quirky things as well, just for kicks. Which brings us to the meat of this blog post.
 
@@ -23,7 +23,7 @@ We’ll let the user specify the number of coarse-grained “pixels” in two di
 
 So, say we wanted to draw something simple, like the canonical space invader. We’ll draw a grid by hand, and fill in pixels as appropriate. A thirteen by ten pixel grid will do nicely.
 
-TODO: Image: Invader-skisse-w350
+![Space invader sketch](/images/invader-sketch.png)
 
 We can glean the appropriate pixels to color black from the grid, which makes it rather easy to translate into a suitable JSON file. The result might be something like:
 
@@ -35,7 +35,7 @@ We can glean the appropriate pixels to color black from the grid, which makes it
   "payload": 
   [
     {
-      "color" : '#000000',
+      "color" : "#000000",
       "pixels" :
       [
         [1, 5], [1, 6], [1, 7], [2, 4],
@@ -56,13 +56,13 @@ We can glean the appropriate pixels to color black from the grid, which makes it
 }
 ```
 
-Is this the optimal textual format for describing a retro-style coarse-pixeled image? Of course not, I made it up in ten seconds (about the same time Brendan Eich spent designing and implementing JavaScript, or so I hear). Is it good enough for this blog post? Aaaabsolutely. But the proof of the pudding is in the eating. So let’s eat!
+Is this the optimal textual format for describing a retro-style coarse-pixeled image? Of course not, I made it up in ten seconds (about the same time Brendan Eich spent designing and implementing JavaScript, according to Internet legend). Is it good enough for this blog post? Aaaabsolutely. But the proof of the pudding is in the eating. So let’s eat!
 
 We’ve established that the user will be posting data like this to our custom HTTP handler; our task is to translate it into an image and feed it into the response stream. Most of this work can be done without considering the context of an HTTP handler at all. The HTTP handler is just there to expose the functionality over the web, really. It’s almost like a web service.
 
 Unfortunately, getting the JSON from the POST request is more cumbersome than it should be. I had to reach for the request’s input stream in order to get to the data. Once you get the JSON, however, the rest is smooth sailing.
 
-I use Json.NET‘s useful Linq-to-JSON capability to coerce the JSON into a .NET object, which I feed to the image-producing method. The Linq-to-JSON code is pretty simple, once you get used to the API:
+I use [Json.NET](https://www.newtonsoft.com/json)‘s useful Linq-to-JSON capability to coerce the JSON into a .NET object, which I feed to the image-producing method. The Linq-to-JSON code is pretty simple, once you get used to the API:
 
 ```csharp
 private static PixItData ToPixItData(string json)
@@ -148,7 +148,7 @@ public class PixItData
 }
 ```
 
-The Pixel type simply represents an (X, Y) coordinate in the grid:
+The **Pixel** type simply represents an (X, Y) coordinate in the grid:
 
 ```csharp
 public class Pixel
@@ -324,9 +324,9 @@ public class PixItHandler : IHttpHandler
 }
 ```
 
-Warning: I take it for granted that you won’t put code this naïve into production, opening yourself up to denial-of-service attacks and what have you. It takes CPU and memory to produce images, you know.
+> Warning: I take it for granted that you won’t put code this naïve into production, opening yourself up to denial-of-service attacks and what have you. It takes CPU and memory to produce images, you know.
 
-Of course, as always when using a custom HTTP handler, we must add the handler to web.config. Like so:
+Of course, as always when using a custom HTTP handler, we must add the handler to _web.config_. Like so:
 
 ```xml
 <configuration>
@@ -341,20 +341,21 @@ Of course, as always when using a custom HTTP handler, we must add the handler t
 
 Note that we restrict the HTTP verb to POST, since we need the JSON data to produce the image.
 
-Now that we have the HTTP handler in place, we can try generating some images. A simple way to invoke the handler is to use Fiddler. Fiddler makes it very easy to build your own raw HTTP request, including a JSON payload. Just what we need. Let’s create a space invader!
+Now that we have the HTTP handler in place, we can try generating some images. A simple way to invoke the handler is to use [Fiddler](http://www.fiddler2.com/fiddler2/). Fiddler makes it very easy to build your own raw HTTP request, including a JSON payload. Just what we need. Let’s create a space invader!
 
 All we need to do is add the appropriate headers and the JSON payload.
-Fiddler-request-builder
+
+![The request builder in Fiddler](/images/fiddler-request-builder.png)
 
 The image only includes the headers for the request, but Fiddler also has a text area for the request body, which is where you’ll stick the JSON data.
 
 The PNG-file returned by our HTTP handler looks like this:
 
-TODO: Image: Invader-black
+![Space invader](/images/invader-black.png)
 
 Nice!
 
-Of course, we could create more elaborate images, using more pixels and more colors. For instance, the following JSON could be used to evoke the memory of a certain anti-hero named Larry, hailing from the hey-day of Sierra On-Line.
+Of course, we could create more elaborate images, using more pixels and more colors. For instance, the following JSON could be used to evoke the memory of a certain anti-hero named [Larry](https://en.wikipedia.org/wiki/Leisure_Suit_Larry), hailing from the hey-day of [Sierra On-Line](http://en.wikipedia.org/wiki/Sierra_Entertainment).
 
 ```json
 { 
@@ -448,6 +449,6 @@ Of course, we could create more elaborate images, using more pixels and more col
 
 The result?
 
-TODO: Image: Larry-4
+![Leisure Suit Larry as rendered by the pix-it HTTP handler.](/images/pix-it-larry.png)
 
 You might say “that’s a big file to create a small image”, but that would be neglecting the greatness of the Laffer, and his impact on a generation of young adolescents.
