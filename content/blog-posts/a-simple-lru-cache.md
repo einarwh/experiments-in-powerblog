@@ -10,15 +10,15 @@ Posted: April 13, 2011
 
 _Disclaimer: copy code from this site at your own peril!_
 
-So yeah, I wanted to share this simple LRU cache I put together. LRU means “least-recently-used”. The idea is that you want to keep the hottest, most useful elements in the cache, so you evict elements that haven’t been used for a while. It’s a useful approximation of Belady’s algorithm (aka the clairvoyant algorithm) in many scenarios. Wikipedia has all the details.
+So yeah, I wanted to share this simple LRU cache I put together. LRU means “least-recently-used”. The idea is that you want to keep the hottest, most useful elements in the cache, so you evict elements that haven’t been used for a while. It’s a useful approximation of Belady’s algorithm (aka the clairvoyant algorithm) in many scenarios. Wikipedia has all [the details](http://en.wikipedia.org/wiki/Cache_algorithms).
 
 Of course, my LRU implementation (written in C#) is extremely simple, naive even. For instance, it’s not self-pruning, meaning there’s no threading or callback magic going on to make sure that elements are evicted as soon as they expire. Rather, you check for expired elements when you interact with the cache. This incurs a little bit of overhead for each operation. Also, it means that if you don’t touch the cache, elements linger there forever. Another name for that would be “memory leak”, which sounds less impressive than “LRU cache”, but there you go. (We’re going off on a tangent here. Why would you create a cache that you never use? So let’s assume that you’re going to use it. “Useful” sort of implies “use”, indeed it should be “ful” of it.)
 
-(The implementation isn’t synchronized either, which means you could wreak havoc if you have multiple threads accessing it simultaneously. But of course, you would be anyway. None of us can write correct multi-threaded code, so we should just refrain from doing so until the STM angel arrives to salvage us all. I believe his name is “Simon“.)
+(The implementation isn’t synchronized either, which means you could wreak havoc if you have multiple threads accessing it simultaneously. But of course, you would be anyway. None of us can write correct multi-threaded code, so we should just refrain from doing so until the STM angel arrives to salvage us all. I believe his name is [“Simon“](https://www.youtube.com/watch?v=tve57vilywc).)
 
 Anyways, the basic idea of an LRU cache is that you timestamp your cache elements, and use the timestamps to decide when to evict elements. To do so efficiently, you do two kinds of book-keeping: one for lookup, another for pruning of expired elements. In my implementation, this translates to a hash table and a linked list. The linked list is sorted by age, making it easy to find the oldest elements. New elements are added to the front, elements are pruned from the back. Pretty simple. I’ve sketched it below, just in case you cannot read.
 
-TODO: Image: Lru-cache
+![LRU cache](/images/lru-cache.png)
 
 The cache in the figure holds five elements, two of which have expired. To be extraordinarily pedagogical, I’ve colored those red. The still-fresh elements are green. Notice that there are arrows going both ways between the hash table and the list. We’ll be using both to do our double book-keeping.
 
@@ -26,7 +26,7 @@ Now, let’s look at the implementation details. Performance-wise, we want to ke
 
 ## Overview
 
-A skeletal view of the ExpirationCache class looks like this:
+A skeletal view of the **ExpirationCache** class looks like this:
 
 ```csharp
 /// <summary>
@@ -44,7 +44,7 @@ public class ExpirationCache<TKey, TValue> where TValue : class
 }
 ```
 
-There’s a fair amount of generic noise there, but the important stuff should be graspable. We can see the hash table (i.e. the Dictionary) and the linked list, as well as the TimeSpan which determines how long items should be held in the cache before expiring. The type declaration reveals that the cache holds elements of type TValue, that are accessed by keys of type TKey.
+There’s a fair amount of generic noise there, but the important stuff should be graspable. We can see the hash table (i.e. the Dictionary) and the linked list, as well as the TimeSpan which determines how long items should be held in the cache before expiring. The type declaration reveals that the cache holds elements of type **TValue**, that are accessed by keys of type **TKey**.
 
 The TimeStamped type is simply a way of adding a timestamp to any ol’ type, like so:
 
@@ -68,7 +68,7 @@ struct TimeStamped<T>
 
 ## Pruning
 
-Let’s look at something a bit more interesting: the pruning. (Of course, I don’t know if caches can really be “pruned”, as they’re not plants. But programming is the realm of mangled metaphors, so we’ll make do.) Here’s the Prune method:
+Let’s look at something a bit more interesting: the pruning. (Of course, I don’t know if caches can really be “pruned”, as they’re not plants. But programming is the realm of mangled metaphors, so we’ll make do.) Here’s the **Prune** method:
 
 ```csharp
 private void Prune()
@@ -114,7 +114,7 @@ public void Add(TKey key, TValue value)
 }
 ```
 
-After the mandatory pruning step is done, we can do what we’re here for. Let’s assume we’re adding a new element first. It’s trivial, even though we need to nest a few type envelopes: we’re wrapping our element in a TimeStamped inside a KeyValuePair inside a LinkedListNode. Then we just put that in front of the list (because it’s our newest one), and add it to the dictionary. Replacing an existing element is not much harder; we just remove it before adding it. We can’t mutate it, since we need a new timestamp and – more importantly – a new position in the linked list. We can’t afford to shuffle things around, since we’d lose O(1) in a heartbeat.
+After the mandatory pruning step is done, we can do what we’re here for. Let’s assume we’re adding a new element first. It’s trivial, even though we need to nest a few type envelopes: we’re wrapping our element in a **TimeStamped** inside a **KeyValuePair** inside a **LinkedListNode**. Then we just put that in front of the list (because it’s our newest one), and add it to the dictionary. Replacing an existing element is not much harder; we just remove it before adding it. We can’t mutate it, since we need a new timestamp and – more importantly – a new position in the linked list. We can’t afford to shuffle things around, since we’d lose O(1) in a heartbeat.
 
 ## Look up
 

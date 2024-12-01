@@ -12,9 +12,9 @@ I recently found out – the hard way, of course – that data binding in ASP.NE
 
 Let’s consider a very simple example. We have a type hierarchy like the following:
 
-TODO: Image: Canine-hierarchy
+![Hierarchy of canines.](/images/canine-hierarchy.png)
 
-There’s an ICanine interface, with implementing classes Wolf and Dog. Chihuahua is a subclass of the latter. The code looks like this:
+There’s an **ICanine** interface, with implementing classes **Wolf** and **Dog**. **Chihuahua** is a subclass of the latter. The code looks like this:
 
 ```csharp
 interface ICanine 
@@ -38,13 +38,13 @@ class Chihuahua : Dog
 }
 ```
 
-Now we’d like to conjure up a collection of canines and bind to them. Sounds innocent enough, right? And it is, if you use one of the benign controls. “Benign” as in “not badly broken”. ListBox is one of those. We create an IEnumerable<ICanine> like so:
+Now we’d like to conjure up a collection of canines and bind to them. Sounds innocent enough, right? And it is, if you use one of the benign controls. “Benign” as in “not badly broken”. **ListBox** is one of those. We create an **IEnumerable&lt;ICanine&gt;** like so:
 
 ```csharp
 var canines = new List<ICanine> { new Dog(), new Wolf(), new Chihuahua() };
 ```
 
-And then we do the two-step song-and-dance of ASP.NET data binding (assuming that _box is an instance of ListBox):
+And then we do the two-step song-and-dance of ASP.NET data binding (assuming that **_box** is an instance of **ListBox**):
 
 ```csharp
 _box.DataSource = canines;
@@ -53,28 +53,28 @@ _box.DataBind();
 
 We run it, and get the following result:
 
-TODO: Image: Bark-listbox
+![Barks in a listbox](/images/bark-listbox.png)
 
 Presto! All is well! What is this guy talking about? Broken polymorphism? Where?
 
-Well, that was the benign control, remember? Here’s a malicious one: DataGrid.
+Well, that was the benign control, remember? Here’s a malicious one: **DataGrid**.
 
-We do the exact same thing, except using _grid of the obvious type:
+We do the exact same thing, except using **_grid** of the obvious type:
 
 ```csharp
 _grid.DataSource = canines;
 _grid.DataBind();
 ```
 
-We run it, and get…
+We run it, and get...
 
-TODO: Image: Exception-grid-wolf
+![TargetInvocationException was unhandled by user code.](/images/exception-grid-wolf.png)
 
 Ouch.
 
-Evidently, there’s some reflection voodoo going on underneath the hood when you’re doing data binding in ASP.NET. And in the case of DataGrid, that voodoo is just too feeble.
+Evidently, there’s some reflection voodoo going on underneath the hood when you’re doing data binding in ASP.NET. And in the case of **DataGrid**, that voodoo is just too feeble.
 
-Now, consider a variation of the code above, omitting the Wolf. Wolves are trouble after all.
+Now, consider a variation of the code above, omitting the **Wolf**. Wolves are trouble after all.
 
 ```csharp
 var canines = new List<ICanine> { new Dog(), new Chihuahua() };
@@ -84,7 +84,7 @@ _box.DataBind();
 
 This time...
 
-TODO: Image: Bark-grid-dogs
+![Barks in a grid](/images/bark-grid-dogs.png)
 
 It works! Oh man, that’s weird. So apparently subclassing works as long as there’s a common base class? You wish. Let’s try this instead:
 
@@ -94,13 +94,13 @@ _box.DataSource = canines;
 _box.DataBind();
 ```
 
-That is, we reverse the order, passing in the Chihuahua first, before the Dog. And now:
+That is, we reverse the order, passing in the **Chihuahua** first, before the **Dog**. And now:
 
-TODO: Image: Reflection-dog-exception
+![TargetInvocationException was unhandled by user code.](/images/reflection-dog-exception.png)
 
 Gaah!
 
-The reflection voodoo seems to be making some arbitrary assumptions regarding types based on the first element in the enumerable or some such. You could probably tease out the details using Reflector and coffee, but there’s no point. It’s just broken; I don’t care exactly how. What we need is a simple and predicatable workaround.
+The reflection voodoo seems to be making some arbitrary assumptions regarding types based on the first element in the enumerable or some such. You could probably tease out the details using [Reflector](https://en.wikipedia.org/wiki/.NET_Reflector) and coffee, but there’s no point. It’s just broken; I don’t care exactly how. What we need is a simple and predicatable workaround.
 
 ## Workaround
 
