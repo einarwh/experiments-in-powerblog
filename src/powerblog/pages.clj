@@ -7,7 +7,9 @@
               :where
               [?e :blog-post/author]]
             db)
-       (map #(d/entity db %))))
+       (map #(d/entity db %))
+       (sort-by :blog-post/published)
+       reverse))
 
 (defn layout [{:keys [title]} & content]
   [:html
@@ -17,7 +19,7 @@
     content]])
 
 (def header
-  [:header [:a {:href "/"} "Powerblog"]])
+  [:header [:a {:href "/"} "@einarwh"]])
 
 (defn render-frontpage [context page]
   (layout {:title "Einar W. Høst"}

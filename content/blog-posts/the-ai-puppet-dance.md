@@ -1,6 +1,7 @@
 :page/title The AI puppet dance
 :blog-post/tags [:ai]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2024-01-12T12:00:00"
 :page/body
 
 # The AI puppet dance

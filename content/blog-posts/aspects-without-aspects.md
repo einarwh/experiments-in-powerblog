@@ -1,6 +1,7 @@
 :page/title Aspects without aspects
 :blog-post/tags [:tech :programming :aop]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2014-07-05T12:00:00"
 :page/body
 
 # Aspects without aspects

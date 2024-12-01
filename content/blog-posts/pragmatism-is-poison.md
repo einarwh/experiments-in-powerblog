@@ -1,6 +1,7 @@
 :page/title Pragmatism is poison
 :blog-post/tags [:tech]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2016-03-16T12:00:00"
 :page/body
 
 # Pragmatism is poison

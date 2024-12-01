@@ -1,6 +1,7 @@
 :page/title Mkay: One validation attribute to rule them all
 :blog-post/tags [:tech :dotnet :aspnet :csharp :meta-programming :javascript]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2013-02-15T12:00:00"
 :page/body
 
 # Mkay: One validation attribute to rule them all

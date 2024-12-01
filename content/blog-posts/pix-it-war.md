@@ -1,6 +1,7 @@
 :page/title Pix-it war!
 :blog-post/tags [:tech :programming :http :dotnet :aspnet :json]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2011-11-04T12:00:00"
 :page/body
 
 # Pix-it war!

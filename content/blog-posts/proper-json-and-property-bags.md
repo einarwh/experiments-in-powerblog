@@ -1,6 +1,7 @@
 :page/title Proper JSON and property bags
 :blog-post/tags [:tech :programming :json]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2020-05-13T12:00:00"
 :page/body
 
 # Proper JSON and property bags

@@ -1,6 +1,7 @@
 :page/title Diamond mirrors
 :blog-post/tags [:tech :programming :kata :fsharp]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2015-02-10T12:00:00"
 :page/body
 
 # Diamond mirrors

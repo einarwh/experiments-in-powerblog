@@ -1,6 +1,7 @@
 :page/title A simple LRU cache
 :blog-post/tags [:tech :programming :algorithms :csharp :dotnet :caching]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2011-04-13T12:00:00"
 :page/body
 
 # A simple LRU cache

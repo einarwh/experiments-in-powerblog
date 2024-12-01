@@ -1,6 +1,7 @@
 :page/title Introducing μnit 
 :blog-post/tags [:tech :programming :dotnet :csharp :reflection :testing]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2012-06-15T12:00:00"
 :page/body
 
 # Introducing μnit

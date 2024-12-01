@@ -1,6 +1,7 @@
 :page/title Dragging a dead priest: programs and programmers in time
 :blog-post/tags [:software-development]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2023-02-05T12:00:00"
 :page/body
 
 # Dragging a dead priest: programs and programmers in time

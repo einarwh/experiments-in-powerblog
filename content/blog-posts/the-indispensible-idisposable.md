@@ -1,6 +1,7 @@
 :page/title The indispensable IDisposable
 :blog-post/tags [:tech :programming :dotnet :csharp]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2011-05-05T12:00:00"
 :page/body
 
 # The indispensable IDisposable

@@ -1,6 +1,7 @@
 :page/title Bix-it: pix-it in the browser
 :blog-post/tags [:tech :programming :http :dotnet :aspnet :csharp :javascript]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2011-11-06T12:00:00"
 :page/body
 
 # Bix-it: pix-it in the browser

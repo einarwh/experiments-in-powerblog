@@ -1,6 +1,7 @@
 :page/title The hawk and the tower
 :blog-post/tags [:tech]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2012-08-24T12:00:00"
 :page/body
 
 # The hawk and the tower

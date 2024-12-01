@@ -1,6 +1,7 @@
 :page/title Strings dressed in tags
 :blog-post/tags [:tech]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2012-06-20T15:43:00"
 :page/body
 
 # Strings dressed in tags

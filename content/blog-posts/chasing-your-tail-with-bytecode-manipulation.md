@@ -1,6 +1,7 @@
 :page/title Chasing your tail with bytecode manipulation
 :blog-post/tags [:tech :programming :csharp :dotnet :bytecode]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2013-11-05T12:00:00"
 :page/body
 
 # Chasing your tail with bytecode manipulation

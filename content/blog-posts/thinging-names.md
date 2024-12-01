@@ -1,6 +1,7 @@
 :page/title Thinging names
 :blog-post/tags [:tech :software-development :modelling]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2015-05-10T12:00:00"
 :page/body
 
 # Thinging names

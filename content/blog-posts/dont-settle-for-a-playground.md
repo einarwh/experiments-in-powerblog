@@ -1,6 +1,7 @@
 :page/title Don't settle for a playground
 :blog-post/tags [:software-development :agile :methodology]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2023-03-29T12:00:00"
 :page/body
 
 # Don't settle for a playground

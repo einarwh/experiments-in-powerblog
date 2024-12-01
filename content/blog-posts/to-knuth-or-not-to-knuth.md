@@ -1,6 +1,7 @@
 :page/title To Knuth or not to Knuth
 :blog-post/tags [:tech :programming :books]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2012-07-08T12:00:00"
 :page/body
 
 # To Knuth or not to Knuth

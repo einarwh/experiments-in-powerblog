@@ -1,9 +1,12 @@
 :page/title Function application in la-la land
 :blog-post/tags [:tech :functional-programming]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2017-10-11T12:00:00"
 :page/body
 
 # Function application in la-la land
+
+Posted: October 11, 2017
 
 Here’s a familiar scenario for a programmer: You have some useful function that you would like to apply to some values. It could be concat that concatinates two strings, or add that adds two integers, or cons which prepends an element to a list, or truncate which cuts off a string at the specified length, or indeed any old function f you come up with which takes a bunch of arguments and produces some result.
 

@@ -1,6 +1,7 @@
 :page/title Pix-it curling
 :blog-post/tags [:tech]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2011-11-07T12:00:00"
 :page/body
 
 # Pix-it curling

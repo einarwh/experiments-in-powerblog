@@ -1,6 +1,7 @@
 :page/title A property with a view
 :blog-post/tags [:tech]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2012-05-01T12:00:00"
 :page/body
 
 # A property with a view

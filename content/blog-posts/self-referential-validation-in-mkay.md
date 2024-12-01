@@ -1,6 +1,7 @@
 :page/title Self-referential validation in Mkay
 :blog-post/tags [:tech]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2013-02-22T12:00:00"
 :page/body
 
 # Self-referential validation in Mkay

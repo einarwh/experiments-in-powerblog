@@ -1,6 +1,7 @@
 :page/title Technical debt isn’t technical
 :blog-post/tags [:tech :technical-debt :software-development]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2015-12-05T12:00:00"
 :page/body
 
 # Technical debt isn’t technical

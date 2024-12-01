@@ -1,6 +1,7 @@
 :page/title Shrink-wrapped Mkay
 :blog-post/tags [:tech :programming :dotnet :aspnetmvc :dsl :javascript]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2013-03-05T12:00:00"
 :page/body
 
 # Shrink-wrapped Mkay

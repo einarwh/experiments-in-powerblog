@@ -1,6 +1,7 @@
 :page/title Donkey code
 :blog-post/tags [:software-design :modelling :domain-driven-design]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2017-01-21T12:00:00"
 :page/body
 
 # Donkey code

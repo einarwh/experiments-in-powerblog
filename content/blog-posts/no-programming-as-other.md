@@ -1,6 +1,7 @@
 :page/title NO! Programming as other
 :blog-post/tags [:programming :software-development]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2021-04-18T12:00:00"
 :page/body
 
 # NO! Programming as other

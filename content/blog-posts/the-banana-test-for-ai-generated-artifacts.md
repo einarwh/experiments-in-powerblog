@@ -1,6 +1,7 @@
 :page/title The banana test for AI-generated artifacts
 :blog-post/tags [:ai]
 :blog-post/author {:person/id :einarwh}
+:blog-post/published #time/ldt "2024-10-03T12:00:00"
 :page/body
 
 # The banana test for AI-generated artifacts
