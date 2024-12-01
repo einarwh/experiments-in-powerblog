@@ -104,7 +104,7 @@ The reflection voodoo seems to be making some arbitrary assumptions regarding ty
 
 ## Workaround
 
-You can mitigate the problem (aka complicate your program in order to work around a broken framework) by using a wrapper type that always stays the same. That way, the type of the instances handed out by the IEnumerable stays nice and homogenous, just the way DataGrid likes it. Inside the wrapper, you delegate to whatever ICanine you want:
+You can mitigate the problem (aka complicate your program in order to work around a broken framework) by using a wrapper type that always stays the same. That way, the type of the instances handed out by the **IEnumerable** stays nice and homogenous, just the way **DataGrid** likes it. Inside the wrapper, you delegate to whatever **ICanine** you want:
 
 ```csharp
 class DataBindingCanineWrapper : ICanine 
@@ -119,30 +119,31 @@ class DataBindingCanineWrapper : ICanine
 }
 ```
 
-This effectively replaces the original IEnumerable<ICanine> containing the bare Chihuahua and Dog with one that contains only wrapper canines. So data binding should work. And it does:
+This effectively replaces the original **IEnumerable&lt;ICanine&gt;** containing the bare **Chihuahua** and **Dog** with one that contains only wrapper canines. So data binding should work. And it does:
 
-TODO: Image: Wrapped-chihuahua
+![Result of using the canine wrapper.](/images/wrapped-chihuahua.png)
 
-Notice that we got the Chihuahua Arff!ing as the first grid element.
+Notice that we got the **Chihuahua** Arff!ing as the first grid element.
 
 You could generate such wrappers on the fly, using reflection. In fact, you can download and use something called a “defensive datasource“. Turns out I’m not the only one who’s been bitten and annoyed by this issue.
 
 ## Peace, love and understanding
 
-Why is DataGrid broken? Well, if you crack open BaseDataList, a base class for both DataGrid and ListBox, you’ll find that the DataSource property assumes that you’re passing it an IEnumerable. No T, just a plain ol’ .NET 1.1-style untyped IEnumerable. So basically, it’s just a series of arbitrary stuff, the type of which could be anything. You could stuff apples and oranges in there, no problem. Now recall this result:
-Bark-grid-dogs
+Why is **DataGrid** broken? Well, if you crack open **BaseDataList**, a base class for both **DataGrid** and **ListBox**, you’ll find that the **DataSource** property assumes that you’re passing it an **IEnumerable**. No **T**, just a plain ol’ .NET 1.1-style untyped **IEnumerable**. So basically, it’s just a series of arbitrary stuff, the type of which could be anything. You could stuff apples and oranges in there, no problem. Now recall this result:
 
-See the Bark header? That’s the name of the property shared by Dog and Chihuahua. This is DataGrid auto-generating columns based on the properties of the objects you pass it for data binding. It’s sort of cool, even though it’s broken. Of course, the DataGrid couldn’t pull that trick off without knowing something about the types of the instances in the IEnumerable. In fact, it absolutely needs to know that all instances share the properties that it’s going to display. If you put instances of both Apple and Orange into your IEnumerable, what would you expect to see? You need some commonality between the types, or the whole premise of DataGrid just falls apart.
+![Barks in a grid again](/images/bark-grid-dogs.png)
 
-Of course, an IEnumerable<T> would give you what you need: a common type T for the DataGrid to work with. But DataGrid is stuck with an IEnumerable for its data source and has to make do, somehow. One solution would be to build an inheritance tree for all the elements in the IEnumerable and pick the root type, the least common denominator so to speak. But I imagine that would be costly. Instead, DataGrid looks at the type of the first element, and assumes that the rest will be just like it (or a subclass). Weird, arbitrary, yet at least not completely irrational.
+See the **Bark** header? That’s the name of the property shared by **Dog** and **Chihuahua**. This is **DataGrid** auto-generating columns based on the properties of the objects you pass it for data binding. It’s sort of cool, even though it’s broken. Of course, the **DataGrid** couldn’t pull that trick off without knowing something about the types of the instances in the **IEnumerable**. In fact, it absolutely needs to know that all instances share the properties that it’s going to display. If you put instances of both **Apple** and **Orange** into your **IEnumerable**, what would you expect to see? You need some commonality between the types, or the whole premise of **DataGrid** just falls apart.
+
+Of course, an **IEnumerable&lt;T&gt;** would give you what you need: a common type **T** for the **DataGrid** to work with. But **DataGrid** is stuck with an **IEnumerable** for its data source and has to make do, somehow. One solution would be to build an inheritance tree for all the elements in the **IEnumerable** and pick the root type, the least common denominator so to speak. But I imagine that would be costly. Instead, **DataGrid** looks at the type of the first element, and assumes that the rest will be just like it (or a subclass). Weird, arbitrary, yet at least not completely irrational.
 
 ## ListBox revisited
 
-Now, given that ListBox also expects an untyped IEnumerable, how come polymorphism seems to work in that case?
+Now, given that **ListBox** also expects an untyped **IEnumerable**, how come polymorphism seems to work in that case?
 
-Consider three unrelated classes, Huey, Dewey and Louie. We’ll make them singletons since there can only be one of each. More importantly, they all inherit directly from System.Object; there’s nothing else linking them together (no IDuck interface, no Duck base class). Coincidentally, though, they each sport a QuacksLike property.
+Consider three unrelated classes, **Huey**, **Dewey** and **Louie**. We’ll make them singletons since there can only be one of each. More importantly, they all inherit directly from **System.Object**; there’s nothing else linking them together (no **IDuck** interface, no **Duck** base class). Coincidentally, though, they each sport a **QuacksLike** property.
 
-Here’s the code for Huey:
+Here’s the code for **Huey**:
 
 ```csharp
 class Huey
@@ -157,9 +158,9 @@ class Huey
 }
 ```
 
-As you can imagine, the declarations for Dewey and Louie are remarkably similar.
+As you can imagine, the declarations for **Dewey** and **Louie** are remarkably similar.
 
-Let’s toss all three into an IEnumerable and see what happens:
+Let’s toss all three into an **IEnumerable** and see what happens:
 
 ```csharp
 _box.DataSource = new ArrayList { Huey.Instance, Dewey.Instance, Louie.Instance };
@@ -168,15 +169,15 @@ _box.DataBind();
 
 The result is this:
 
-TODO: Image: Ducks-listbox
+![A ListBox of ducks](/images/ducks-listbox.png)
 
-Isn’t that something? It’s not really polymorphic at all! Instead, it turns out that ListBox supports duck typing. As long as the object has a public property matching the DataTextField for the ListBox, the actual type is irrelevant. The property’s type is irrelevant too. We could change Dewey‘s implementation of QuacksLike like this, and it will still work:
+Isn’t that something? It’s not really polymorphic at all! Instead, it turns out that **ListBox** supports duck typing. As long as the object has a public property matching the **DataTextField** for the **ListBox**, the actual type is irrelevant. The property’s type is irrelevant too. We could change **Dewey**‘s implementation of **QuacksLike** like this, and it will still work:
 
 ```csharp
 public Quacker QuacksLike { get { return new Quacker(); } }
 ```
 
-Quacker could be anything, really. Here’s a possibility:
+**Quacker** could be anything, really. Here’s a possibility:
 
 ```csharp
 public class Quacker
@@ -190,14 +191,14 @@ public class Quacker
 
 Now we get this:
 
-TODO: Image: Any-old-duck
+![Any old duck with a QuacksLike property](/images/any-old-duck.png)
 
-Of course, if we were to replace Dewey with, say, an Apple, we’d be in trouble (unless it happens to have a public QuacksLike property, but that seems unlikely):
+Of course, if we were to replace **Dewey** with, say, an **Apple**, we’d be in trouble (unless it happens to have a public **QuacksLike** property, but that seems unlikely):
 
-TODO: Image: Exception-apple-quacks
+![Exception: Apple has no QuacksLike property](/images/exception-apple-quacks.png)
 
 No duck typing without quacking, that’s what I always say!
 
 ## Conclusion
 
-So polymorphism is not actually supported by either control. It’s just that it’s more likely that you’ll notice when you use a DataGrid than a ListBox. Fun!
+So polymorphism is not actually supported by either control. It’s just that it’s more likely that you’ll notice when you use a **DataGrid** than a **ListBox**. Fun!

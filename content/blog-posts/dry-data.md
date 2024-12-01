@@ -8,11 +8,11 @@
 
 Posted: June 20, 2011 
 
-I’m a big proponent of the NoORM movement. Haven’t heard of it? That’s because it doesn’t exist. But it sort of does, under a different name. So-called “micro-ORMs” like Simple.Data, dapper and massive all belong to this category. That’s three really smart guys (unwittingly) supporting the same cause as I. Not bad. I’d say that’s the genesis of a movement right there.
+I’m a big proponent of the NoORM movement. Haven’t heard of it? That’s because it doesn’t exist. But it sort of does, under a different name. So-called “micro-ORMs” like [Simple.Data](https://github.com/ThatRendle/Simple.Data), [dapper](https://github.com/DapperLib/Dapper) and [massive](https://github.com/FransBouma/Massive) all belong to this category. That’s three really smart guys (unwittingly) supporting the same cause as I. Not bad. I’d say that’s the genesis of a movement right there.
 
-Unsurprisingly, NoORM means “not only ORM”. The implication is that there are scenarios where full-blown object-relational mapper frameworks like nHibernate and Entity Framework are overkill. Such frameworks really go beyond merely addressing the infamous object/relational impedence mismatch (which is arguably irreconcilable), to support an almost seamless experience of persistent objects stored in a relational database. To do so, they pull out the heavy guns, like the Unit of Work pattern from Martin Fowler’s Patterns of Enterprise Application Architecture (One of those seminal tomes with an “on bookshelf”-to-“actually read it” ratio that’s just a little too high.)
+Unsurprisingly, NoORM means “not only ORM”. The implication is that there are scenarios where full-blown object-relational mapper frameworks like nHibernate and Entity Framework are overkill. Such frameworks really go beyond merely addressing the infamous object/relational impedence mismatch (which is arguably [irreconcilable](https://seldo.com/posts/orm_is_an_antipattern)), to support an almost seamless experience of persistent objects stored in a relational database. To do so, they pull out the heavy guns, like the [Unit of Work](https://martinfowler.com/eaaCatalog/unitOfWork.html) pattern from Martin Fowler’s [Patterns of Enterprise Application Architecture](https://martinfowler.com/books/eaa.html) (One of those seminal tomes with an “on bookshelf”-to-“actually read it” ratio that’s just a little too high.)
 
-And that’s great! I always say, let someone else “maintain a list of objects affected by a business transaction and coordinate the writing out of changes and the resolution of concurrency problems”. Preferably someone smarter than me. It’s hard to get right, and it in the right circumstances, being able to leverage a mature framework to do that heavy lifting for you is a huge boon.
+And that’s great! I always say, let someone _else_ “maintain a list of objects affected by a business transaction and coordinate the writing out of changes and the resolution of concurrency problems”. Preferably someone smarter than me. It’s hard to get right, and it in the right circumstances, being able to leverage a mature framework to do that heavy lifting for you is a huge boon.
 
 Make sure you have some heavy lifting to do, though. All the power, all the functionality, all the goodness supported by state-of-the-art ORMs, comes at a cost. There’s a cost in configuration, in conceptual overhead, in overall complexity of your app. Potentially there’s a cost in performance as well. What if you don’t care about flexible ways of configuring the mapping of a complex hierarchy of rich domain objects onto a highly normalized table structure? What if you don’t need to support concurrent, persistent manipulation of the state of those objects? What if all you need is to grab some data and go to town? In that case, you might be better served with something simpler, like raw ADO.NET calls or some thin, unambitious veneer on top of that.
 
@@ -134,7 +134,7 @@ What varies?
 * The list of input parameters.
 * In the case of queries: the data row we’re mapping from and the .NET type we’re mapping to.
 * The names of stored procedures.
-* The execute method (ExecuteReader, ExecuteScalar, ExecuteNonQuery). We’re gonna ignore DataSets since I don’t like them. (I’ll be using my own anemic POCOs, thank you very much!).
+* The execute method (**ExecuteReader**, **ExecuteScalar**, **ExecuteNonQuery**). We’re gonna ignore **DataSet**s since I don’t like them. (I’ll be using my own anemic POCOs, thank you very much!).
 
 What stays the same?
 
@@ -142,9 +142,9 @@ What stays the same?
 * The need to create and open a connection.
 * The need to create and configure a command object.
 * The need to execute the command against the database.
-* The need to map the result of the command to some suitable representation (unless we’re doing ExecuteNonQuery).
+* The need to map the result of the command to some suitable representation (unless we’re doing **ExecuteNonQuery**).
 
-There are a couple of design patterns that spring to mind, like Strategy or Template method, that might help us clean things up. We’ll be leaving GoF on the shelf next to PoEAA, though, and use lambdas and generic methods instead.
+There are a couple of design patterns that spring to mind, like [Strategy](https://en.wikipedia.org/wiki/Strategy_pattern) or [Template method](https://en.wikipedia.org/wiki/Template_method_pattern), that might help us clean things up. We’ll be leaving [GoF](https://en.wikipedia.org/wiki/Design_Patterns) on the shelf next to PoEAA, though, and use lambdas and generic methods instead.
 
 I take “don’t repeat yourself” quite literally. So we’re aiming for a single method where we’ll be doing all our communication with the database. We’re going to channel all our queries and commands through that same method, passing in just the stuff that varies.
 
@@ -294,7 +294,7 @@ public TResult Execute<T, TResult>(string spName,
 }
 ```
 
-So basically the solution is to pass in a function that specifies the execute method to run. The other execute methods can use this to get their stuff done. Now that we have our single, magical do-all database interaction method, let’s make make things a bit more reusable. We’ll cut the database code out of the client, and introduce a tiny abstraction. Let’s call it Database, since that’s what it is. In fact, for good measure, let’s throw in a new method that might be useful in the process: ExecuteRow. Here’s the code:
+So basically the solution is to pass in a function that specifies the execute method to run. The other execute methods can use this to get their stuff done. Now that we have our single, magical do-all database interaction method, let’s make make things a bit more reusable. We’ll cut the database code out of the client, and introduce a tiny abstraction. Let’s call it **Database**, since that’s what it is. In fact, for good measure, let’s throw in a new method that might be useful in the process: **ExecuteRow**. Here’s the code:
 
 ```csharp
 public class Database
@@ -369,7 +369,7 @@ public class Database
 }
 ```
 
-ExecuteScalar is pretty straightforward, but there are a few interesting details concerning the others. First, ExecuteReader derives a map from IDataReader to IEnumerable from the user-supplied map from IDataRecord to T. Second, ExecuteNonQuery doesn’t really care about the result from calling DbCommand.ExecuteNonQuery against the database (which indicates the number of rows affected by the command/non-query). So we’re providing the simplest possible map – the identity map – to the Execute method.
+**ExecuteScalar** is pretty straightforward, but there are a few interesting details concerning the others. First, **ExecuteReader** derives a map from **IDataReader** to **IEnumerable** from the user-supplied map from **IDataRecord** to **T**. Second, **ExecuteNonQuery** doesn’t really care about the result from calling **DbCommand.ExecuteNonQuery** against the database (which indicates the number of rows affected by the command/non-query). So we’re providing the simplest possible map – the identity map – to the **Execute** method.
 
 So the execution code is pretty DRY now. Basically, you’re just passing in the stuff that varies. And there’s a single method actually creating connections and commands and executing them against the database. Good stuff.
 
@@ -423,7 +423,7 @@ public class Client4
 }
 ```
 
-Actually, it’s not too bad, but I’m not happy about the repeated chanting of new SqlParameter. We’ll introduce a simple abstraction to DRY up that too, and give us a syntax that’s a bit more succinct and declarative-looking.
+Actually, it’s not too bad, but I’m not happy about the repeated chanting of **new SqlParameter**. We’ll introduce a simple abstraction to DRY up that too, and give us a syntax that’s a bit more succinct and declarative-looking.
 
 ```csharp
 public class StoredProcedure
@@ -466,7 +466,7 @@ public class StoredProcedure
 }
 ```
 
-This is basically a sponge for parameters. It uses a little trick with a get-indexer with side-effects to do its thing. This allows for a simple fluent syntax to add parameters to a DbCommand object. Let’s refactor the generic Execute method to use it.
+This is basically a sponge for parameters. It uses a little trick with a get-indexer with side-effects to do its thing. This allows for a simple fluent syntax to add parameters to a **DbCommand** object. Let’s refactor the generic **Execute** method to use it.
 
 ```csharp
 public TResult Execute<T, TResult>(string spName, 
@@ -489,7 +489,7 @@ public TResult Execute<T, TResult>(string spName,
 }
 ```
 
-The refactoring ripples through to the other execute methods as well, meaning you pass in a Func instead of the parameter array. Now the interesting part is how the new abstraction affects the client code. Here’s how:
+The refactoring ripples through to the other execute methods as well, meaning you pass in a **Func** instead of the parameter array. Now the interesting part is how the new abstraction affects the client code. Here’s how:
 
 ```csharp
 public class Client5

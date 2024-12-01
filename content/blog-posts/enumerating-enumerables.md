@@ -8,11 +8,11 @@
 
 Posted: May 7, 2011 
 
-You know when you’re iterating over some IEnumerable, and you need to associate the items in the IEnumerable with a sequence number?
+You know when you’re iterating over some **IEnumerable**, and you need to associate the items in the **IEnumerable** with a sequence number?
 
 In Python, you could do this:
 
-TODO: Image: Python-enumerate-shell
+![Python solution for indexed enumeration.](/images/python-enumerate-shell.png)
 
 In C#, however, you’re forced to do something like this:
 
@@ -26,7 +26,7 @@ foreach (var it in items)
 }
 ```
 
-Yuck. I feel dirty each time. It’s two measly lines of code, but it sure feels like I’m nailing something onto the loop that doesn’t belong there. (And that’s probably because that’s exactly what I’m doing.) It feels out of sync with the level of abstraction for the foreach statement, and it’s just plain ugly. So what I’m looking for is an approach that’s more appealing aesthetically, something a little more polished, something like:
+Yuck. I feel dirty each time. It’s two measly lines of code, but it sure feels like I’m nailing something onto the loop that doesn’t belong there. (And that’s probably because that’s exactly what I’m doing.) It feels out of sync with the level of abstraction for the **foreach** statement, and it’s just plain ugly. So what I’m looking for is an approach that’s more appealing aesthetically, something a little more polished, something like:
 
 ```csharp
 var items = new [] { "zero", "one", "two" };
@@ -38,7 +38,7 @@ foreach (var it in items.Enumerate())
 
 To be sure, this is still not as clean as the Python code (for one, there’s no decomposition of tuple types).  But personally, I like it a whole lot better than the original C# version. It’s prettier, cleaner, and plugs the leaky abstraction.
 
-As you can imagine, I’m using an extension method to pretend that IEnumerables can be, you know, enumerated. The task of the extension method is just to turn an IEnumerable<T> into an IEnumerable<Enumerated<T>>, like so:
+As you can imagine, I’m using an extension method to pretend that **IEnumerable**s can be, you know, enumerated. The task of the extension method is just to turn an **IEnumerable&lt;T&gt;** into an **IEnumerable&lt;Enumerated&lt;T&gt;&gt;**, like so:
 
 ```csharp
 public static IEnumerable<Enumerated<T>> Enumerate<T>(this IEnumerable<T> e)   
@@ -48,7 +48,7 @@ public static IEnumerable<Enumerated<T>> Enumerate<T>(this IEnumerable<T> e)
 }
 ```
 
-And Enumerated<T> is just a necessary evil to appease the C# compiler:
+And **Enumerated&lt;T&gt;** is just a necessary evil to appease the C# compiler:
 
 ```csharp
 class Enumerated<T>
@@ -74,9 +74,9 @@ class Enumerated<T>
 }
 ```
 
-It is easy to augment types with arbitrary information this way; sequence numbers is just one example. For a general solution, though, you probably wouldn’t want to keep writing these plumbing wrappers like Enumerated<T>. It’s not just that your brain would go numb, you also need something more versatile, something that’s not bound to the specific type of information you’re augmenting with. The task-specific types are an obstacle to a simple, generic and flexible implementation.
+It is easy to augment types with arbitrary information this way; sequence numbers is just one example. For a general solution, though, you probably wouldn’t want to keep writing these plumbing wrappers like **Enumerated&lt;T&gt;**. It’s not just that your brain would go numb, you also need something more versatile, something that’s not bound to the specific type of information you’re augmenting with. The task-specific types are an obstacle to a simple, generic and flexible implementation.
 
-A solution is to use the Tuple<T1, T2> type introduced in .NET 4. It’s sort of a compromise, though, and I don’t quite like it. Since it is a generic tuple, the names of the properties are meaningless (Item1 and Item2), and I believe rather firmly that names should be meaningful. However, using the Tuple<T1, T2> type makes it very easy to generalize the augmentation process. Here’s how you could go about it:
+A solution is to use the **Tuple&lt;T1, T2&gt;** type introduced in .NET 4. It’s sort of a compromise, though, and I don’t quite like it. Since it is a generic tuple, the names of the properties are meaningless (**Item1** and **Item2**), and I believe rather firmly that names should be meaningful. However, using the **Tuple&lt;T1, T2&gt;** type makes it very easy to generalize the augmentation process. Here’s how you could go about it:
 
 ```csharp
 public static IEnumerable<Tuple<T, T1>> Augment<T, T1>(this IEnumerable<T> e, Func<T1> aug)
@@ -85,7 +85,7 @@ public static IEnumerable<Tuple<T, T1>> Augment<T, T1>(this IEnumerable<T> e, Fu
 }
 ```
 
-You can use Augment directly, like so:
+You can use **Augment** directly, like so:
 
 ```csharp
 foreach (var it in items.Augment(() => Guid.NewGuid()))
@@ -94,9 +94,9 @@ foreach (var it in items.Augment(() => Guid.NewGuid()))
 }
 ```
 
-In this case, I’m augmenting each item with a Guid. Here’s the output:
+In this case, I’m augmenting each item with a **Guid**. Here’s the output:
 
-TODO: Image: Csharp-augment-prompt
+![Augmenting with a Guid.](/images/csharp-augment-prompt.png)
 
 This is convenient for one-off scenarios. If you’re going to augment types the same way multiple times, though, you might go through the trouble of defining some extension methods:
 
@@ -129,4 +129,4 @@ foreach (var it in items.WithGuids())
 }
 ```
 
-Which is pretty neat. If you can stomach Item1 and Item2, that is.
+Which is pretty neat. If you can stomach **Item1** and **Item2**, that is.
