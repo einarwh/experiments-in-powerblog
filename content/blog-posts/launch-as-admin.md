@@ -1,7 +1,7 @@
 :page/title Launch as admin
 :blog-post/tags [:tech :programming :tools :visual-studio :windows]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2011-09-27T12:00:00"
+:blog-post/published #time/ldt "2011-09-27T17:17:00"
 :page/body
 
 # Launch as admin

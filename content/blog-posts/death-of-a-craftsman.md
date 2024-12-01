@@ -1,7 +1,7 @@
 :page/title Death of a craftsman
 :blog-post/tags [:tech :software-development :craft]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2020-04-05T12:00:00"
+:blog-post/published #time/ldt "2020-04-05T11:24:00"
 :page/body
 
 # Death of a craftsman

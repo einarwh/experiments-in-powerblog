@@ -1,7 +1,7 @@
 :page/title LINQ to Exceptions
 :blog-post/tags [:tech :programming :linq :csharp]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2014-06-28T12:00:00"
+:blog-post/published #time/ldt "2014-06-28T20:04:00"
 :page/body
 
 # LINQ to Exceptions

@@ -1,7 +1,7 @@
 :page/title Telepathic computer control with Launchy
 :blog-post/tags [:tech :programming :tools :windows]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2011-09-25T12:00:00"
+:blog-post/published #time/ldt "2011-09-25T22:32:00"
 :page/body
 
 # Telepathic computer control with Launchy

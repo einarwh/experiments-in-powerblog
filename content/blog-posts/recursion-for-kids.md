@@ -1,7 +1,7 @@
 :page/title Recursion for kids
 :blog-post/tags [:tech :programming :math :recursion :csharp]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2012-01-19T12:00:00"
+:blog-post/published #time/ldt "2012-01-19T14:15:00"
 :page/body
 
 # Recursion for kids

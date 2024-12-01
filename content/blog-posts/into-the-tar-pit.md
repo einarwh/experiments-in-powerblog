@@ -1,7 +1,7 @@
 :page/title Into the tar pit
 :blog-post/tags [:tech :software-development]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2020-05-19T12:00:00"
+:blog-post/published #time/ldt "2020-05-19T22:30:00"
 :page/body
 
 # Into the tar pit

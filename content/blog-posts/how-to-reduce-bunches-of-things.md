@@ -1,7 +1,7 @@
 :page/title How to reduce bunches of things
 :blog-post/tags [:tech :programming :functional-programming :csharp]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2017-10-05T12:00:00"
+:blog-post/published #time/ldt "2017-10-05T23:01:00"
 :page/body
 
 # How to reduce bunches of things

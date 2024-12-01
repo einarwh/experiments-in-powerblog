@@ -1,7 +1,7 @@
 :page/title Dry data
 :blog-post/tags [:tech :programming :csharp :database :dotnet :orm :patterns :sql]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2011-06-20T12:00:00"
+:blog-post/published #time/ldt "2011-06-20T19:17:00"
 :page/body
 
 # Dry data

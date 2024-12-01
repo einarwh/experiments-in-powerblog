@@ -1,7 +1,7 @@
 :page/title Conway's mob
 :blog-post/tags [:tech software-development :mob-programming]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2020-09-05T12:00:00"
+:blog-post/published #time/ldt "2020-09-05T16:57:00"
 :page/body
 
 # Conway's mob

@@ -1,7 +1,7 @@
 :page/title LINQ to Nullable
 :blog-post/tags [:tech :programming :functional-programming :csharp :dotnet]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2017-09-27T12:00:00"
+:blog-post/published #time/ldt "2017-09-27T22:38:00"
 :page/body
 
 # LINQ to Nullable

@@ -1,7 +1,7 @@
 :page/title Programmer vs developer
 :blog-post/tags [:programming :software-development]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2021-02-11T12:00:00"
+:blog-post/published #time/ldt "2021-02-11T15:31:00"
 :page/body
 
 # Programmer vs developer

@@ -1,7 +1,7 @@
 :page/title On the complexity of JSON serialization
 :blog-post/tags [:climbing :nature]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2020-05-08T12:00:00"
+:blog-post/published #time/ldt "2020-05-08T16:04:00"
 :page/body
 
 # On the complexity of JSON serialization

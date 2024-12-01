@@ -1,7 +1,7 @@
 :page/title Yes, it’s an animated Hama bead Larry
 :blog-post/tags [:pixel-art :retro-gaming :hama-beads]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2012-11-01T12:00:00"
+:blog-post/published #time/ldt "2012-11-01T12:35:00"
 :page/body
 
 # Yes, it’s an animated Hama bead Larry

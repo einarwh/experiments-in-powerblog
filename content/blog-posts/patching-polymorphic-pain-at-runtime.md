@@ -1,7 +1,7 @@
 :page/title Patching polymorphic pain at runtime
 :blog-post/tags [:tech :programming :dotnet :aspnet :csharp :reflection]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2014-04-28T12:00:00"
+:blog-post/published #time/ldt "2014-04-28T17:40:00"
 :page/body
 
 # Patching polymorphic pain at runtime

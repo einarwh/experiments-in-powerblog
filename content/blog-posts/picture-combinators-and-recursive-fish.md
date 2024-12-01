@@ -1,7 +1,7 @@
 :page/title Picture combinators and recursive fish
 :blog-post/tags [:tech :functional-programming :escher :fsharp]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2017-07-22T12:00:00"
+:blog-post/published #time/ldt "2017-07-22T07:24:00"
 :page/body
 
 # Picture combinators and recursive fish

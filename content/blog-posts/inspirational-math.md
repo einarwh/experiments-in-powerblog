@@ -1,7 +1,7 @@
 :page/title Inspirational math
 :blog-post/tags [:self-help]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2023-05-20T12:00:00"
+:blog-post/published #time/ldt "2023-05-20T11:09:00"
 :page/body
 
 # Inspirational math

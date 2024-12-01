@@ -1,7 +1,7 @@
 :page/title Function application in la-la land
 :blog-post/tags [:tech :functional-programming]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2017-10-11T12:00:00"
+:blog-post/published #time/ldt "2017-10-11T21:06:00"
 :page/body
 
 # Function application in la-la land

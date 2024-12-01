@@ -1,7 +1,7 @@
 :page/title Strings with assumptions
 :blog-post/tags [:tech]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2016-01-29T12:00:00"
+:blog-post/published #time/ldt "2016-01-29T23:23:00"
 :page/body
 
 # Strings with assumptions

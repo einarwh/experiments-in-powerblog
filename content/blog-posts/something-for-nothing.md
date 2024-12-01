@@ -1,7 +1,7 @@
 :page/title Something for nothing
 :blog-post/tags [:tech]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2017-01-17T12:00:00"
+:blog-post/published #time/ldt "2017-01-17T21:35:00"
 :page/body
 
 # Something for nothing

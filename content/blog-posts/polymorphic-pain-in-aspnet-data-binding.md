@@ -1,7 +1,7 @@
 :page/title Polymorphic pain in ASP.NET data binding
 :blog-post/tags [:tech :programming :dotnet :aspnet :csharp]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2011-04-17T12:00:00"
+:blog-post/published #time/ldt "2011-04-17T17:48:00"
 :page/body
 
 # Polymorphic pain in ASP.NET data binding

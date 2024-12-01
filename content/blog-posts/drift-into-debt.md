@@ -1,7 +1,7 @@
 :page/title Drift into debt
 :blog-post/tags [:technical-debt :software-development]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2023-04-25T12:00:00"
+:blog-post/published #time/ldt "2023-04-25T17:01:00"
 :page/body
 
 # Drift into debt

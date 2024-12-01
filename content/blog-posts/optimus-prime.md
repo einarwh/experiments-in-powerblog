@@ -1,7 +1,7 @@
 :page/title Optimus Prime
 :blog-post/tags [:tech :programming :dotnet :csharp]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2011-10-05T12:00:00"
+:blog-post/published #time/ldt "2011-10-05T23:00:00"
 :page/body
 
 # Optimus Prime

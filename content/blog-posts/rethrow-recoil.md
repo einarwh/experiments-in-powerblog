@@ -1,7 +1,7 @@
 :page/title Rethrow recoil
 :blog-post/tags [:tech :programming :csharp]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2014-06-30T12:00:00"
+:blog-post/published #time/ldt "2014-06-30T15:48:00"
 :page/body
 
 # Rethrow recoil

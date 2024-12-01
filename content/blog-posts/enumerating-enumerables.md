@@ -1,7 +1,7 @@
 :page/title Enumerating enumerables
 :blog-post/tags [:tech :programming :dotnet :csharp :python]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2011-05-07T12:00:00"
+:blog-post/published #time/ldt "2011-05-07T17:09:00"
 :page/body
 
 # Enumerating enumerables
