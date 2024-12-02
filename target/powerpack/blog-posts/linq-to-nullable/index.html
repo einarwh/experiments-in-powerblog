@@ -1,0 +1,101 @@
+<!DOCTYPE html><html lang="en" prefix="og: http://ogp.me/ns#"><head><title>LINQ to Nullable | @einarwh</title><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="LINQ to Nullable"><meta property="og:url" content="https://www.example.com/blog-posts/linq-to-nullable/"><link rel="stylesheet" href="/bundles/c5b7698bdf4e/app.css"></head><body><header><a href="/">@einarwh</a></header><h1>LINQ to Nullable</h1>
+<p>Posted: September 27, 2017</p>
+<p>Things got a bit out of hand today.</p>
+<p>It all started when I added a point to the agenda for our backend team meeting saying I’d explain real quick what a functor is – or at least what my understanding of what a functor is is. And so I did.</p>
+<p>Now the explanation itself didn’t go half bad, I don’t think. While I’m sure I would have offended mathematicians and possibly some haskellites, they weren’t there. Instead, the room was filled with C# programmers.</p>
+<p>I think I said something like the following. Assume you have a parameterized type <code>S&lt;T&gt;</code>, where <code>S</code> defines some structure on top of type <code>T</code>. The obvious example for a C# programmer would be an <code>IEnumerable&lt;T&gt;</code>, but of course there are others, including <code>Task&lt;T&gt;</code> and <code>Nullable&lt;T&gt;</code> and indeed <code>Whatever&lt;T&gt;</code>. Now if you have such an <code>S</code> and a mapping function that given some <code>S&lt;T&gt;</code> and a function from <code>T</code> to <code>U</code> produces an <code>S&lt;U&gt;</code> then you almost have a functor already! In addition to that, you just need to make sure that your mapping is well-behaved in a sense. First, mapping the identity function over a structure shouldn’t change it. So if you map <code>it =&gt; it</code> over some structure <code>S</code>, that should just give you the same structure you started with. And second, assume you have a function <code>f</code> from <code>T</code> to <code>U</code> and a function <code>g</code> from <code>U</code> to <code>V</code>. If you map <code>f</code> over <code>S</code> to yield <code>S&lt;U&gt;</code> and then map <code>g</code> over that to yield <code>S&lt;V&gt;</code>, that should give you the same result as mapping the composed function <code>it =&gt; g(f(it))</code> over <code>S&lt;T&gt;</code>.</p>
+<p>To illustrate, I explained that <code>Nullable&lt;T&gt;</code> is a functor – or at least it should be. And it would be, if we defined the appropriate mapping function for <code>Nullable&lt;T&gt;</code>. So I wrote the following on the whiteboard:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">public</span> <span class="k">static</span> <span class="k">class</span> <span class="nc">NullableExtensions</span> <span class="p">{</span>
+  <span class="k">public</span> <span class="k">static</span> <span class="n">TTarget</span><span class="p">?</span> <span class="n">Select</span><span class="p">&lt;</span><span class="n">TSource</span><span class="p">,</span> <span class="n">TTarget</span><span class="p">&gt;(</span>
+      <span class="k">this</span> <span class="n">TSource</span><span class="p">?</span> <span class="n">t</span><span class="p">,</span> 
+      <span class="n">Func</span><span class="p">&lt;</span><span class="n">TSource</span><span class="p">,</span> <span class="n">TTarget</span><span class="p">&gt;</span> <span class="n">selector</span><span class="p">)</span>
+    <span class="k">where</span> <span class="n">TSource</span> <span class="p">:</span> <span class="k">struct</span>
+    <span class="nc">where</span> <span class="n">TTarget</span> <span class="p">:</span> <span class="k">struct</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="n">t</span><span class="p">.</span><span class="n">HasValue</span> <span class="p">?</span> <span class="p">(</span><span class="n">TTarget</span><span class="p">?)</span> <span class="n">selector</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">Value</span><span class="p">)</span> <span class="p">:</span> <span class="k">null</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+<p>So this is our mapping function, even though I named it <code>Select</code>, which is the name used in the C# and LINQ world. A benefit of this function is that you no longer have to manually handle the mundane issues of worrying about whether or not some <code>Nullable&lt;T&gt;</code> is <code>null</code>. So instead of writing code like this, which resembles something from our code base:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="n">Duration</span><span class="p">?</span> <span class="n">duration</span> <span class="p">=</span> <span class="k">null</span><span class="p">;</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">thing</span><span class="p">.</span><span class="n">Frames</span><span class="p">.</span><span class="n">HasValue</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">ms</span> <span class="p">=</span> <span class="n">thing</span><span class="p">.</span><span class="n">Frames</span><span class="p">.</span><span class="n">Value</span> <span class="p">*</span> <span class="m">40</span><span class="p">;</span>
+  <span class="n">duration</span> <span class="p">=</span> <span class="n">Duration</span><span class="p">.</span><span class="n">FromMilliseconds</span><span class="p">(</span><span class="n">ms</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+<p>You can write this instead:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="n">Duration</span><span class="p">?</span> <span class="n">duration</span> <span class="p">=</span> <span class="n">thing</span><span class="p">.</span><span class="n">Frames</span><span class="p">.</span><span class="n">Select</span><span class="p">(</span><span class="n">fs</span> <span class="p">=&gt;</span> <span class="n">Duration</span><span class="p">.</span><span class="n">FromMilliseconds</span><span class="p">(</span><span class="n">fs</span> <span class="p">*</span> <span class="m">40</span><span class="p">));</span>
+</code></pre>
+<p>I think it is quite nice – at least if you can get comfortable calling an extension method on something that might be null. But from this point on, things started to go awry. But it wasn’t my fault! They started it!</p>
+<p>See, some of the people in the meeting said they kind of liked the approach, but argued that Map would be a better name because it would avoid confusion with <code>Select</code>, which is associated with LINQ and <code>IEnumerable&lt;T&gt;</code>. In some sense, this was the opposite argument I used for choosing <code>Select</code> over <code>Map</code> in the first place! I thought it would make sense to call it <code>Select</code> precisely because that’s the name for the exact same thing for another kind of structure.</p>
+<p>So as I left the meeting, I started wondering. I suspected that there really was nothing particular that tied LINQ and the query syntax to <code>IEnumerable&lt;T&gt;</code>, which would mean you could use it for other things. Other functors. And so I typed the following into LinqPad:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="n">DateTime</span><span class="p">?</span> <span class="n">maybeToday</span> <span class="p">=</span> <span class="n">DateTime</span><span class="p">.</span><span class="n">Today</span><span class="p">;</span>
+<span class="kt">var</span> <span class="n">maybeTomorrow</span> <span class="p">=</span> <span class="k">from</span> <span class="n">dt</span> <span class="k">in</span> <span class="n">maybeToday</span> <span class="k">select</span> <span class="n">dt</span><span class="p">.</span><span class="n">AddDays</span><span class="p">(</span><span class="m">1</span><span class="p">);</span>
+<span class="n">maybeTomorrow</span><span class="p">.</span><span class="n">Dump</span><span class="p">();</span>
+</code></pre>
+<p>And it worked, which I thought was pretty cool. I consulted the C# specification and found that as long as you implement methods of appropriate names and signatures, you can use the LINQ query syntax. And so I decided to let functors be functors and just see what I could do with <code>Nullable</code>s using LINQ. So I wrote this:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">public</span> <span class="k">static</span> <span class="n">TSource</span><span class="p">?</span> <span class="n">Where</span><span class="p">&lt;</span><span class="n">TSource</span><span class="p">&gt;(</span>
+    <span class="k">this</span> <span class="n">TSource</span><span class="p">?</span> <span class="n">t</span><span class="p">,</span> 
+    <span class="n">Func</span><span class="p">&lt;</span><span class="n">TSource</span><span class="p">,</span> <span class="kt">bool</span><span class="p">&gt;</span> <span class="n">predicate</span><span class="p">)</span>
+  <span class="k">where</span> <span class="n">TSource</span> <span class="p">:</span> <span class="k">struct</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="n">t</span><span class="p">.</span><span class="n">HasValue</span> <span class="p">&amp;&amp;</span> <span class="n">predicate</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">Value</span><span class="p">)</span> <span class="p">?</span> <span class="n">t</span> <span class="p">:</span> <span class="k">null</span><span class="p">;</span>
+  <span class="p">}</span>
+</code></pre>
+<p>Which allowed me to write</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="n">DateTime</span><span class="p">?</span> <span class="n">MaybeSaturday</span><span class="p">(</span><span class="n">DateTime</span><span class="p">?</span> <span class="n">maybeDateTime</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">return</span>
+    <span class="k">from</span> <span class="n">dt</span> <span class="k">in</span> <span class="n">maybeDateTime</span>
+    <span class="k">where</span> <span class="n">dt</span><span class="p">.</span><span class="n">DayOfWeek</span> <span class="p">==</span> <span class="n">DayOfWeek</span><span class="p">.</span><span class="n">Friday</span>
+    <span class="k">select</span> <span class="n">dt</span><span class="p">.</span><span class="n">AddDays</span><span class="p">(</span><span class="m">1</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+<p>Which will return <code>null</code> unless it’s passed a <code>Nullable</code> that wraps a <code>DateTime</code> representing a Friday. Useful.</p>
+<p>It should have stopped there, but the C# specification is full of examples of expressions written in query syntax and what they’re translated into. For instance, I found that implementing this:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">public</span> <span class="k">static</span> <span class="n">TTarget</span><span class="p">?</span> <span class="n">SelectMany</span><span class="p">&lt;</span><span class="n">TSource</span><span class="p">,</span> <span class="n">TTarget</span><span class="p">&gt;(</span>
+    <span class="k">this</span> <span class="n">TSource</span><span class="p">?</span> <span class="n">t</span><span class="p">,</span> 
+    <span class="n">Func</span><span class="p">&lt;</span><span class="n">TSource</span><span class="p">,</span> <span class="n">TTarget</span><span class="p">?&gt;</span> <span class="n">selector</span><span class="p">)</span>
+  <span class="k">where</span> <span class="n">TSource</span> <span class="p">:</span> <span class="k">struct</span>
+  <span class="nc">where</span> <span class="n">TTarget</span> <span class="p">:</span> <span class="k">struct</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="n">t</span><span class="p">.</span><span class="n">HasValue</span> <span class="p">?</span> <span class="n">selector</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">Value</span><span class="p">)</span> <span class="p">:</span> <span class="k">null</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">static</span> <span class="n">TResult</span><span class="p">?</span> <span class="n">SelectMany</span><span class="p">&lt;</span><span class="n">TSource</span><span class="p">,</span> <span class="n">TIntermediate</span><span class="p">,</span> <span class="n">TResult</span><span class="p">&gt;(</span>
+    <span class="k">this</span> <span class="n">TSource</span><span class="p">?</span> <span class="n">t</span><span class="p">,</span> 
+    <span class="n">Func</span><span class="p">&lt;</span><span class="n">TSource</span><span class="p">,</span> <span class="n">TIntermediate</span><span class="p">?&gt;</span> <span class="n">selector</span><span class="p">,</span> 
+    <span class="n">Func</span><span class="p">&lt;</span><span class="n">TSource</span><span class="p">,</span> <span class="n">TIntermediate</span><span class="p">,</span> <span class="n">TResult</span><span class="p">&gt;</span> <span class="n">resultSelector</span><span class="p">)</span>
+  <span class="k">where</span> <span class="n">TSource</span> <span class="p">:</span> <span class="k">struct</span>
+  <span class="nc">where</span> <span class="n">TIntermediate</span> <span class="p">:</span> <span class="k">struct</span>
+  <span class="nc">where</span> <span class="n">TResult</span> <span class="p">:</span> <span class="k">struct</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="n">t</span><span class="p">.</span><span class="n">SelectMany</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+          <span class="p">.</span><span class="n">Select</span><span class="p">(</span><span class="n">it</span> <span class="p">=&gt;</span> <span class="n">resultSelector</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">Value</span><span class="p">,</span> <span class="n">it</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre>
+<p>I could suddenly write this, which is actually quite nice:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="n">TimeSpan</span><span class="p">?</span> <span class="n">Diff</span><span class="p">(</span><span class="n">DateTime</span><span class="p">?</span> <span class="n">maybeThis</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">?</span> <span class="n">maybeThat</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">return</span>
+    <span class="k">from</span> <span class="n">dt1</span> <span class="k">in</span> <span class="n">maybeThis</span>
+    <span class="k">from</span> <span class="n">dt2</span> <span class="k">in</span> <span class="n">maybeThat</span>
+    <span class="nf">select</span> <span class="p">(</span><span class="n">dt2</span> <span class="p">-</span> <span class="n">dt1</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+<p>It will give you a wrapped <code>TimeSpan</code> if you pass it two wrapped <code>DateTime</code>s, <code>null</code> otherwise. How many checks did you write? None.</p>
+<p>And as I said, it sort of got a bit out of hand. Which is why I now have implementations of <code>Contains</code>, <code>Count</code>, <code>Any</code>, <code>First</code>, <code>FirstOrDefault</code>, even <code>Aggregate</code>, and I don’t seem to be stopping. You can see the current state of affairs <a href="https://gist.github.com/einarwh/ce264d577d13a7a76a1f2c861d19c411">here</a>.</p>
+<p>What I find amusing is that you can usually find a reasonable interpretation and implementation for each of these functions. Count, for instance, will only ever return <code>0</code> or <code>1</code>, but that sort of makes sense. <code>First</code> means unwrapping the value inside the <code>Nullable&lt;T&gt;</code> without checking that there is an actual value there. Any answers true if the <code>Nullable&lt;T&gt;</code> holds a value. And so on and so forth.</p>
+<p>Finally, as an exercise for the reader: what extension methods would you write to enable this?</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">static</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">Greet</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">greeting</span> <span class="p">=</span>
+    <span class="k">from</span> <span class="n">v1</span> <span class="k">in</span> <span class="n">Task</span><span class="p">.</span><span class="n">FromResult</span><span class="p">(</span><span class="s">"hello"</span><span class="p">)</span>
+    <span class="k">from</span> <span class="n">v2</span> <span class="k">in</span> <span class="n">Task</span><span class="p">.</span><span class="n">FromResult</span><span class="p">(</span><span class="s">"world"</span><span class="p">)</span>
+    <span class="k">select</span> <span class="p">(</span><span class="n">v1</span> <span class="p">+</span> <span class="s">" "</span> <span class="p">+</span> <span class="n">v2</span><span class="p">);</span>
+
+  <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="k">await</span> <span class="n">greeting</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+</body></html>

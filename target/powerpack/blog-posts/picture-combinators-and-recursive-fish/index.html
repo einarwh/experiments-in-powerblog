@@ -1,0 +1,379 @@
+<!DOCTYPE html><html lang="en" prefix="og: http://ogp.me/ns#"><head><title>Picture combinators and recursive fish | @einarwh</title><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Picture combinators and recursive fish"><meta property="og:url" content="https://www.example.com/blog-posts/picture-combinators-and-recursive-fish/"><link rel="stylesheet" href="/bundles/c5b7698bdf4e/app.css"></head><body><header><a href="/">@einarwh</a></header><h1>Picture combinators and recursive fish</h1>
+<p>Posted: July 22, 2017</p>
+<p>On February 9th 2017, I was sitting in an auditorium in Krakow, listening to Mary Sheeran and John Hughes give the opening keynote at the <a href="http://www.lambdadays.org/">Lambda Days</a> conference. It was an inspired and inspiring keynote, that discussed some of the most influential ideas in some of the most interesting papers written on functional programming. You should absolutely <a href="https://www.youtube.com/watch?v=1qBHf8DrWR8">check it out</a>.</p>
+<p>One of the papers that was mentioned was <em>Functional Geometry</em> by Peter Henderson, written in 1982. In it, Henderson shows a deconstruction of an Escher woodcut called Square Limit, and how he can elegantly reconstruct a replica of the woodcut by using functions as data. He defines a small set of picture combinators – simple functions that operate on picture functions – to form complex pictures out of simple ones.</p>
+<p>Escher’s original woodcut looks like this:</p>
+<p><img src="/images/6a20a4277acc/escher-square-limit.png" alt="Escher's Square Limit woodcutting&quot;"></p>
+<p>Which is pretty much a recursive dream. No wonder Henderson found it so fascinating – any functional programmer would.</p>
+<p>As I was listening the keynote, I recalled that I had heard about the paper before, in the legendary SICP lectures by Abelson and Sussman (in lecture 3A, in case you’re interested). I figured it was about time I read the paper first hand. And so I did. Or rather, I read the revised version from 2002, because that’s what I found online.</p>
+<p>And of course one thing led to another, and pretty soon I had implemented my own version in F#. Which is sort of why we’re here. Feel free to tag along as I walk through how I implemented it.</p>
+<p>A key point in the paper is to distinguish between the capability of rendering some shape within a bounding box onto a screen on the one hand, and the transformation and composition of pictures into more complex pictures on the other. This is, as it were, the essence of decoupling through abstraction.</p>
+<p>Our basic building block will be a <em>picture</em>. We will <em>not</em> think of a picture as a collection of colored pixels, but rather as something that is capable of scaling and fitting itself with respect to a bounding box. In other words, we have this:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">type</span> <span class="nc">Picture</span> <span class="o">:</span> <span class="n">Box</span> <span class="o">-&gt;</span> <span class="n">Shape</span> <span class="kt">list</span>
+</code></pre>
+<p>A picture is a <em>function</em> that takes a box and creates a list of shapes for rendering.</p>
+<p>What about the box itself? We define it using three vectors <strong>a</strong>, <strong>b</strong> and <strong>c</strong>.</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">type</span> <span class="nc">Vector</span> <span class="o">=</span> <span class="o">{</span> <span class="n">x</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="n">y</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">}</span>
+<span class="k">type</span> <span class="nc">Box</span> <span class="o">=</span> <span class="o">{</span> <span class="n">a</span> <span class="o">:</span> <span class="n">Vector</span><span class="o">;</span> <span class="n">b</span> <span class="o">:</span> <span class="n">Vector</span><span class="o">;</span> <span class="n">c</span> <span class="o">:</span> <span class="n">Vector</span><span class="o">}</span>
+</code></pre>
+<p>The vector <strong>a</strong> denotes the offset from the origin to the bottom left corner of the box. The vectors <strong>b</strong> and <strong>c</strong> span out the bounding box itself. Each vector is defined by its magnitude in the <strong>x</strong> and <strong>y</strong> dimensions.</p>
+<p>For example, assume we have a picture <strong>F</strong> that will produce the letter F when given a bounding box. A rendering might look like this:</p>
+<p>TODO: basic-f</p>
+<p>But if we give F a different box, the rendering will look different too:</p>
+<p>TODO: skewed-f-image</p>
+<p>So, how do we create and render such a magical, self-fitting picture?</p>
+<p>We can decompose the problem into three parts: defining the basic shape, transforming the shape with respect to the bounding box, and rendering the final shape.</p>
+<p>We start by defining a basic shape relative to the unit square. The unit square has sides of length 1, and we position it such that the bottom left corner is at (0, 0) and top right corner is at (1, 1). Here’s a definition that puts a polygon outlining the F picture inside the unit square:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">fShape</span> <span class="o">=</span> 
+  <span class="k">let</span> <span class="nv">pts</span> <span class="o">=</span> <span class="o">[</span> 
+    <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">30</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">20</span> <span class="o">}</span> 
+    <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">40</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">20</span> <span class="o">}</span>
+    <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">40</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">45</span> <span class="o">}</span>
+    <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">60</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">45</span> <span class="o">}</span>
+    <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">60</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">55</span> <span class="o">}</span>
+    <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">40</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">55</span> <span class="o">}</span>
+    <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">40</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">70</span> <span class="o">}</span>
+    <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">70</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">70</span> <span class="o">}</span>
+    <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">70</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">80</span> <span class="o">}</span>
+    <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">30</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">80</span> <span class="o">}</span> <span class="o">]</span>
+  <span class="n">Polygon</span> <span class="o">{</span> <span class="n">points</span> <span class="o">=</span> <span class="n">pts</span> <span class="o">}</span>
+</code></pre>
+<p>To make this basic shape fit the bounding box, we need a mapping function. That’s easy enough to obtain:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">mapper</span> <span class="o">{</span> <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="o">;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span> <span class="n">c</span> <span class="o">=</span> <span class="n">c</span> <span class="o">}</span> <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">}</span> <span class="o">=</span>
+   <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">c</span> <span class="o">*</span> <span class="n">y</span>
+</code></pre>
+<p>The <strong>mapper</strong> function takes a bounding box and a vector, and produces a new vector adjusted to fit the box. We’ll use partial application to create a suitable <strong>map</strong> function for a particular box.</p>
+<p>As you can see, we’re doing a little bit of vector arithmetic to produce the new vector. We’re adding three vectors: <strong>a</strong>, the vector obtained by scaling <strong>b</strong> by <strong>x</strong>, and the vector obtained by scaling <strong>c</strong> by <strong>y</strong>. As we proceed, we’ll need some additional operations as well. We implement them by overloading some operators for the <strong>Vector</strong> type:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">static</span> <span class="k">member</span> <span class="o">(+)</span> <span class="o">({</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x1</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">y1</span> <span class="o">},</span> <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x2</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">y2</span> <span class="o">})</span> <span class="o">=</span>
+    <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">+</span> <span class="n">x2</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">y1</span> <span class="o">+</span> <span class="n">y2</span> <span class="o">}</span>
+
+<span class="k">static</span> <span class="k">member</span> <span class="o">(~-)</span> <span class="o">({</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">})</span> <span class="o">=</span>
+    <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="n">y</span> <span class="o">}</span>
+
+<span class="k">static</span> <span class="k">member</span> <span class="o">(-)</span> <span class="o">(</span><span class="n">v1</span><span class="o">,</span> <span class="n">v2</span><span class="o">)</span> <span class="o">=</span> <span class="n">v1</span> <span class="o">+</span> <span class="o">(-</span><span class="n">v2</span><span class="o">)</span>
+
+<span class="k">static</span> <span class="k">member</span> <span class="o">(*)</span> <span class="o">(</span><span class="n">f</span><span class="o">,</span> <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">})</span> <span class="o">=</span>
+    <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="n">f</span> <span class="o">*</span> <span class="n">x</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">f</span> <span class="o">*</span> <span class="n">y</span> <span class="o">}</span>
+
+<span class="k">static</span> <span class="k">member</span> <span class="o">(*)</span> <span class="o">(</span><span class="n">v</span><span class="o">,</span> <span class="n">f</span><span class="o">)</span> <span class="o">=</span> <span class="n">f</span> <span class="o">*</span> <span class="n">v</span>
+
+<span class="k">static</span> <span class="k">member</span> <span class="o">(/)</span> <span class="o">(</span><span class="n">v</span><span class="o">,</span> <span class="n">f</span><span class="o">)</span> <span class="o">=</span> <span class="n">v</span> <span class="o">*</span> <span class="o">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">f</span><span class="o">)</span>
+</code></pre>
+<p>This gives us addition, negation, subtraction, scalar multiplication and scalar division for vectors.</p>
+<p>Finally we need to render the shape in some way. It is largely an implementation detail, but we’ll take a look at one possible simplified rendering. The code below can be used to produce an SVG image of polygon shapes using the <a href="https://github.com/praeclarum/NGraphics">NGraphics</a> library.</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">type</span> <span class="nc">PolygonShape</span> <span class="o">=</span> <span class="o">{</span> <span class="n">points</span> <span class="o">:</span> <span class="n">Vector</span> <span class="kt">list</span> <span class="o">}</span>
+
+<span class="k">type</span> <span class="nc">Shape</span> <span class="o">=</span> <span class="n">Polygon</span> <span class="k">of</span> <span class="n">PolygonShape</span>
+
+<span class="k">let</span> <span class="nv">mapShape</span> <span class="n">m</span> <span class="o">=</span> <span class="k">function</span> 
+  <span class="o">|</span> <span class="n">Polygon</span> <span class="o">{</span> <span class="n">points</span> <span class="o">=</span> <span class="n">pts</span> <span class="o">}</span> <span class="o">-&gt;</span>
+    <span class="n">Polygon</span> <span class="o">{</span> <span class="n">points</span> <span class="o">=</span> <span class="n">pts</span> <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="n">m</span> <span class="o">}</span>
+
+<span class="k">let</span> <span class="nv">createPicture</span> <span class="n">shapes</span> <span class="o">=</span> 
+   <span class="k">fun</span> <span class="n">box</span> <span class="o">-&gt;</span>
+     <span class="n">shapes</span> <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">(</span><span class="n">mapShape</span> <span class="o">(</span><span class="n">mapper</span> <span class="n">box</span><span class="o">))</span>
+
+<span class="k">let</span> <span class="nv">renderSvg</span> <span class="n">width</span> <span class="n">height</span> <span class="n">filename</span> <span class="n">shapes</span> <span class="o">=</span> 
+  <span class="k">let</span> <span class="nv">size</span> <span class="o">=</span> <span class="n">Size</span><span class="o">(</span><span class="n">width</span><span class="o">,</span> <span class="n">height</span><span class="o">)</span>
+  <span class="k">let</span> <span class="nv">canvas</span> <span class="o">=</span> <span class="n">GraphicCanvas</span><span class="o">(</span><span class="n">size</span><span class="o">)</span>
+  <span class="k">let</span> <span class="nv">p</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="n">Point</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">height</span> <span class="o">-</span> <span class="n">y</span><span class="o">)</span> 
+  <span class="k">let</span> <span class="nv">drawShape</span> <span class="o">=</span> <span class="k">function</span> 
+  <span class="o">|</span> <span class="n">Polygon</span> <span class="o">{</span> <span class="n">points</span> <span class="o">=</span> <span class="n">pts</span> <span class="o">}</span> <span class="o">-&gt;</span>
+    <span class="k">match</span> <span class="n">pts</span> <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">(</span><span class="k">fun</span> <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">}</span> <span class="o">-&gt;</span> <span class="n">p</span> <span class="n">x</span> <span class="n">y</span><span class="o">)</span> <span class="k">with</span> 
+    <span class="o">|</span> <span class="n">startPoint</span> <span class="o">::</span> <span class="n">t</span> <span class="o">-&gt;</span>
+      <span class="k">let</span> <span class="nv">move</span> <span class="o">=</span> <span class="n">MoveTo</span><span class="o">(</span><span class="n">startPoint</span><span class="o">)</span> <span class="o">:&gt;</span> <span class="n">PathOp</span>
+      <span class="k">let</span> <span class="nv">lines</span> <span class="o">=</span> <span class="n">t</span> <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">(</span><span class="k">fun</span> <span class="n">pt</span> <span class="o">-&gt;</span> <span class="n">LineTo</span><span class="o">(</span><span class="n">pt</span><span class="o">)</span> <span class="o">:&gt;</span> <span class="n">PathOp</span><span class="o">)</span> 
+      <span class="k">let</span> <span class="nv">close</span> <span class="o">=</span> <span class="n">ClosePath</span><span class="bp">()</span> <span class="o">:&gt;</span> <span class="n">PathOp</span>
+      <span class="k">let</span> <span class="nv">ops</span> <span class="o">=</span> <span class="o">(</span><span class="n">move</span> <span class="o">::</span> <span class="n">lines</span><span class="o">)</span> <span class="o">@</span> <span class="o">[</span> <span class="n">close</span> <span class="o">]</span> 
+      <span class="n">canvas</span><span class="o">.</span><span class="n">DrawPath</span><span class="o">(</span><span class="n">ops</span><span class="o">,</span> <span class="nn">Pens</span><span class="p">.</span><span class="n">Black</span><span class="o">)</span>
+    <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="bp">()</span>
+  <span class="n">shapes</span> <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="n">drawShape</span>
+  <span class="k">use</span> <span class="n">writer</span> <span class="o">=</span> <span class="k">new</span> <span class="n">StreamWriter</span><span class="o">(</span><span class="n">filename</span><span class="o">)</span>
+  <span class="n">canvas</span><span class="o">.</span><span class="n">Graphic</span><span class="o">.</span><span class="n">WriteSvg</span><span class="o">(</span><span class="n">writer</span><span class="o">)</span>
+</code></pre>
+<p>When we create the picture, we use the <strong>mapShape</strong> function to apply our mapping function to all the points in the polygon that makes up the F. The <strong>renderSvg</strong> function is used to do the actual rendering of the shapes produced by the picture function.</p>
+<p>Once we have the picture abstraction in place, we can proceed to define combinators that transform or compose pictures. The neat thing is that we can define these combinators without having to worry about the rendering of shapes. In other words, we never have to pry open our abstraction, we will trust it to do the right thing. All our work will be relative, with respect to the bounding boxes.</p>
+<p>We start with some basic one-to-one transformations, that is, functions with this type:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">type</span> <span class="nc">Transformation</span> <span class="o">=</span> <span class="n">Picture</span> <span class="o">-&gt;</span> <span class="n">Picture</span>
+</code></pre>
+<p>The first transformation is <strong>turn</strong>, which rotates a picture 90 degrees counter-clockwise around its center (that is, around the center of its bounding box).</p>
+<p>The effect of <strong>turn</strong> looks like this:</p>
+<p>TODO: turn-f</p>
+<p>Note that turning four times produces the original picture. We can formulate this as a property:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="o">(</span><span class="n">turn</span> <span class="o">&gt;&gt;</span> <span class="n">turn</span> <span class="o">&gt;&gt;</span> <span class="n">turn</span> <span class="o">&gt;&gt;</span> <span class="n">turn</span><span class="o">)</span> <span class="n">p</span> <span class="o">=</span> <span class="n">p</span>
+</code></pre>
+<p>(Of course, for pictures with symmetries, turning twice or even once might be enough to yield a picture equal to the original. But the property above should hold for all pictures.)</p>
+<p>The vector arithmetic to turn the bounding box 90 degrees counter-clockwise is as follows:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="o">(</span><span class="n">a'</span><span class="o">,</span> <span class="n">b'</span><span class="o">,</span> <span class="n">c'</span><span class="o">)</span> <span class="o">=</span> <span class="o">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="o">,</span> <span class="n">c</span><span class="o">,</span> <span class="o">-</span><span class="n">b</span><span class="o">)</span>
+</code></pre>
+<p>And to reiterate: the neat thing is that this is all we need to consider. We define the transformation using nothing but this simple arithmetic. We trust the picture itself to cope with everything else.</p>
+<p>In code, we write this:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">turnBox</span> <span class="o">{</span> <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="o">;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span> <span class="n">c</span> <span class="o">=</span> <span class="n">c</span> <span class="o">}</span> <span class="o">=</span>
+    <span class="o">{</span> <span class="n">a</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="o">;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">c</span><span class="o">;</span> <span class="n">c</span> <span class="o">=</span> <span class="o">-</span><span class="n">b</span> <span class="o">}</span>
+
+<span class="k">let</span> <span class="nv">turn</span> <span class="n">p</span> <span class="o">=</span> <span class="n">turnBox</span> <span class="o">&gt;&gt;</span> <span class="n">p</span>
+</code></pre>
+<p>The overloaded operators we defined above makes it very easy to translate the vector arithmetic into code. It also makes the code very easy to read, and hopefully convince yourself that it does the right thing.</p>
+<p>The next transformation is <strong>flip</strong>, which flips a picture about the center vertical axis of the bounding box.</p>
+<p>Which might sound a bit involved, but it’s just this:</p>
+<p>TODO: flip-f</p>
+<p>Flipping twice always produces the same picture, so the following property should hold:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="o">(</span><span class="n">flip</span> <span class="o">&gt;&gt;</span> <span class="n">flip</span><span class="o">)</span> <span class="n">p</span> <span class="o">=</span> <span class="n">p</span>
+</code></pre>
+<p>The vector arithmetic is as follows:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="o">(</span><span class="n">a'</span><span class="o">,</span> <span class="n">b'</span><span class="o">,</span> <span class="n">c'</span><span class="o">)</span> <span class="o">=</span> <span class="o">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="o">,</span> <span class="o">-</span><span class="n">b</span><span class="o">,</span> <span class="n">c</span><span class="o">)</span>
+</code></pre>
+<p>Which translates neatly to:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">flipBox</span> <span class="o">{</span> <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="o">;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span> <span class="n">c</span> <span class="o">=</span> <span class="n">c</span> <span class="o">}</span> <span class="o">=</span>
+   <span class="o">{</span> <span class="n">a</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="o">;</span> <span class="n">b</span> <span class="o">=</span> <span class="o">-</span><span class="n">b</span><span class="o">;</span> <span class="n">c</span> <span class="o">=</span> <span class="n">c</span> <span class="o">}</span>
+
+<span class="k">let</span> <span class="nv">flip</span> <span class="n">p</span> <span class="o">=</span> <span class="n">flipBox</span> <span class="o">&gt;&gt;</span> <span class="n">p</span>
+</code></pre>
+<p>The third transformation is a bit peculiar, and quite particular to the task of mimicking Escher’s Square Limit, which is what we’re building up to. Henderson called the transformation <strong>rot45</strong>, but I’ll refer to it as <strong>toss</strong>, since I think it resembles light-heartedly tossing the picture up in the air:</p>
+<p>TODO: toss-f</p>
+<p>What’s going on here? Its a 45 degree counter-clockwise rotation around top left corner, which also shrinks the bounding box by a factor of √2.</p>
+<p>It’s not so easy to define simple properties that should hold for <strong>toss</strong>. For instance, tossing twice is not the same as turning once. So we won’t even try.</p>
+<p>The vector arithmetic is still pretty simple:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="o">(</span><span class="n">a'</span><span class="o">,</span> <span class="n">b'</span><span class="o">,</span> <span class="n">c'</span><span class="o">)</span> <span class="o">=</span> <span class="o">(</span><span class="n">a</span> <span class="o">+</span> <span class="o">(</span><span class="n">b</span> <span class="o">+</span> <span class="n">c</span><span class="o">)</span> <span class="o">/</span> <span class="mi">2</span><span class="o">,</span> <span class="o">(</span><span class="n">b</span> <span class="o">+</span> <span class="n">c</span><span class="o">)</span> <span class="o">/</span> <span class="mi">2</span><span class="o">,</span> <span class="o">(</span><span class="n">c</span> <span class="err">−</span> <span class="n">b</span><span class="o">)</span> <span class="o">/</span> <span class="mi">2</span><span class="o">)</span>
+</code></pre>
+<p>And it still translates very directly into code:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">tossBox</span> <span class="o">{</span> <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="o">;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span> <span class="n">c</span> <span class="o">=</span> <span class="n">c</span> <span class="o">}</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="nv">a</span><span class="k">'</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="o">(</span><span class="n">b</span> <span class="o">+</span> <span class="n">c</span><span class="o">)</span> <span class="o">/</span> <span class="mi">2</span>
+  <span class="k">let</span> <span class="nv">b</span><span class="k">'</span> <span class="o">=</span> <span class="o">(</span><span class="n">b</span> <span class="o">+</span> <span class="n">c</span><span class="o">)</span> <span class="o">/</span> <span class="mi">2</span>
+  <span class="k">let</span> <span class="nv">c</span><span class="k">'</span> <span class="o">=</span> <span class="o">(</span><span class="n">c</span> <span class="err">−</span> <span class="n">b</span><span class="o">)</span> <span class="o">/</span> <span class="mi">2</span>
+  <span class="o">{</span> <span class="n">a</span> <span class="o">=</span> <span class="n">a'</span><span class="o">;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b'</span><span class="o">;</span> <span class="n">c</span> <span class="o">=</span> <span class="n">c'</span> <span class="o">}</span>
+
+<span class="k">let</span> <span class="nv">toss</span> <span class="n">p</span> <span class="o">=</span> <span class="n">tossBox</span> <span class="o">&gt;&gt;</span> <span class="n">p</span>
+</code></pre>
+<p>That’s all the transformations we’ll use. We can of course combine transformations, e.g:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="o">(</span><span class="n">turn</span> <span class="o">&gt;&gt;</span> <span class="n">turn</span> <span class="o">&gt;&gt;</span> <span class="n">flip</span> <span class="o">&gt;&gt;</span> <span class="n">toss</span><span class="o">)</span>
+</code></pre>
+<p>Which produces this:</p>
+<p>TODO: turn-turn-flip-toss</p>
+<p>We proceed to compose simple pictures into more complex ones. We define two basic functions for composing pictures, <strong>above</strong> and <strong>beside</strong>. The two are quite similar. Both functions take two pictures as arguments; <strong>above</strong> places the first picture above the second, whereas <strong>beside</strong> places the first picture to the left of the second.</p>
+<p>TODO: above-beside.png</p>
+<p>Here we see the F placed above the turned F, and the F placed beside the turned F. Notice that each composed picture forms a square, whereas each original picture is placed within a half of that square. What happens is that the bounding box given to the composite picture is split in two, with each original picture receiving one of the split boxes as their bounding box. The example shows an even split, but in general we can assign a fraction of the bounding box to the first argument picture, and the remainder to the second.</p>
+<p>For implementation details, we’ll just look at <strong>above</strong>:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">splitHorizontally</span> <span class="n">f</span> <span class="n">box</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="nv">top</span> <span class="o">=</span> <span class="n">box</span> <span class="o">|&gt;</span> <span class="n">moveVertically</span> <span class="o">(</span><span class="mi">1</span><span class="o">.</span> <span class="o">-</span> <span class="n">f</span><span class="o">)</span> <span class="o">|&gt;</span> <span class="n">scaleVertically</span> <span class="n">f</span>  
+  <span class="k">let</span> <span class="nv">bottom</span> <span class="o">=</span> <span class="n">box</span> <span class="o">|&gt;</span> <span class="n">scaleVertically</span> <span class="o">(</span><span class="mi">1</span><span class="o">.</span> <span class="o">-</span> <span class="n">f</span><span class="o">)</span>
+  <span class="o">(</span><span class="n">top</span><span class="o">,</span> <span class="n">bottom</span><span class="o">)</span>
+
+<span class="k">let</span> <span class="nv">aboveRatio</span> <span class="n">m</span> <span class="n">n</span> <span class="n">p1</span> <span class="n">p2</span> <span class="o">=</span>
+  <span class="k">fun</span> <span class="n">box</span> <span class="o">-&gt;</span>
+    <span class="k">let</span> <span class="nv">f</span> <span class="o">=</span> <span class="kt">float</span> <span class="n">m</span> <span class="o">/</span> <span class="kt">float</span> <span class="o">(</span><span class="n">m</span> <span class="o">+</span> <span class="n">n</span><span class="o">)</span>
+    <span class="k">let</span> <span class="nv">b1</span><span class="o">,</span> <span class="n">b2</span> <span class="o">=</span> <span class="n">splitHorizontally</span> <span class="n">f</span> <span class="n">box</span>
+    <span class="n">p1</span> <span class="n">b1</span> <span class="o">@</span> <span class="n">p2</span> <span class="n">b2</span>
+
+<span class="k">let</span> <span class="nv">above</span> <span class="o">=</span> <span class="n">aboveRatio</span> <span class="mi">1</span> <span class="mi">1</span>
+</code></pre>
+<p>There are three things we need to do: work out the fraction of the bounding box assigned to the first picture, split the bounding box in two according to that fraction, and pass the appropriate bounding box to each picture. We “split” the bounding box by creating two new bounding boxes, scaled and moved as appropriate. The mechanics of scaling and moving is implemented as follows:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">scaleVertically</span> <span class="n">s</span> <span class="o">{</span> <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="o">;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span> <span class="n">c</span> <span class="o">=</span> <span class="n">c</span> <span class="o">}</span> <span class="o">=</span> 
+  <span class="o">{</span> <span class="n">a</span> <span class="o">=</span> <span class="n">a</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">b</span> 
+    <span class="n">c</span> <span class="o">=</span> <span class="n">c</span> <span class="o">*</span> <span class="n">s</span> <span class="o">}</span>
+
+<span class="k">let</span> <span class="nv">moveVertically</span> <span class="n">offset</span> <span class="o">{</span> <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="o">;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="o">;</span> <span class="n">c</span> <span class="o">=</span> <span class="n">c</span> <span class="o">}</span> <span class="o">=</span> 
+  <span class="o">{</span> <span class="n">a</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">c</span> <span class="o">*</span> <span class="n">offset</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">b</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">c</span> <span class="o">}</span>
+</code></pre>
+<p>Now we can create more interesting images, such as this one:</p>
+<p>TODO: composite-f</p>
+<p>Which is made like this:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="n">above</span> <span class="o">(</span><span class="n">beside</span> <span class="o">(</span><span class="n">turn</span> <span class="o">(</span><span class="n">turn</span> <span class="o">(</span><span class="n">flip</span> <span class="n">p</span><span class="o">)))</span> <span class="o">(</span><span class="n">turn</span> <span class="o">(</span><span class="n">turn</span> <span class="n">p</span><span class="o">)))</span>
+      <span class="o">(</span><span class="n">beside</span> <span class="o">(</span><span class="n">flip</span> <span class="n">p</span><span class="o">)</span> <span class="n">p</span><span class="o">)</span>
+</code></pre>
+<p>With this, our basic toolset is complete. Now it is time to lose the support wheels and turn our attention to the original task: creating a replica of Henderson’s replica of Escher’s Square Limit!</p>
+<p>We start with a basic picture that is somewhat more interesting than the F we have been using so far.</p>
+<p>According to the paper, Henderson created his fish from 30 bezier curves. Here is my attempt at recreating it:</p>
+<p>TODO: Henderson’s fish</p>
+<p>You’ll notice that the fish violates the boundaries of the unit square. That is, some points on the shape has coordinates that are below zero or above one. This is fine, the picture isn’t really <em>bound</em> by its box, it’s just scaled and positioned relative to it.</p>
+<p>We can of course <strong>turn</strong>, <strong>flip</strong> and <strong>toss</strong> the fish as we like.</p>
+<p>TODO: Henderson’s fish (turned, flipped and tossed)</p>
+<p>But there’s more to the fish than might be immediately obvious. After all, it’s not just any fish, it’s an Escher fish. An interesting property of the fish is shown if we overlay it with itself turned twice.</p>
+<p>We define a combinator <strong>over</strong> that takes two pictures and places <em>both</em> pictures with respect to the same bounding box. And voila:</p>
+<p>TODO: overlay-fish</p>
+<p>As we can see, the fish is designed so that it fits together neatly with itself. And it doesn’t stop there.</p>
+<p>TODO: The t tile</p>
+<p>This shows the tile <strong>t</strong>, which is one of the building blocks we’ll use to construct Square Limit. The function <strong>ttile</strong> creates a t-tile when given a picture:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">ttile</span> <span class="n">f</span> <span class="o">=</span> 
+   <span class="k">let</span> <span class="nv">fishN</span> <span class="o">=</span> <span class="n">f</span> <span class="o">|&gt;</span> <span class="n">toss</span> <span class="o">|&gt;</span> <span class="n">flip</span>
+   <span class="k">let</span> <span class="nv">fishE</span> <span class="o">=</span> <span class="n">fishN</span> <span class="o">|&gt;</span> <span class="n">turn</span> <span class="o">|&gt;</span> <span class="n">turn</span> <span class="o">|&gt;</span> <span class="n">turn</span> 
+   <span class="n">over</span> <span class="n">f</span> <span class="o">(</span><span class="n">over</span> <span class="n">fishN</span> <span class="n">fishE</span><span class="o">)</span>
+</code></pre>
+<p>Here we see why we needed the <strong>toss</strong> transformation defined earlier, and begin to appreciate the ingenious design of the fish.</p>
+<p>The second building block we’ll need is called tile <strong>u</strong>. It looks like this:</p>
+<p>TODO: The u tile</p>
+<p>And we construct it like this:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">utile</span> <span class="o">(</span><span class="n">f</span> <span class="o">:</span> <span class="n">Picture</span><span class="o">)</span> <span class="o">=</span> 
+  <span class="k">let</span> <span class="nv">fishN</span> <span class="o">=</span> <span class="n">f</span> <span class="o">|&gt;</span> <span class="n">toss</span> <span class="o">|&gt;</span> <span class="n">flip</span>
+  <span class="k">let</span> <span class="nv">fishW</span> <span class="o">=</span> <span class="n">fishN</span> <span class="o">|&gt;</span> <span class="n">turn</span>
+  <span class="k">let</span> <span class="nv">fishS</span> <span class="o">=</span> <span class="n">fishW</span> <span class="o">|&gt;</span> <span class="n">turn</span>
+  <span class="k">let</span> <span class="nv">fishE</span> <span class="o">=</span> <span class="n">fishS</span> <span class="o">|&gt;</span> <span class="n">turn</span>
+  <span class="n">over</span> <span class="o">(</span><span class="n">over</span> <span class="n">fishN</span> <span class="n">fishW</span><span class="o">)</span>
+       <span class="o">(</span><span class="n">over</span> <span class="n">fishE</span> <span class="n">fishS</span><span class="o">)</span>
+</code></pre>
+<p>To compose the Square Limit itself, we observe that we can construct it from nine tiles organized in a 3×3 grid. We define a helper function <strong>nonet</strong> that takes nine pictures as arguments and lays them out top to bottom, left to right. Calling <strong>nonet</strong> with pictures of the letters H, E, N, D, E, R, S, O, N produces this result:</p>
+<p>TODO: H-E-N-D-E-R-S-O-N</p>
+<p>The code for <strong>nonet</strong> looks like this:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">nonet</span> <span class="n">p</span> <span class="n">q</span> <span class="n">r</span> <span class="n">s</span> <span class="n">t</span> <span class="n">u</span> <span class="n">v</span> <span class="n">w</span> <span class="n">x</span> <span class="o">=</span>
+  <span class="n">aboveRatio</span> <span class="mi">1</span> <span class="mi">2</span> <span class="o">(</span><span class="n">besideRatio</span> <span class="mi">1</span> <span class="mi">2</span> <span class="n">p</span> <span class="o">(</span><span class="n">beside</span> <span class="n">q</span> <span class="n">r</span><span class="o">))</span>
+                 <span class="o">(</span><span class="n">above</span> <span class="o">(</span><span class="n">besideRatio</span> <span class="mi">1</span> <span class="mi">2</span> <span class="n">s</span> <span class="o">(</span><span class="n">beside</span> <span class="n">t</span> <span class="n">u</span><span class="o">))</span>
+                        <span class="o">(</span><span class="n">besideRatio</span> <span class="mi">1</span> <span class="mi">2</span> <span class="n">v</span> <span class="o">(</span><span class="n">beside</span> <span class="n">w</span> <span class="n">x</span><span class="o">)))</span>
+</code></pre>
+<p>Now we just need to figure out the appropriate pictures to pass to <strong>nonet</strong> to produce the Square Limit replica.</p>
+<p>The center tile is the easiest: it is simply the tile u that we have already constructed. In addition, we’ll need a side tile and a corner tile. Each of those will be used four times, with the <strong>turn</strong> transformation applied 0 to 3 times.</p>
+<p>Both <strong>side</strong> and <strong>corner</strong> have a self-similar, recursive nature. We can think of both tiles as consisting of nested 2×2 grids. Similarly to <strong>nonet</strong>, we define a function <strong>quartet</strong> to construct such grids out of four pictures:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">quartet</span> <span class="n">p</span> <span class="n">q</span> <span class="n">r</span> <span class="n">s</span> <span class="o">=</span> <span class="n">above</span> <span class="o">(</span><span class="n">beside</span> <span class="n">p</span> <span class="n">q</span><span class="o">)</span> <span class="o">(</span><span class="n">beside</span> <span class="n">r</span> <span class="n">s</span><span class="o">)</span>
+</code></pre>
+<p>What should we use to fill our quartets? Well, first off, we need a base case to terminate the recursion. To help us do so, we’ll use a degenerate picture <strong>blank</strong> that produces <em>nothing</em> when given a bounding box.</p>
+<p>We’ll discuss <strong>side</strong> first since it is the simplest of the two (and also because <strong>corner</strong> uses <strong>side</strong>). The base case should look like this:</p>
+<p>TODO: side 1 fish</p>
+<p>For the recursive case, we’ll want self-similar copies of the side-tile in the top row instead of blank pictures. So the case one step removed from the base case should look like this:</p>
+<p>TODO: side 2 fish</p>
+<p>The following code helps us construct sides of arbitrary depth:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">rec</span> <span class="n">side</span> <span class="n">n</span> <span class="n">p</span> <span class="o">=</span> 
+  <span class="k">let</span> <span class="nv">s</span> <span class="o">=</span> <span class="k">if</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">then</span> <span class="n">blank</span> <span class="k">else</span> <span class="n">side</span> <span class="o">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span> <span class="n">p</span>
+  <span class="k">let</span> <span class="nv">t</span> <span class="o">=</span> <span class="n">ttile</span> <span class="n">p</span>
+  <span class="n">quartet</span> <span class="n">s</span> <span class="n">s</span> <span class="o">(</span><span class="n">t</span> <span class="o">|&gt;</span> <span class="n">turn</span><span class="o">)</span> <span class="n">t</span>
+</code></pre>
+<p>This gives us the side tile that should be used as the “north” tile in the nonet function. We obtain “west”, “south” and “east” as well by turning it around once, twice or thrice.</p>
+<p>Creating a corner is quite similar to creating a side. The base case should be a <strong>quartet</strong> consisting of three <strong>blank</strong> pictures, and a <strong>u</strong> tile for the final, bottom right picture. It should look like this:</p>
+<p>TODO: corner 1 fish</p>
+<p>The recursive case should use self-similar copies of both the corner tile (for the top left or “north-west” picture) and the side tile (for the top right and bottom left pictures), while keeping the u tile for the bottom right tile.</p>
+<p>TODO: corner 2 fish</p>
+<p>Here’s how we can write it in code:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">rec</span> <span class="n">corner</span> <span class="n">n</span> <span class="n">p</span> <span class="o">=</span> 
+  <span class="k">let</span> <span class="nv">c</span><span class="o">,</span> <span class="n">s</span> <span class="o">=</span> <span class="k">if</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">then</span> <span class="n">blank</span><span class="o">,</span> <span class="n">blank</span> 
+             <span class="k">else</span> <span class="n">corner</span> <span class="o">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span> <span class="n">p</span><span class="o">,</span> <span class="n">side</span> <span class="o">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span> <span class="n">p</span>
+  <span class="k">let</span> <span class="nv">u</span> <span class="o">=</span> <span class="n">utile</span> <span class="n">p</span>
+  <span class="n">quartet</span> <span class="n">c</span> <span class="n">s</span> <span class="o">(</span><span class="n">s</span> <span class="o">|&gt;</span> <span class="n">turn</span><span class="o">)</span> <span class="n">u</span>
+</code></pre>
+<p>This gives us the top left corner for our <strong>nonet</strong> function, and of course we can produce the remaining corners by turning it a number of times.</p>
+<p>Putting everything together, we have:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">squareLimit</span> <span class="n">n</span> <span class="n">picture</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="nv">cornerNW</span> <span class="o">=</span> <span class="n">corner</span> <span class="n">n</span> <span class="n">picture</span>
+  <span class="k">let</span> <span class="nv">cornerSW</span> <span class="o">=</span> <span class="n">turn</span> <span class="n">cornerNW</span>
+  <span class="k">let</span> <span class="nv">cornerSE</span> <span class="o">=</span> <span class="n">turn</span> <span class="n">cornerSW</span>
+  <span class="k">let</span> <span class="nv">cornerNE</span> <span class="o">=</span> <span class="n">turn</span> <span class="n">cornerSE</span>
+  <span class="k">let</span> <span class="nv">sideN</span> <span class="o">=</span> <span class="n">side</span> <span class="n">n</span> <span class="n">picture</span>
+  <span class="k">let</span> <span class="nv">sideW</span> <span class="o">=</span> <span class="n">turn</span> <span class="n">sideN</span>
+  <span class="k">let</span> <span class="nv">sideS</span> <span class="o">=</span> <span class="n">turn</span> <span class="n">sideW</span>
+  <span class="k">let</span> <span class="nv">sideE</span> <span class="o">=</span> <span class="n">turn</span> <span class="n">sideS</span>
+  <span class="k">let</span> <span class="nv">center</span> <span class="o">=</span> <span class="n">utile</span> <span class="n">picture</span>
+  <span class="n">nonet</span> <span class="n">cornerNW</span> <span class="n">sideN</span> <span class="n">cornerNE</span>  
+        <span class="n">sideW</span> <span class="n">center</span> <span class="n">sideE</span>
+        <span class="n">cornerSW</span> <span class="n">sideS</span> <span class="n">cornerSE</span>
+</code></pre>
+<p>Calling <code>squareLimit 3 fish</code> produces the following image:</p>
+<p>TODO: sqlimit-3.png</p>
+<p>Which is a pretty good replica of Henderson’s replica of Escher’s Square Limit, to a depth of 3. Sweet!</p>
+<p>Misson accomplished? Are we done?</p>
+<p>Sort of, I suppose. I mean, we could be.</p>
+<p>However, if you take a look directly at Escher’s woodcut (or, more likely, the photos of it that you can find online), you’ll notice a couple of things. 1) Henderson’s basic fish looks a bit different from Escher’s basic fish. 2) Escher’s basic fish comes in three hues: white, grey and black, whereas Henderson just has a white one. So it would be nice to address those issues.</p>
+<p>Here’s what I came up with.</p>
+<p>TODO: escher-fish-all.png</p>
+<p>To support different hues of the same fish requires a bit of thinking – we can’t just follow Henderson’s instructions any more. But we can use exactly the same approach! In addition to transforming the shape of the picture, we need to be able to transform the <em>coloring</em> of the picture. For this, we introduce a new abstraction, that we will call a <strong>Lens</strong>.</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">type</span> <span class="nc">Hue</span> <span class="o">=</span> <span class="n">Blackish</span> <span class="o">|</span> <span class="n">Greyish</span> <span class="o">|</span> <span class="n">Whiteish</span>
+
+<span class="k">type</span> <span class="nc">Lens</span> <span class="o">=</span> <span class="n">Box</span> <span class="o">*</span> <span class="n">Hue</span>
+</code></pre>
+<p>We redefine a picture to accept a lens instead of just a box. That way, the picture can take the hue (that is, the coloring) into account when figuring out what to draw. Now we can define a new combinator <strong>rehue</strong> that changes the hue given to a picture:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">rehue</span> <span class="n">p</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="nv">change</span> <span class="o">=</span> <span class="k">function</span>
+  <span class="o">|</span> <span class="n">Blackish</span> <span class="o">-&gt;</span> <span class="n">Greyish</span>
+  <span class="o">|</span> <span class="n">Greyish</span> <span class="o">-&gt;</span> <span class="n">Whiteish</span>
+  <span class="o">|</span> <span class="n">Whiteish</span> <span class="o">-&gt;</span> <span class="n">Blackish</span>
+  <span class="k">fun</span> <span class="o">(</span><span class="n">box</span><span class="o">,</span> <span class="n">hue</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">p</span> <span class="o">(</span><span class="n">box</span><span class="o">,</span> <span class="n">change</span> <span class="n">hue</span><span class="o">)</span>
+<span class="o">```</span><span class="n">fsharp</span>
+
+<span class="n">Changing</span> <span class="n">hue</span> <span class="n">three</span> <span class="n">times</span> <span class="n">takes</span> <span class="n">us</span> <span class="n">back</span> <span class="k">to</span> <span class="n">the</span> <span class="n">original</span> <span class="n">hue</span><span class="o">:</span>
+
+<span class="o">```</span><span class="n">fsharp</span>
+<span class="o">(</span><span class="n">rehue</span> <span class="o">&gt;&gt;</span> <span class="n">rehue</span> <span class="o">&gt;&gt;</span> <span class="n">rehue</span><span class="o">)</span> <span class="n">p</span> <span class="o">=</span> <span class="n">p</span>
+</code></pre>
+<p>We need to revise the tiles we used to construct the Square Limit to incorporate the <strong>rehue</strong> combinator. It turns out we need to create two variants of the <strong>t</strong> tile.</p>
+<p>TODO: ttile-shades</p>
+<p>But of course it’s just the same old <strong>t</strong> tile with appropriate calls to <strong>rehue</strong> for each fish:</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">ttile</span> <span class="n">hueN</span> <span class="n">hueE</span> <span class="n">f</span> <span class="o">=</span> 
+   <span class="k">let</span> <span class="nv">fishN</span> <span class="o">=</span> <span class="n">f</span> <span class="o">|&gt;</span> <span class="n">toss</span> <span class="o">|&gt;</span> <span class="n">flip</span>
+   <span class="k">let</span> <span class="nv">fishE</span> <span class="o">=</span> <span class="n">fishN</span> <span class="o">|&gt;</span> <span class="n">turn</span> <span class="o">|&gt;</span> <span class="n">turn</span> <span class="o">|&gt;</span> <span class="n">turn</span> 
+   <span class="n">over</span> <span class="n">f</span> <span class="o">(</span><span class="n">over</span> <span class="o">(</span><span class="n">fishN</span> <span class="o">|&gt;</span> <span class="n">hueN</span><span class="o">)</span>
+                <span class="o">(</span><span class="n">fishE</span> <span class="o">|&gt;</span> <span class="n">hueE</span><span class="o">))</span>
+
+<span class="k">let</span> <span class="nv">ttile1</span> <span class="o">=</span> <span class="n">ttile</span> <span class="n">rehue</span> <span class="o">(</span><span class="n">rehue</span> <span class="o">&gt;&gt;</span> <span class="n">rehue</span><span class="o">)</span>
+
+<span class="k">let</span> <span class="nv">ttile2</span> <span class="o">=</span> <span class="n">ttile</span> <span class="o">(</span><span class="n">rehue</span> <span class="o">&gt;&gt;</span> <span class="n">rehue</span><span class="o">)</span> <span class="n">rehue</span>
+</code></pre>
+<p>For the <strong>u</strong> tile, we need three variants:</p>
+<p>TODO: utiles.png</p>
+<p>Again, we just call <strong>rehue</strong> to varying degrees for each fish.</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">utile</span> <span class="n">hueN</span> <span class="n">hueW</span> <span class="n">hueS</span> <span class="n">hueE</span> <span class="n">f</span> <span class="o">=</span> 
+  <span class="k">let</span> <span class="nv">fishN</span> <span class="o">=</span> <span class="n">f</span> <span class="o">|&gt;</span> <span class="n">toss</span> <span class="o">|&gt;</span> <span class="n">flip</span>
+  <span class="k">let</span> <span class="nv">fishW</span> <span class="o">=</span> <span class="n">fishN</span> <span class="o">|&gt;</span> <span class="n">turn</span>
+  <span class="k">let</span> <span class="nv">fishS</span> <span class="o">=</span> <span class="n">fishW</span> <span class="o">|&gt;</span> <span class="n">turn</span>
+  <span class="k">let</span> <span class="nv">fishE</span> <span class="o">=</span> <span class="n">fishS</span> <span class="o">|&gt;</span> <span class="n">turn</span>
+  <span class="n">over</span> <span class="o">(</span><span class="n">over</span> <span class="o">(</span><span class="n">fishN</span> <span class="o">|&gt;</span> <span class="n">hueN</span><span class="o">)</span> <span class="o">(</span><span class="n">fishW</span> <span class="o">|&gt;</span> <span class="n">hueW</span><span class="o">))</span>
+       <span class="o">(</span><span class="n">over</span> <span class="o">(</span><span class="n">fishE</span> <span class="o">|&gt;</span> <span class="n">hueE</span><span class="o">)</span> <span class="o">(</span><span class="n">fishS</span> <span class="o">|&gt;</span> <span class="n">hueS</span><span class="o">))</span>
+
+<span class="k">let</span> <span class="nv">utile1</span> <span class="o">=</span> 
+  <span class="n">utile</span> <span class="o">(</span><span class="n">rehue</span> <span class="o">&gt;&gt;</span> <span class="n">rehue</span><span class="o">)</span> <span class="n">id</span> <span class="o">(</span><span class="n">rehue</span> <span class="o">&gt;&gt;</span> <span class="n">rehue</span><span class="o">)</span> <span class="n">id</span>
+
+<span class="k">let</span> <span class="nv">utile2</span> <span class="o">=</span> 
+  <span class="n">utile</span> <span class="n">id</span> <span class="o">(</span><span class="n">rehue</span> <span class="o">&gt;&gt;</span> <span class="n">rehue</span><span class="o">)</span> <span class="n">rehue</span> <span class="o">(</span><span class="n">rehue</span> <span class="o">&gt;&gt;</span> <span class="n">rehue</span><span class="o">)</span>
+
+<span class="k">let</span> <span class="nv">utile3</span> <span class="o">=</span> 
+  <span class="n">utile</span> <span class="o">(</span><span class="n">rehue</span> <span class="o">&gt;&gt;</span> <span class="n">rehue</span><span class="o">)</span> <span class="n">id</span> <span class="n">rehue</span> <span class="n">id</span> 
+</code></pre>
+<p>We use the two variants of the <strong>t</strong> tile in two side functions, one for the “north” and “south” side, another for the “west” and “east” side.</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">side</span> <span class="n">tt</span> <span class="n">hueSW</span> <span class="n">hueSE</span> <span class="n">n</span> <span class="n">p</span> <span class="o">=</span> 
+  <span class="k">let</span> <span class="nv">rec</span> <span class="n">aux</span> <span class="n">n</span> <span class="n">p</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="nv">t</span> <span class="o">=</span> <span class="n">tt</span> <span class="n">p</span>
+    <span class="k">let</span> <span class="nv">r</span> <span class="o">=</span> <span class="k">if</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">then</span> <span class="n">blank</span> <span class="k">else</span> <span class="n">aux</span> <span class="o">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span> <span class="n">p</span>
+    <span class="n">quartet</span> <span class="n">r</span> <span class="n">r</span> <span class="o">(</span><span class="n">t</span> <span class="o">|&gt;</span> <span class="n">turn</span> <span class="o">|&gt;</span> <span class="n">hueSW</span><span class="o">)</span> <span class="o">(</span><span class="n">t</span> <span class="o">|&gt;</span> <span class="n">hueSE</span><span class="o">)</span>
+  <span class="n">aux</span> <span class="n">n</span> <span class="n">p</span>
+
+<span class="k">let</span> <span class="nv">side1</span> <span class="o">=</span>
+  <span class="n">side</span> <span class="n">ttile1</span> <span class="n">id</span> <span class="n">rehue</span> 
+
+<span class="k">let</span> <span class="nv">side2</span> <span class="o">=</span>
+  <span class="n">side</span> <span class="n">ttile2</span> <span class="o">(</span><span class="n">rehue</span> <span class="o">&gt;&gt;</span> <span class="n">rehue</span><span class="o">)</span> <span class="n">rehue</span>
+</code></pre>
+<p>We define two corner functions as well, one for the “north-west” and “south-east” corner, another for the “north-east” and the “south-west” corner.</p>
+<pre class="codehilite"><code class="language-fsharp"><span></span><span class="k">let</span> <span class="nv">corner</span> <span class="n">ut</span> <span class="n">sideNE</span> <span class="n">sideSW</span> <span class="n">n</span> <span class="n">p</span> <span class="o">=</span> 
+  <span class="k">let</span> <span class="nv">rec</span> <span class="n">aux</span> <span class="n">n</span> <span class="n">p</span> <span class="o">=</span> 
+    <span class="k">let</span> <span class="nv">c</span><span class="o">,</span> <span class="n">ne</span><span class="o">,</span> <span class="n">sw</span> <span class="o">=</span> 
+      <span class="k">if</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">then</span> <span class="n">blank</span><span class="o">,</span> <span class="n">blank</span><span class="o">,</span> <span class="n">blank</span> 
+               <span class="k">else</span> <span class="n">aux</span> <span class="o">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span> <span class="n">p</span><span class="o">,</span> <span class="n">sideNE</span> <span class="o">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span> <span class="n">p</span><span class="o">,</span> <span class="n">sideSW</span> <span class="o">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span> <span class="n">p</span>
+    <span class="k">let</span> <span class="nv">u</span> <span class="o">=</span> <span class="n">ut</span> <span class="n">p</span>
+    <span class="n">quartet</span> <span class="n">c</span> <span class="n">ne</span> <span class="o">(</span><span class="n">sw</span> <span class="o">|&gt;</span> <span class="n">turn</span><span class="o">)</span> <span class="n">u</span>
+  <span class="n">aux</span> <span class="n">n</span> <span class="n">p</span> 
+
+<span class="k">let</span> <span class="nv">corner1</span> <span class="o">=</span> 
+  <span class="n">corner</span> <span class="n">utile3</span> <span class="n">side1</span> <span class="n">side2</span>
+
+<span class="k">let</span> <span class="nv">corner2</span> <span class="o">=</span> 
+  <span class="n">corner</span> <span class="n">utile2</span> <span class="n">side2</span> <span class="n">side1</span>
+</code></pre>
+<p>Now we can write an updated <strong>squareLimit</strong> that uses our new tile functions.</p>
+<pre class="codehilite"><code><span></span>let squareLimit n picture =
+  let cornerNW = corner1 n picture
+  let cornerSW = corner2 n picture |&gt; turn
+  let cornerSE = cornerNW |&gt; turn |&gt; turn
+  let cornerNE = cornerSW |&gt; turn |&gt; turn
+  let sideN = side1 n picture
+  let sideW = side2 n picture |&gt; turn
+  let sideS = sideN |&gt; turn |&gt; turn
+  let sideE = sideW |&gt; turn |&gt; turn
+  let center = utile1 picture
+  nonet cornerNW sideN cornerNE  
+        sideW center sideE
+        cornerSW sideS cornerSE
+</code></pre>
+<p>And now calling <code>squareLimit 5 fish</code> produces the following image:</p>
+<p>TODO: square-limit-shades-level-5.png</p>
+<p>Which is a pretty good replica of Escher’s Square Limit, to a depth of 5.</p>
+<p>The complete code is <a href="https://github.com/einarwh/funfish">here</a>.</p>
+<p>Update: I have also written a version using Fable and SAFE that I use for presentations. You can find it <a href="https://github.com/einarwh/safe-fish">here</a>.</p>
+</body></html>

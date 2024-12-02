@@ -264,7 +264,7 @@ let aboveRatio m n p1 p2 =
 let above = aboveRatio 1 1
 ```
 
-There are three things we need to do: work out the fraction of the bounding box assigned to the first picture, split the bounding box in two according to that fraction, and pass the appropriate bounding box to each picture. We “split” the bounding box by creating two new bounding boxes, scaled and moved as appropriate. The mechanics of scaling and moving is implemented as follows:
+There are three things we need to do: work out the fraction of the bounding box assigned to the first picture, split the bounding box in two according to that fraction, and pass the appropriate bounding box to each picture. We "split" the bounding box by creating two new bounding boxes, scaled and moved as appropriate. The mechanics of scaling and moving is implemented as follows:
 
 ```fsharp
 let scaleVertically s { a = a; b = b; c = c } = 
@@ -382,13 +382,13 @@ let rec side n p =
   quartet s s (t |> turn) t
 ```
 
-This gives us the side tile that should be used as the “north” tile in the nonet function. We obtain “west”, “south” and “east” as well by turning it around once, twice or thrice.
+This gives us the side tile that should be used as the "north" tile in the nonet function. We obtain "west", "south" and "east" as well by turning it around once, twice or thrice.
 
 Creating a corner is quite similar to creating a side. The base case should be a **quartet** consisting of three **blank** pictures, and a **u** tile for the final, bottom right picture. It should look like this:
 
 TODO: corner 1 fish
 
-The recursive case should use self-similar copies of both the corner tile (for the top left or “north-west” picture) and the side tile (for the top right and bottom left pictures), while keeping the u tile for the bottom right tile.
+The recursive case should use self-similar copies of both the corner tile (for the top left or "north-west" picture) and the side tile (for the top right and bottom left pictures), while keeping the u tile for the bottom right tile.
 
 TODO: corner 2 fish
 
@@ -506,7 +506,7 @@ let utile3 =
   utile (rehue >> rehue) id rehue id 
 ```
 
-We use the two variants of the **t** tile in two side functions, one for the “north” and “south” side, another for the “west” and “east” side.
+We use the two variants of the **t** tile in two side functions, one for the "north" and "south" side, another for the "west" and "east" side.
 
 ```fsharp
 let side tt hueSW hueSE n p = 
@@ -523,7 +523,7 @@ let side2 =
   side ttile2 (rehue >> rehue) rehue
 ```
 
-We define two corner functions as well, one for the “north-west” and “south-east” corner, another for the “north-east” and the “south-west” corner.
+We define two corner functions as well, one for the "north-west" and "south-east" corner, another for the "north-east" and the "south-west" corner.
 
 ```fsharp
 let corner ut sideNE sideSW n p = 

@@ -1,0 +1,286 @@
+<!DOCTYPE html><html lang="en" prefix="og: http://ogp.me/ns#"><head><title>The indispensable IDisposable | @einarwh</title><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="The indispensable IDisposable"><meta property="og:url" content="https://www.example.com/blog-posts/the-indispensible-idisposable/"><link rel="stylesheet" href="/bundles/c5b7698bdf4e/app.css"></head><body><header><a href="/">@einarwh</a></header><h1>The indispensable IDisposable</h1>
+<p>Posted: May 12, 2011</p>
+<p>The <strong>using</strong> statement in C# is a peculiar spoonful of syntactic sugar. It is peculiar because it’s tailor-made for a particular interface in the .NET framework. (i.e. <strong>IDisposable</strong>). Hence in <a href="http://www.ecma-international.org/publications/standards/Ecma-334.htm">the C# standard</a>, you’ll find that the semantics of using is defined in terms of how it interacts with that interface, the existence of which is sort of assumed a priori. So the boundary between language and library gets really blurred.</p>
+<p>As you well know, the purpose of <strong>using</strong> is to make it 1) more convenient for programmers to work with so-called unmanaged resources, and 2) more likely that programmers will dispose of such resources in a timely manner. That’s why it’s there.</p>
+<p>The archetypical usage is something like:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">using</span> <span class="p">(</span><span class="kt">var</span> <span class="n">resource</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Resource</span><span class="p">())</span>
+<span class="p">{</span>  
+  <span class="c1">// Use the resource here.</span>
+<span class="p">}</span>
+</code></pre>
+<p>This will expand to:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="kt">var</span> <span class="n">resource</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Resource</span><span class="p">();</span>
+<span class="k">try</span>
+<span class="p">{</span>
+  <span class="c1">// Use the resource here.</span>
+<span class="p">}</span>
+<span class="k">finally</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">resource</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">resource</span><span class="p">.</span><span class="n">Dispose</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+<p>The <strong>using</strong> statement has a lot of potential use cases beyond that, though – indeed, that’s what this blog post is all about! The MSDN documentation states that “the primary use of <strong>IDisposable</strong> is to release unmanaged resources”, but it is easy and fun to come up with interesting secondary uses. Basically any time you need something to happen before and after an operation, you got a potential use case for <strong>using</strong>. In other words, you can use it as sort of a poor man’s <a href="https://en.wikipedia.org/wiki/Aspect-oriented_programming">AOP</a>.</p>
+<p>Some people find the secondary uses for using to be abuse, others find it artistic. The most convincing argument I’ve read against liberal use of <strong>using</strong> is Eric Lippert’s comment on <a href="https://stackoverflow.com/questions/2101524/is-it-abusive-to-use-idisposable-and-using-as-a-means-for-getting-scoped-beha">this stack overflow question</a>. Essentially, the argument is that a <strong>Dispose</strong> method should be called out of politeness, not necessity: the correctness of your code shouldn’t depend upon <strong>Dispose</strong> being called. I won’t let that stop me though! (Granted, you’d need to put 1024 me’s in a cluster to get the brain equivalent of a Lippert, but hey – he’s just this guy, you know?). After all, what does code correctness mean? If your application leaks scarce resources due to untimely disposal, it’s broken – you’ll find it necessary to explicitly dispose of them. There’s a sliding scale between politeness and necessity, between art and abuse, and it’s not always obvious when you’re crossing the line. Also, I have to admit, I have a soft spot for cute solutions, especially when it makes for clean, readable code. I therefore lean towards the forgiving side. YMMW.</p>
+<p>So with that out of the way, let’s start abusing <strong>using</strong>:</p>
+<h2>Example 1: Performance timing</h2>
+<p>In my mind, the simplest non-standard application of <strong>using</strong> is to measure the time spent doing some operation (typically a method call). A <strong>PerfTimer</strong> implementing <strong>IDisposible</strong> gives you a neat syntax for that:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">class</span> <span class="nc">Program</span>
+<span class="p">{</span>  
+  <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span>  
+  <span class="p">{</span>
+    <span class="k">using</span> <span class="p">(</span><span class="k">new</span> <span class="n">PerfTimer</span><span class="p">())</span>
+    <span class="p">{</span>
+      <span class="c1">// Do your thing.</span>
+    <span class="p">}</span>  
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">class</span> <span class="nc">PerfTimer</span> <span class="p">:</span> <span class="n">IDisposable</span>
+<span class="p">{</span>  
+  <span class="k">private</span> <span class="k">readonly</span> <span class="n">Stopwatch</span> <span class="n">_</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Stopwatch</span><span class="p">();</span>  
+
+  <span class="k">public</span> <span class="nf">PerfTimer</span><span class="p">()</span>
+  <span class="p">{</span>    
+    <span class="n">_</span><span class="p">.</span><span class="n">Start</span><span class="p">();</span>
+  <span class="p">}</span>  
+
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Dispose</span><span class="p">()</span> 
+  <span class="p">{</span>
+    <span class="n">_</span><span class="p">.</span><span class="n">Stop</span><span class="p">();</span>
+    <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">"Spent {0} ms."</span><span class="p">,</span> <span class="n">_</span><span class="p">.</span><span class="n">ElapsedMilliseconds</span><span class="p">);</span>  
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+<p>Note that you don’t have to hold on to the <strong>PerfTimer</strong> you obtain in the using statement, since you’re not actually using it inside the scope of the using block. Obviously <strong>Dispose</strong> will be called nevertheless.</p>
+<h2>Example 2: Impersonation</h2>
+<p>Impersonation is one of my favorite using use cases. What you want is to carry out a sequence of instructions using a particular identity, and then revert to the original identity when you’re done. Wrapping your fake id up in an <strong>IDisposable</strong> makes it all very clean and readable:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">class</span> <span class="nc">Program</span>
+<span class="p">{</span>  
+  <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span>  
+  <span class="p">{</span>
+    <span class="n">WindowsIdentity</span> <span class="n">id</span> <span class="p">=</span> <span class="err">…</span><span class="p">;</span>    
+    <span class="k">using</span> <span class="p">(</span><span class="k">new</span> <span class="n">Persona</span><span class="p">(</span><span class="n">id</span><span class="p">))</span> 
+    <span class="p">{</span>
+      <span class="c1">// Act as id.</span>
+    <span class="p">}</span>  
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">class</span> <span class="nc">Persona</span> <span class="p">:</span> <span class="n">IDisposable</span>
+<span class="p">{</span> 
+  <span class="k">private</span> <span class="k">readonly</span> <span class="n">WindowsImpersonationContext</span> <span class="n">_</span><span class="p">;</span>  
+
+  <span class="k">public</span> <span class="nf">Persona</span><span class="p">(</span><span class="n">WindowsIdentity</span> <span class="n">id</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_</span> <span class="p">=</span> <span class="n">id</span><span class="p">.</span><span class="n">Impersonate</span><span class="p">();</span>
+  <span class="p">}</span>  
+
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Dispose</span><span class="p">()</span> 
+  <span class="p">{</span> 
+    <span class="n">_</span><span class="p">.</span><span class="n">Undo</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+<h2>Example 3: Temporary dependency replacement</h2>
+<p>Another useful application of using is to fake out some global resource during testing. It’s really a kind of dependency injection happening in the using statement. The neat thing is that you can reinject the real object when you’re done. This can help avoid side-effects from one test affecting another test.</p>
+<p>Let’s say you want to control time:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">class</span> <span class="nc">Program</span> 
+<span class="p">{</span>
+  <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span> 
+  <span class="p">{</span>
+    <span class="n">Tick</span><span class="p">();</span> <span class="n">Tick</span><span class="p">();</span> <span class="n">Tick</span><span class="p">();</span>
+    <span class="n">DateTime</span> <span class="n">dt</span> <span class="p">=</span> <span class="n">DateTime</span><span class="p">.</span><span class="n">Now</span><span class="p">;</span>
+    <span class="k">using</span> <span class="p">(</span><span class="n">Timepiece</span><span class="p">.</span><span class="n">Replacement</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="n">dt</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">dt</span> <span class="err">–</span> <span class="n">DateTime</span><span class="p">.</span><span class="n">Now</span><span class="p">)))</span> 
+    <span class="p">{</span>
+      <span class="n">Tick</span><span class="p">();</span> <span class="n">Tick</span><span class="p">();</span> <span class="n">Tick</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="n">Tick</span><span class="p">();</span> <span class="n">Tick</span><span class="p">();</span> <span class="n">Tick</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="k">static</span> <span class="k">void</span> <span class="nf">Tick</span><span class="p">()</span> 
+  <span class="p">{</span>
+    <span class="n">Thread</span><span class="p">.</span><span class="n">Sleep</span><span class="p">(</span><span class="m">1000</span><span class="p">);</span>
+    <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">"The time is {0}"</span><span class="p">,</span> <span class="n">Timepiece</span><span class="p">.</span><span class="n">Now</span><span class="p">.</span><span class="n">ToLongTimeString</span><span class="p">());</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">static</span> <span class="k">class</span> <span class="nc">Timepiece</span> 
+<span class="p">{</span>
+  <span class="k">private</span> <span class="k">static</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">DateTime</span><span class="p">&gt;</span> <span class="n">_</span> <span class="p">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="n">DateTime</span><span class="p">.</span><span class="n">Now</span><span class="p">;</span>
+
+  <span class="k">public</span> <span class="k">static</span> <span class="n">DateTime</span> <span class="n">Now</span> <span class="p">{</span> <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_</span><span class="p">();</span> <span class="p">}</span> <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">static</span> <span class="n">IDisposable</span> <span class="nf">Replacement</span><span class="p">(</span><span class="n">Func</span><span class="p">&lt;</span><span class="n">DateTime</span><span class="p">&gt;</span> <span class="n">f</span><span class="p">)</span> 
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">TempTimepiece</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
+  <span class="p">}</span> 
+
+  <span class="k">class</span> <span class="nc">TempTimepiece</span> <span class="p">:</span> <span class="n">IDisposable</span>
+  <span class="p">{</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">DateTime</span><span class="p">&gt;</span> <span class="n">_original</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="nf">TempTimepiece</span><span class="p">(</span><span class="n">Func</span><span class="p">&lt;</span><span class="n">DateTime</span><span class="p">&gt;</span> <span class="n">f</span><span class="p">)</span> 
+    <span class="p">{</span>
+      <span class="n">_original</span> <span class="p">=</span> <span class="n">_</span><span class="p">;</span>
+      <span class="n">_</span> <span class="p">=</span> <span class="n">f</span><span class="p">;</span>
+    <span class="p">}</span>
+  
+    <span class="k">public</span> <span class="k">void</span> <span class="nf">Dispose</span><span class="p">()</span> 
+    <span class="p">{</span>
+      <span class="n">_</span> <span class="p">=</span> <span class="n">_original</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+<p>The idea is that we eliminate uses of <strong>DateTime.Now</strong> in our code, and consistently use <strong>Timepiece.Now</strong> instead. By default, <strong>Timepiece.Now</strong> uses <strong>DateTime.Now</strong> to yield the current time, but you’re free to replace it. You can pass in your own time provider to the <strong>Replacement</strong> method, and that we be used instead – until someone calls <strong>Dispose</strong> on the <strong>TempTimepiece</strong> instance returned from <strong>Replacement</strong>, that is. In the code above, we’re causing time to go backwards for the three <strong>Tick</strong>s inside the <strong>using</strong> block. The output looks like this:</p>
+<p><img src="/images/3dc77c2cc6e4/timepiece-backwards.png" alt="Output showing the time."></p>
+<h2>Example 4: Printing nested structures</h2>
+<p>So far we’ve seen some modest examples of abuse. For our last example, let’s go a bit overboard, forget our inhibitions and really embrace using!</p>
+<p>Here’s what I mean:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">public</span> <span class="k">override</span> <span class="k">void</span> <span class="nf">Write</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">using</span><span class="p">(</span><span class="n">Html</span><span class="p">())</span>
+  <span class="p">{</span>
+    <span class="k">using</span> <span class="p">(</span><span class="n">Head</span><span class="p">())</span>
+    <span class="p">{</span>
+      <span class="k">using</span> <span class="p">(</span><span class="n">Title</span><span class="p">())</span>
+      <span class="p">{</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s">"Greeting"</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">using</span> <span class="p">(</span><span class="n">Body</span><span class="p">(</span><span class="n">Bgcolor</span><span class="p">(</span><span class="s">"pink"</span><span class="p">)))</span>
+    <span class="p">{</span>
+      <span class="n">using</span><span class="p">(</span><span class="n">P</span><span class="p">(</span><span class="n">Style</span><span class="p">(</span><span class="s">"font-size:large"</span><span class="p">)))</span>
+      <span class="p">{</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s">"Hello world!"</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+<p>Hee hee.</p>
+<p>Yup, it’s an embedded DSL for writing HTML, based on the using statement. Whatever your other reactions might be – it’s fairly readable, don’t you think?</p>
+<p>When you run it, it produces the following output (nicely formatted and everything):</p>
+<p><img src="/images/d63adc034745/html-writer.png" alt="HTML output from the HTML-DSL"></p>
+<p>How does it work, though?</p>
+<p>Well, the basic idea is that you don’t really have to obtain a new <strong>IDisposable</strong> every time you’re using using. You can keep using the same one over and over, altering its state as you go along. Here’s how you can do it:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">class</span> <span class="nc">Program</span>
+<span class="p">{</span>
+  <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">(</span><span class="kt">string</span><span class="p">[]</span> <span class="n">args</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">new</span> <span class="nf">HtmlWriter</span><span class="p">(</span><span class="n">Console</span><span class="p">.</span><span class="n">Out</span><span class="p">).</span><span class="n">Write</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">class</span> <span class="nc">HtmlWriter</span> <span class="p">:</span> <span class="n">BaseHtmlWriter</span>
+<span class="p">{</span>
+  <span class="k">public</span> <span class="nf">HtmlWriter</span><span class="p">(</span><span class="n">TextWriter</span> <span class="n">tw</span><span class="p">)</span> <span class="p">:</span> <span class="k">base</span><span class="p">(</span><span class="n">tw</span><span class="p">)</span> <span class="p">{}</span>
+
+  <span class="k">public</span> <span class="k">override</span> <span class="k">void</span> <span class="nf">Write</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="n">using</span><span class="p">(</span><span class="n">Html</span><span class="p">())</span>
+    <span class="p">{</span>
+      <span class="k">using</span> <span class="p">(</span><span class="n">Head</span><span class="p">())</span>
+      <span class="p">{</span>
+        <span class="k">using</span> <span class="p">(</span><span class="n">Title</span><span class="p">())</span>
+        <span class="p">{</span>
+          <span class="n">Text</span><span class="p">(</span><span class="s">"Greeting"</span><span class="p">);</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+      <span class="k">using</span> <span class="p">(</span><span class="n">Body</span><span class="p">(</span><span class="n">Bgcolor</span><span class="p">(</span><span class="s">"pink"</span><span class="p">)))</span>
+      <span class="p">{</span>
+        <span class="n">using</span><span class="p">(</span><span class="n">P</span><span class="p">(</span><span class="n">Style</span><span class="p">(</span><span class="s">"font-size:large"</span><span class="p">)))</span>
+        <span class="p">{</span>
+          <span class="n">Text</span><span class="p">(</span><span class="s">"Hello world!"</span><span class="p">);</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">class</span> <span class="nc">DisposableWriter</span> <span class="p">:</span> <span class="n">IDisposable</span>
+<span class="p">{</span>
+  <span class="k">private</span> <span class="k">readonly</span> <span class="n">Stack</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">_tags</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Stack</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;();</span>
+  <span class="k">private</span> <span class="k">readonly</span> <span class="n">TextWriter</span> <span class="n">_</span><span class="p">;</span>
+            
+  <span class="k">public</span> <span class="nf">DisposableWriter</span><span class="p">(</span><span class="n">TextWriter</span> <span class="n">tw</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_</span> <span class="p">=</span> <span class="n">tw</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="n">IDisposable</span> <span class="nf">Tag</span><span class="p">(</span><span class="kt">string</span> <span class="n">tag</span><span class="p">,</span> <span class="k">params</span> <span class="kt">string</span><span class="p">[]</span> <span class="n">attrs</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">string</span> <span class="n">s</span> <span class="p">=</span> <span class="n">attrs</span><span class="p">.</span><span class="n">Length</span> <span class="p">&gt;</span> <span class="m">0</span> <span class="p">?</span> <span class="n">tag</span> <span class="p">+</span> <span class="s">" "</span> <span class="p">+</span> <span class="kt">string</span><span class="p">.</span><span class="n">Join</span><span class="p">(</span><span class="s">" "</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span> <span class="p">:</span> <span class="n">tag</span><span class="p">;</span>
+    <span class="n">Write</span><span class="p">(</span><span class="s">"&lt;"</span> <span class="p">+</span> <span class="n">s</span> <span class="p">+</span> <span class="s">"&gt;"</span><span class="p">);</span>
+    <span class="n">_tags</span><span class="p">.</span><span class="n">Push</span><span class="p">(</span><span class="n">tag</span><span class="p">);</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Text</span><span class="p">(</span><span class="kt">string</span> <span class="n">s</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">Write</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">private</span> <span class="k">void</span> <span class="nf">Write</span><span class="p">(</span><span class="kt">string</span> <span class="n">s</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">_</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">void</span> <span class="nf">Dispose</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">tag</span> <span class="p">=</span> <span class="n">_tags</span><span class="p">.</span><span class="n">Pop</span><span class="p">();</span>
+    <span class="n">Write</span><span class="p">(</span><span class="s">"&lt;/"</span> <span class="p">+</span> <span class="n">tag</span> <span class="p">+</span> <span class="s">"&gt;"</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">abstract</span> <span class="k">class</span> <span class="nc">BaseHtmlWriter</span>
+<span class="p">{</span>
+  <span class="k">private</span> <span class="k">readonly</span> <span class="n">DisposableWriter</span> <span class="n">_</span><span class="p">;</span>
+
+  <span class="k">protected</span> <span class="nf">BaseHtmlWriter</span><span class="p">(</span><span class="n">TextWriter</span> <span class="n">tw</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_</span> <span class="p">=</span> <span class="k">new</span> <span class="n">DisposableWriter</span><span class="p">(</span><span class="n">tw</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">protected</span> <span class="n">IDisposable</span> <span class="nf">Html</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="n">_</span><span class="p">.</span><span class="n">Tag</span><span class="p">(</span><span class="s">"html"</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">protected</span> <span class="n">IDisposable</span> <span class="nf">Body</span><span class="p">(</span><span class="k">params</span> <span class="kt">string</span><span class="p">[]</span> <span class="n">attrs</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="n">_</span><span class="p">.</span><span class="n">Tag</span><span class="p">(</span><span class="s">"body"</span><span class="p">,</span> <span class="n">attrs</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// More tags…</span>
+
+  <span class="k">protected</span> <span class="kt">string</span> <span class="nf">Bgcolor</span><span class="p">(</span><span class="kt">string</span> <span class="k">value</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="nf">Attr</span><span class="p">(</span><span class="s">"bgcolor"</span><span class="p">,</span> <span class="k">value</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">protected</span> <span class="kt">string</span> <span class="nf">Style</span><span class="p">(</span><span class="kt">string</span> <span class="k">value</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="nf">Attr</span><span class="p">(</span><span class="s">"style"</span><span class="p">,</span> <span class="k">value</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// More attributes…</span>
+
+  <span class="k">protected</span> <span class="kt">string</span> <span class="nf">Attr</span><span class="p">(</span><span class="kt">string</span> <span class="n">key</span><span class="p">,</span> <span class="kt">string</span> <span class="k">value</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="n">key</span> <span class="p">+</span> <span class="s">"=\""</span> <span class="p">+</span> <span class="k">value</span> <span class="p">+</span> <span class="s">"\""</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">protected</span> <span class="k">void</span> <span class="nf">Text</span><span class="p">(</span><span class="kt">string</span> <span class="n">s</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_</span><span class="p">.</span><span class="n">Text</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">abstract</span> <span class="k">void</span> <span class="nf">Write</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre>
+<p>So you can see, it’s almost like you’re using an <strong>IDisposable</strong> in a fluent interface. You just keep using the same <strong>DisposableWriter</strong> over and over again! Internally, it maintains a stack of tags. Whenever you add a new tag to the writer (which happens on each new <strong>using</strong>), it writes the start tag to the stream and pushes it onto the stack. When the <strong>using</strong> block ends, <strong>Dispose</strong> is called on the <strong>DisposableWriter</strong> – causing it to pop the correct tag off the stack and write the corresponding end tag to the stream. The indentation is determined by the depth of the stack, of course.</p>
+<p>Wasn’t that fun? There are other things you could do, too. For instance, I bet you could implement an interpreter for a stack-based language (such as IL) pretty easily. Let each instruction implement <strong>IDisposable</strong>, pop values off the stack upon instantiation, execute the instruction, optionally push a value back on upon <strong>Dispose</strong>. Shouldn’t be hard at all.</p>
+<p>Now if I could only come up with some neat abuses of <strong>foreach</strong>…</p>
+</body></html>

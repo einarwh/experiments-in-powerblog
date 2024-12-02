@@ -1,0 +1,823 @@
+<!DOCTYPE html><html lang="en" prefix="og: http://ogp.me/ns#"><head><title>A property with a view | @einarwh</title><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="A property with a view"><meta property="og:url" content="https://www.example.com/blog-posts/a-property-with-a-view/"><link rel="stylesheet" href="/bundles/c5b7698bdf4e/app.css"></head><body><header><a href="/">@einarwh</a></header><h1>A property with a view</h1>
+<p>Posted: May 1, 2012</p>
+<p>I’ve never been much of an early adopter, so now that Silverlight is dead and cold and has been for a while, it seems appropriate for me to blog about it. More specifically, I’d like to write about the chore that is <strong>INotifyPropertyChanged</strong> and how to make practically all the grunt work go away.</p>
+<p>(Actually, I’m not sure that Silverlight is completely dead yet. It may be that Microsoft won’t be pumping much fresh blood into its veins, but that’s not quite the same thing as being dead. A technology isn’t dead as long as there’s a market for it and all that jazz. Assuming that there are some kinds of applications (such as rich line-of-business applications) that are easier to build with Silverlight than HTML5 given the toolsets that are available, I think we’ll find that Silverlight hangs around to haunt us for quite a while. But that’s sort of a side issue. It doesn’t really matter if Silverlight is dead or not, the issue of tackling <strong>INotifyPropertyChanged</strong> is interesting in and of itself.)</p>
+<p>So <strong>INotifyPropertyChanged</strong> is the hoop you have to jump through to enable Silverlight views to update themselves as the view models they bind to change. It’s hard to envision not wanting the view to update when the view model changes. So typically you’ll want all the properties you bind to, to automatically cause the view to refresh itself. The problem is that this doesn’t happen out of the box. Instead, there’s this cumbersome and tiresome ritual you have to go through where you implement <strong>INotifyPropertyChanged</strong>, and have all the setters in your view model holler “hey, I’ve changed” by firing the <strong>PropertyChanged</strong> event. Brains need not apply to do this kind of work; it’s just mind-numbing, repetitive plumbing code. It would be much nicer if the framework would just be intelligent enough to provide the necessary notifications all by itself. Unfortunately, that’s not the case.</p>
+<h2>Solution: IL weaving</h2>
+<p>Silver.Needle is the name I use for some code I wrote to do fix that. The basic idea is to use IL manipulation to automatically turn the plain vanilla .NET properties on your view models into view-update-triggering properties with the boring but necessary plumbing just magically *there*. Look ma, no hands!</p>
+<p>If you’re unfamiliar with IL manipulation, you might assume that it’s hard to do because it’s sort of low-level and therefore all voodooy and scary. But you’d be wrong. It might have been, without proper tools. Enter the star of this blog post: <a href="http://www.mono-project.com/Cecil">Mono.Cecil</a>. Mono.Cecil is a library for IL manipulation written by Jb Evain. It is so powerful, it’s almost indecent: you get the feeling that IL manipulation shouldn’t be that easy. But it is, it really is. It’s a walk in the park. And the power trip you get is unbelievable.</p>
+<p>Of course, since I rarely have original thoughts, Silver.Needle isn’t unique. You’ll find that Justin Angel described <a href="http://justinangel.net/AutomagicallyImplementingINotifyPropertyChanged">a very similar approach</a> on his blog, more than two years ago. He used Mono.Cecil too. So did the <strong>Kind of Magic</strong> and <strong>NotifyPropertyWeaver</strong> projects (<em>Update 2024: both now apparently defunct</em>). But as always, it’s much more fun and educational to roll your own!</p>
+<blockquote>
+<p>Disclaimer: it is fairly easy to shoot yourself in the foot when you’re meddling with IL directly. I accept no liability if you try to run any of the code included in this blog post and end up injecting IL into your cat, or causing your boss to fail spectacularly at runtime, or encountering any other unfortunate and grotesque mishap as a result of doing so. You have been warned.</p>
+</blockquote>
+<h2>Viewable properties</h2>
+<p>To do the IL manipulation, we need a way to distinguish between properties to tamper with and properties to leave alone. We’ll refer to the former as <em>viewable</em> properties because, you know, they’re able to <em>work</em> with a <em>view</em>?</p>
+<p>Silver.Needle gives you two options for indicating that a property is viewable. The first option is to opt-in for individual properties on a class, by annotating each property with the <strong>Viewable</strong> attribute. The second option is to annotate the entire class as <strong>Viewable</strong>, and optionally opt-out for individual properties on that class using the <strong>Opaque</strong> attribute. In either case, the class is considered to be a “view model”, with one or more viewable properties that notify the view of any changes.</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">public</span> <span class="k">class</span> <span class="nc">ViewableAttribute</span><span class="p">:</span> <span class="n">Attribute</span> <span class="p">{}</span>
+</code></pre>
+<p>So the task solved by Silver.Needle is to perform the IL voodoo necessary to make sure that the output of the C# compiler of this pretty lean and neato code:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">public</span> <span class="k">class</span> <span class="nc">PersonViewModel</span>
+<span class="p">{</span>
+<span class="na">  [Viewable]</span>
+  <span class="k">public</span> <span class="kt">string</span> <span class="n">Name</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+<p>…is the same as the output generated directly when compiling this cumbersome and clumsy mess:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">public</span> <span class="k">class</span> <span class="nc">PersonViewModel</span> <span class="p">:</span> <span class="n">INotifyPropertyChanged</span>
+<span class="p">{</span>
+  <span class="k">private</span> <span class="kt">string</span> <span class="n">_name</span><span class="p">;</span>
+
+  <span class="k">public</span> <span class="k">event</span> <span class="n">PropertyChangedEventHandler</span> <span class="n">PropertyChanged</span><span class="p">;</span>
+
+  <span class="k">public</span> <span class="kt">string</span> <span class="n">Name</span>
+  <span class="p">{</span>
+    <span class="k">get</span>
+    <span class="p">{</span>
+      <span class="k">return</span> <span class="n">_name</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">set</span>
+    <span class="p">{</span>
+      <span class="n">_name</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span>
+      <span class="n">NotifyViewableProperty</span><span class="p">(</span><span class="s">"Name"</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">private</span> <span class="k">void</span> <span class="nf">NotifyViewableProperty</span><span class="p">(</span><span class="kt">string</span> <span class="n">propertyName</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">propertyChanged</span> <span class="p">=</span> <span class="k">this</span><span class="p">.</span><span class="n">PropertyChanged</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">propertyChanged</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">propertyChanged</span><span class="p">.</span><span class="n">Invoke</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> 
+        <span class="k">new</span> <span class="nf">PropertyChangedEventArgs</span><span class="p">(</span><span class="n">propertyName</span><span class="p">));</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+<p>We start by using Mono.Cecil to look for types that contain such properties. It’s a simple matter of 1) loading the assembly with Mono.Cecil, 2) iterating over the types in the assembly and 3) iterating over the properties defined for each type. Of course, if we find one or more “view model” types with properties that should perform view notification, we must proceed to do the necessary IL manipulation and write the changed assembly to disk afterwards. The meat of the matter is in scanning an individual type and doing the IL manipulation. We’ll come to that shortly. The surrounding bureaucracy is handled by the <strong>NotificationTamperer</strong> class.</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">public</span> <span class="k">class</span> <span class="nc">NotificationTamperer</span> <span class="p">:</span> <span class="n">ITamperer</span>
+<span class="p">{</span>
+  <span class="k">private</span> <span class="k">readonly</span> <span class="kt">string</span> <span class="n">_assemblyOutputFileName</span><span class="p">;</span>
+
+  <span class="k">public</span> <span class="nf">NotificationTamperer</span><span class="p">()</span> <span class="p">:</span> <span class="k">this</span><span class="p">(</span><span class="s">"default_tampered.dll"</span><span class="p">)</span> <span class="p">{}</span>
+
+  <span class="k">public</span> <span class="nf">NotificationTamperer</span><span class="p">(</span><span class="kt">string</span> <span class="n">assemblyOutputFileName</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_assemblyOutputFileName</span> <span class="p">=</span> <span class="n">assemblyOutputFileName</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">private</span> <span class="k">static</span> <span class="n">AssemblyDefinition</span> <span class="nf">ReadSilverlightAssembly</span><span class="p">(</span>
+    <span class="kt">string</span> <span class="n">assemblyPath</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">resolver</span> <span class="p">=</span> <span class="k">new</span> <span class="n">DefaultAssemblyResolver</span><span class="p">();</span>
+    <span class="n">resolver</span><span class="p">.</span><span class="n">AddSearchDirectory</span><span class="p">(</span><span class="s">@"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\Silverlight\v4.0"</span><span class="p">);</span>
+
+    <span class="kt">var</span> <span class="n">assembly</span> <span class="p">=</span> <span class="n">AssemblyDefinition</span><span class="p">.</span><span class="n">ReadAssembly</span><span class="p">(</span>
+      <span class="n">assemblyPath</span><span class="p">,</span>
+      <span class="k">new</span> <span class="n">ReaderParameters</span> <span class="p">{</span> <span class="n">AssemblyResolver</span> <span class="p">=</span> <span class="n">resolver</span> <span class="p">});</span>
+    <span class="k">return</span> <span class="n">assembly</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="kt">bool</span> <span class="nf">TamperWith</span><span class="p">(</span><span class="kt">string</span> <span class="n">assemblyPath</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">assembly</span> <span class="p">=</span> <span class="n">ReadSilverlightAssembly</span><span class="p">(</span><span class="n">assemblyPath</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="n">result</span> <span class="p">=</span> <span class="n">TamperWith</span><span class="p">(</span><span class="n">assembly</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">assembly</span><span class="p">.</span><span class="n">Write</span><span class="p">(</span><span class="n">_assemblyOutputFileName</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">private</span> <span class="kt">bool</span> <span class="nf">TamperWith</span><span class="p">(</span><span class="n">AssemblyDefinition</span> <span class="n">assembly</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">bool</span> <span class="n">result</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+    <span class="k">foreach</span> <span class="p">(</span><span class="n">TypeDefinition</span> <span class="n">type</span> <span class="k">in</span> <span class="n">assembly</span><span class="p">.</span><span class="n">MainModule</span><span class="p">.</span><span class="n">Types</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">result</span> <span class="p">=</span> <span class="k">new</span> <span class="n">TypeTamperer</span><span class="p">(</span><span class="n">type</span><span class="p">).</span><span class="n">MaybeTamperWith</span><span class="p">()</span> <span class="p">||</span> <span class="n">result</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+<p>There’s not much going on here worth commenting upon, it’s just the stuff outlined above. I guess the only thing worth noting is that we need to add a reference to the Silverlight assemblies, so that Mono.Cecil can resolve type dependencies as necessary later on. (For simplicity, I just hard-coded the path to the assemblies on my system. Did I mention it’s not quite ready for the enterprise yet?)</p>
+<p>The interesting stuff happens in the <strong>TypeTamperer</strong>. You’ll notice that the <strong>TypeTamperer</strong> works on a single type, which is passed in to the constructor. This is the type that may or may not contain viewable properites, and may or may not end up being tampered with. The type is represented by a Mono.Cecil <strong>TypeDefinition</strong>, which has collections for interfaces, methods, fields, events and so forth.</p>
+<p>The <strong>TypeTamperer</strong> does two things. First, it looks for any viewable properties. Second, if any viewable properties were found, it ensures that the type in question implements the <strong>INotifyPropertyChanged</strong> interface, and that the viewable properties participate in the notification mechanism by raising the <strong>PropertyChanged</strong> event as appropriate.</p>
+<p>Let’s see how the identification happens:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">public</span> <span class="kt">bool</span> <span class="nf">MaybeTamperWith</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="n">_typeDef</span><span class="p">.</span><span class="n">IsClass</span> 
+    <span class="p">&amp;&amp;</span> <span class="n">HasPropertiesToTamperWith</span><span class="p">()</span> 
+    <span class="p">&amp;&amp;</span> <span class="n">ReallyTamperWith</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="kt">bool</span> <span class="nf">HasPropertiesToTamperWith</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">FindPropertiesToTamperWith</span><span class="p">();</span>
+  <span class="k">return</span> <span class="n">_map</span><span class="p">.</span><span class="n">Count</span> <span class="p">&gt;</span> <span class="m">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="k">void</span> <span class="nf">FindPropertiesToTamperWith</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">isViewableType</span> <span class="p">=</span> <span class="n">IsViewable</span><span class="p">(</span><span class="n">_typeDef</span><span class="p">);</span>
+  <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">prop</span> <span class="k">in</span> <span class="n">_typeDef</span><span class="p">.</span><span class="n">Properties</span>
+    <span class="p">.</span><span class="n">Where</span><span class="p">(</span><span class="n">p</span> <span class="p">=&gt;</span> <span class="n">IsViewable</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="p">||</span> <span class="p">(</span><span class="n">isViewableType</span> <span class="p">&amp;&amp;</span> <span class="p">!</span><span class="n">IsOpaque</span><span class="p">(</span><span class="n">p</span><span class="p">))))</span>
+  <span class="p">{</span>
+    <span class="n">HandlePropertyToNotify</span><span class="p">(</span><span class="n">prop</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="k">static</span> <span class="kt">bool</span> <span class="nf">IsViewable</span><span class="p">(</span><span class="n">ICustomAttributeProvider</span> <span class="n">item</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="nf">HasAttribute</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">ViewableAttributeName</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="k">static</span> <span class="kt">bool</span> <span class="nf">IsOpaque</span><span class="p">(</span><span class="n">ICustomAttributeProvider</span> <span class="n">item</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="nf">HasAttribute</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">OpaqueAttributeName</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="k">static</span> <span class="kt">bool</span> <span class="nf">HasAttribute</span><span class="p">(</span><span class="n">ICustomAttributeProvider</span> <span class="n">item</span><span class="p">,</span> 
+  <span class="kt">string</span> <span class="n">attributeName</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="n">item</span><span class="p">.</span><span class="n">CustomAttributes</span><span class="p">.</span><span class="n">Any</span><span class="p">(</span>
+    <span class="n">a</span> <span class="p">=&gt;</span> <span class="n">a</span><span class="p">.</span><span class="n">AttributeType</span><span class="p">.</span><span class="n">Name</span> <span class="p">==</span> <span class="n">attributeName</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+<p>As you can see, the code is very straight-forward. We just make sure that the type we’re inspecting is a class (as opposed to an interface), and look for viewable properties. If we find a viewable property, the HandlePropertyToNotify method is called. We’ll look at that method in detail later on. For now though, we’ll just note that the property will end up in an <strong>IDictionary</strong> named _map, so that the <strong>ReallyTamperWith</strong> method is called, triggering the IL manipulation.</p>
+<p>For each of the view model types, we need to make sure that the type implements INotifyPropertyChanged. From an IL manipulation point of view, this entails three things:</p>
+<ul>
+<li>Adding interface declaration as needed.</li>
+<li>Adding event declaration as needed.</li>
+<li>Adding event trigger method as needed.</li>
+</ul>
+<p>Silver.Needle tries to play nicely with a complete or partial hand-written implementation of <strong>INotifyPropertyChanged</strong>. It’s not too hard to do, the main complicating matter being that we need to consider inheritance. The type might inherit from another type (say, <strong>ViewModelBase</strong>) that implements the interface. Obviously, we shouldn’t do anything in that case. We should only inject implementation code for types that do not already implement the interface, either directly or in a base type. To do this, we need to walk the inheritance chain up to <strong>System.Object</strong> before we can conclude that the interface is indeed missing and proceed to inject code for the implementation.</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">private</span> <span class="kt">bool</span> <span class="nf">ReallyTamperWith</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">EnsureTypeImplementsInterface</span><span class="p">();</span>
+  <span class="n">TamperWithPropertySetters</span><span class="p">();</span>
+  <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="k">void</span> <span class="nf">EnsureTypeImplementsInterface</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(!</span><span class="n">TypeAlreadyImplementsInterface</span><span class="p">())</span>
+  <span class="p">{</span>
+    <span class="n">InjectInterfaceImplementation</span><span class="p">();</span>
+  <span class="p">}</span>
+  <span class="n">IdentifyNotificationMethod</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="k">static</span> <span class="kt">bool</span> <span class="nf">TypeImplementsInterface</span><span class="p">(</span><span class="n">TypeDefinition</span> <span class="n">typeDef</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">return</span> 
+    <span class="n">typeDef</span><span class="p">.</span><span class="n">Interfaces</span><span class="p">.</span><span class="n">Any</span><span class="p">(</span>
+      <span class="n">it</span> <span class="p">=&gt;</span> <span class="n">it</span><span class="p">.</span><span class="n">Name</span> <span class="p">==</span> <span class="s">"INotifyPropertyChanged"</span><span class="p">)</span> 
+    <span class="p">||</span>
+    <span class="p">(</span><span class="n">typeDef</span><span class="p">.</span><span class="n">BaseType</span> <span class="p">!=</span> <span class="k">null</span> 
+      <span class="p">&amp;&amp;</span> <span class="n">TypeImplementsInterface</span><span class="p">(</span><span class="n">typeDef</span><span class="p">.</span><span class="n">BaseType</span><span class="p">.</span><span class="n">Resolve</span><span class="p">()));</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="k">void</span> <span class="nf">InjectInterfaceImplementation</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">InjectInterfaceDeclaration</span><span class="p">();</span>
+  <span class="n">InjectEventHandler</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre>
+<p>This is still pretty self-explanatory. The most interesting method is <strong>TypeImplementsInterface</strong>, which calls itself recursively to climb up the inheritance ladder until it either finds a type that implements <strong>INotifyPropertyChanged</strong> or a type whose base type is <strong>null</strong> (that would be <strong>System.Object</strong>).</p>
+<h2>Implementing the interface</h2>
+<p>Injecting code to implement the interface consists of two parts, just as if you were implementing the interface by writing source code by hand: 1) injecting the declaration of the interface, and 2) injecting the code to fulfil the contract defined by the interface, that is, the declaration of the <strong>PropertyChanged</strong> event handler.</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">private</span> <span class="k">void</span> <span class="nf">InjectInterfaceDeclaration</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">_typeDef</span><span class="p">.</span><span class="n">Interfaces</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">_types</span><span class="p">.</span><span class="n">INotifyPropertyChanged</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+<p>The code to add the interface declaration is utterly trivial: you just add the appropriate type to the <strong>TypeDefinition</strong>‘s <strong>Interfaces</strong> collection. You get a first indication of the power of Mono.Cecil right there. You do need to obtain the proper <strong>TypeReference</strong> (another Mono.Cecil type) though. I’ve created a helper class to make this as simple as I could as well. The code looks like this:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">public</span> <span class="k">class</span> <span class="nc">TypeResolver</span>
+<span class="p">{</span>
+  <span class="k">private</span> <span class="k">readonly</span> <span class="n">TypeDefinition</span> <span class="n">_typeDef</span><span class="p">;</span>
+  <span class="k">private</span> <span class="k">readonly</span> <span class="n">IDictionary</span><span class="p">&lt;</span><span class="n">Type</span><span class="p">,</span> <span class="n">TypeReference</span><span class="p">&gt;</span> <span class="n">_typeRefs</span> <span class="p">=</span> 
+    <span class="k">new</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="n">Type</span><span class="p">,</span> <span class="n">TypeReference</span><span class="p">&gt;();</span>
+  <span class="k">private</span> <span class="k">readonly</span> <span class="n">TypeSystem</span> <span class="n">_ts</span><span class="p">;</span>
+  <span class="k">private</span> <span class="k">readonly</span> <span class="n">ModuleDefinition</span> <span class="n">_systemModule</span><span class="p">;</span>
+  <span class="k">private</span> <span class="k">readonly</span> <span class="n">ModuleDefinition</span> <span class="n">_mscorlibModule</span><span class="p">;</span>
+
+  <span class="k">public</span> <span class="nf">TypeResolver</span><span class="p">(</span><span class="n">TypeDefinition</span> <span class="n">typeDef</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_typeDef</span> <span class="p">=</span> <span class="n">typeDef</span><span class="p">;</span>
+    <span class="n">_ts</span> <span class="p">=</span> <span class="n">typeDef</span><span class="p">.</span><span class="n">Module</span><span class="p">.</span><span class="n">TypeSystem</span><span class="p">;</span>
+    <span class="n">Func</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="n">ModuleDefinition</span><span class="p">&gt;</span> <span class="n">getModule</span> <span class="p">=</span> 
+      <span class="n">m</span> <span class="p">=&gt;</span> <span class="n">typeDef</span><span class="p">.</span><span class="n">Module</span><span class="p">.</span><span class="n">AssemblyResolver</span><span class="p">.</span><span class="n">Resolve</span><span class="p">(</span><span class="n">m</span><span class="p">).</span><span class="n">MainModule</span><span class="p">;</span>
+    <span class="n">_systemModule</span> <span class="p">=</span> <span class="n">getModule</span><span class="p">(</span><span class="s">"system"</span><span class="p">);</span>
+    <span class="n">_mscorlibModule</span> <span class="p">=</span> <span class="n">getModule</span><span class="p">(</span><span class="s">"mscorlib"</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="n">TypeReference</span> <span class="n">Object</span>
+  <span class="p">{</span>
+    <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_ts</span><span class="p">.</span><span class="n">Object</span><span class="p">;</span> <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="n">TypeReference</span> <span class="n">String</span>
+  <span class="p">{</span>
+    <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_ts</span><span class="p">.</span><span class="n">String</span><span class="p">;</span> <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="n">TypeReference</span> <span class="n">Void</span>
+  <span class="p">{</span>
+    <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_ts</span><span class="p">.</span><span class="n">Void</span><span class="p">;</span> <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="n">TypeReference</span> <span class="n">INotifyPropertyChanged</span>
+  <span class="p">{</span>
+    <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="n">LookupSystem</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">INotifyPropertyChanged</span><span class="p">));</span> <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="n">TypeReference</span> <span class="n">PropertyChangedEventHandler</span>
+  <span class="p">{</span>
+    <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="n">LookupSystem</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">PropertyChangedEventHandler</span><span class="p">));</span> <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="n">TypeReference</span> <span class="n">PropertyChangedEventArgs</span>
+  <span class="p">{</span>
+    <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="n">LookupSystem</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">PropertyChangedEventArgs</span><span class="p">));</span> <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="n">TypeReference</span> <span class="n">Delegate</span>
+  <span class="p">{</span>
+    <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="n">LookupCore</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">Delegate</span><span class="p">));</span> <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="n">TypeReference</span> <span class="n">Interlocked</span>
+  <span class="p">{</span>
+    <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="n">LookupCore</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">Interlocked</span><span class="p">));</span> <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">private</span> <span class="n">TypeReference</span> <span class="nf">LookupCore</span><span class="p">(</span><span class="n">Type</span> <span class="n">t</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="nf">Lookup</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">_mscorlibModule</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">private</span> <span class="n">TypeReference</span> <span class="nf">LookupSystem</span><span class="p">(</span><span class="n">Type</span> <span class="n">t</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="nf">Lookup</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">_systemModule</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">private</span> <span class="n">TypeReference</span> <span class="nf">Lookup</span><span class="p">(</span><span class="n">Type</span> <span class="n">t</span><span class="p">,</span> <span class="n">ModuleDefinition</span> <span class="n">moduleDef</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(!</span><span class="n">_typeRefs</span><span class="p">.</span><span class="n">ContainsKey</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+    <span class="p">{</span>
+      <span class="kt">var</span> <span class="n">typeRef</span> <span class="p">=</span> <span class="n">moduleDef</span><span class="p">.</span><span class="n">Types</span><span class="p">.</span><span class="n">FirstOrDefault</span><span class="p">(</span>
+        <span class="n">td</span> <span class="p">=&gt;</span> <span class="n">td</span><span class="p">.</span><span class="n">FullName</span> <span class="p">==</span> <span class="n">t</span><span class="p">.</span><span class="n">FullName</span><span class="p">);</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">typeRef</span> <span class="p">==</span> <span class="k">null</span><span class="p">)</span>
+      <span class="p">{</span>
+        <span class="k">return</span> <span class="k">null</span><span class="p">;</span>
+      <span class="p">}</span>
+      <span class="kt">var</span> <span class="n">importedTypeRef</span> <span class="p">=</span> <span class="n">_typeDef</span><span class="p">.</span><span class="n">Module</span><span class="p">.</span><span class="n">Import</span><span class="p">(</span><span class="n">typeRef</span><span class="p">);</span>
+      <span class="n">_typeRefs</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="p">=</span> <span class="n">importedTypeRef</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">_typeRefs</span><span class="p">[</span><span class="n">t</span><span class="p">];</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+<p>Mono.Cecil comes with a built-in <strong>TypeSystem</strong> type that contains <strong>TypeReference</strong> objects for the most common types, such as <strong>Object</strong> and <strong>String</strong>. For other types, though, you need to use Mono.Cecil’s assembly resolver to get the appropriate <strong>TypeReference</strong> objects. For convenience, <strong>TypeResolver</strong> defines properties with <strong>TypeReference</strong> objects for all the types used by <strong>TypeTamperer</strong>.</p>
+<p>With the interface declaration in place, we need to provide an implementation (otherwise, we get nasty runtime exceptions).</p>
+<p>Herein lies a potential hickup which might lead to problems in case the implementer is exceedingly stupid, though. Since Silver.Needle is a proof-of-concept rather than a super-robust enterprise tool, I don’t worry too much about such edge cases. Nevertheless, I try to play nice where I can (and if it’s easy to do), so here goes: The issue is that the view model type might already have a member of some sort named <strong>PropertyChanged</strong>, even though the type itself doesn’t inherit from <strong>INotifyPropertyChanged</strong>. If it actually is an event handler such as defined by <strong>INotifyPropertyChanged</strong>, everything is fine (I just need to make sure that I don’t add it.) The real issue if there is some other member named <strong>PropertyChanged</strong>, say, a property or a method. I can’t imagine why you’d want to do such a thing, but of course there’s no stopping the inventiveness of the sufficiently stupid programmer. To avoid producing a weird assembly that will fail dramatically during runtime, Silver.Needle will discover the presence of a malplaced, ill-typed <strong>PropertyChanged</strong> and give up, leaving the type untampered (and hence not implementing <strong>INotifyPropertyChanged</strong>).</p>
+<p>Adding the event handler is a bit more work than you might expect. If you inspect the IL, it becomes abundantly clear that C# provides a good spoonful of syntactic sugar for events. At the IL level, you’ll find that the simple event declaration expands to this:</p>
+<ul>
+<li>A field for the event handler.</li>
+<li>An event, which hooks up the field with add and remove methods.</li>
+<li>Implementation for the add and remove methods.</li>
+</ul>
+<p>It’s quite a bit of IL:</p>
+<pre class="codehilite"><code><span></span>field private class [System]System.ComponentModel.PropertyChangedEventHandler PropertyChanged
+
+event [System]System.ComponentModel.PropertyChangedEventHandler PropertyChanged
+{
+  .addon instance void Silver.Needle.Tests.Data.Dependencies.Complex.PersonViewModel::add_PropertyChanged(class [System]System.ComponentModel.PropertyChangedEventHandler)
+  .removeon instance void Silver.Needle.Tests.Data.Dependencies.Complex.PersonViewModel::remove_PropertyChanged(class [System]System.ComponentModel.PropertyChangedEventHandler)
+}
+
+.method public final hidebysig specialname newslot virtual 
+  instance void add_PropertyChanged (
+    class [System]System.ComponentModel.PropertyChangedEventHandler 'value'
+  ) cil managed 
+{
+  .maxstack 3
+  .locals init (
+    [0] class [System]System.ComponentModel.PropertyChangedEventHandler,
+    [1] class [System]System.ComponentModel.PropertyChangedEventHandler,
+    [2] class [System]System.ComponentModel.PropertyChangedEventHandler
+  )
+
+  IL_0000: ldarg.0
+  IL_0001: ldfld class [System]System.ComponentModel.PropertyChangedEventHandler Silver.Needle.Tests.Data.Dependencies.Complex.PersonViewModel::PropertyChanged
+  IL_0006: stloc.0
+  // loop start (head: IL_0007)
+  IL_0007: ldloc.0
+  IL_0008: stloc.1
+  IL_0009: ldloc.1
+  IL_000a: ldarg.1
+  IL_000b: call class [mscorlib]System.Delegate [mscorlib]System.Delegate::Combine(class [mscorlib]System.Delegate, class [mscorlib]System.Delegate)
+  IL_0010: castclass [System]System.ComponentModel.PropertyChangedEventHandler
+  IL_0015: stloc.2
+  IL_0016: ldarg.0
+  IL_0017: ldflda class [System]System.ComponentModel.PropertyChangedEventHandler Silver.Needle.Tests.Data.Dependencies.Complex.PersonViewModel::PropertyChanged
+  IL_001c: ldloc.2
+  IL_001d: ldloc.1
+  IL_001e: call !!0 [mscorlib]System.Threading.Interlocked::CompareExchange&lt;class [System]System.ComponentModel.PropertyChangedEventHandler&gt;(!!0&amp;, !!0, !!0)
+  IL_0023: stloc.0
+  IL_0024: ldloc.0
+  IL_0025: ldloc.1
+  IL_0026: bne.un.s IL_0007
+  // end loop
+  IL_0028: ret
+} // end of method PersonViewModel::add_PropertyChanged
+
+.method public final hidebysig specialname newslot virtual 
+  instance void remove_PropertyChanged (
+    class [System]System.ComponentModel.PropertyChangedEventHandler 'value'
+  ) cil managed 
+{
+  .maxstack 3
+  .locals init (
+    [0] class [System]System.ComponentModel.PropertyChangedEventHandler,
+    [1] class [System]System.ComponentModel.PropertyChangedEventHandler,
+    [2] class [System]System.ComponentModel.PropertyChangedEventHandler
+  )
+
+  IL_0000: ldarg.0
+  IL_0001: ldfld class [System]System.ComponentModel.PropertyChangedEventHandler Silver.Needle.Tests.Data.Dependencies.Complex.PersonViewModel::PropertyChanged
+  IL_0006: stloc.0
+  // loop start (head: IL_0007)
+  IL_0007: ldloc.0
+  IL_0008: stloc.1
+  IL_0009: ldloc.1
+  IL_000a: ldarg.1
+  IL_000b: call class [mscorlib]System.Delegate [mscorlib]System.Delegate::Remove(class [mscorlib]System.Delegate, class [mscorlib]System.Delegate)
+  IL_0010: castclass [System]System.ComponentModel.PropertyChangedEventHandler
+  IL_0015: stloc.2
+  IL_0016: ldarg.0
+  IL_0017: ldflda class [System]System.ComponentModel.PropertyChangedEventHandler Silver.Needle.Tests.Data.Dependencies.Complex.PersonViewModel::PropertyChanged
+  IL_001c: ldloc.2
+  IL_001d: ldloc.1
+  IL_001e: call !!0 [mscorlib]System.Threading.Interlocked::CompareExchange&lt;class [System]System.ComponentModel.PropertyChangedEventHandler&gt;(!!0&amp;, !!0, !!0)
+  IL_0023: stloc.0
+  IL_0024: ldloc.0
+  IL_0025: ldloc.1
+  IL_0026: bne.un.s IL_0007
+  // end loop
+  IL_0028: ret
+} // end of method PersonViewModel::remove_PropertyChanged
+</code></pre>
+<p>The bad news is that it’s up to us to inject all that goo into our type. The good news is that Mono.Cecil makes it fairly easy to do. We’ll get right to it:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">private</span> <span class="k">void</span> <span class="nf">InjectEventHandler</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">InjectPropertyChangedField</span><span class="p">();</span>
+  <span class="n">InjectEventDeclaration</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="k">void</span> <span class="nf">InjectPropertyChangedField</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="c1">//.field private class [System]System.ComponentModel.PropertyChangedEventHandler PropertyChanged</span>
+  <span class="kt">var</span> <span class="n">field</span> <span class="p">=</span> <span class="k">new</span> <span class="n">FieldDefinition</span><span class="p">(</span><span class="n">PropertyChangedFieldName</span><span class="p">,</span> 
+    <span class="n">FieldAttributes</span><span class="p">.</span><span class="n">Private</span><span class="p">,</span> 
+    <span class="n">_types</span><span class="p">.</span><span class="n">PropertyChangedEventHandler</span><span class="p">);</span>
+  <span class="n">_typeDef</span><span class="p">.</span><span class="n">Fields</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">field</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="k">void</span> <span class="nf">InjectEventDeclaration</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="c1">// .event [System]System.ComponentModel.PropertyChangedEventHandler PropertyChanged</span>
+  <span class="c1">// {</span>
+  <span class="c1">// 	.addon instance void Voodoo.ViewModel.GoalViewModel::add_PropertyChanged(class [System]System.ComponentModel.PropertyChangedEventHandler)</span>
+  <span class="c1">// 	.removeon instance void Voodoo.ViewModel.GoalViewModel::remove_PropertyChanged(class [System]System.ComponentModel.PropertyChangedEventHandler)</span>
+  <span class="c1">// }</span>
+  <span class="kt">var</span> <span class="n">eventDef</span> <span class="p">=</span> <span class="k">new</span> <span class="n">EventDefinition</span><span class="p">(</span><span class="n">PropertyChangedFieldName</span><span class="p">,</span> 
+    <span class="n">EventAttributes</span><span class="p">.</span><span class="n">None</span><span class="p">,</span> 
+    <span class="n">_types</span><span class="p">.</span><span class="n">PropertyChangedEventHandler</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">AddMethod</span> <span class="p">=</span> <span class="n">CreateAddPropertyChangedMethod</span><span class="p">(),</span>
+    <span class="n">RemoveMethod</span> <span class="p">=</span> <span class="n">CreateRemovePropertyChangedMethod</span><span class="p">()</span>
+  <span class="p">};</span>
+  <span class="n">_typeDef</span><span class="p">.</span><span class="n">Methods</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">eventDef</span><span class="p">.</span><span class="n">AddMethod</span><span class="p">);</span>
+  <span class="n">_typeDef</span><span class="p">.</span><span class="n">Methods</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">eventDef</span><span class="p">.</span><span class="n">RemoveMethod</span><span class="p">);</span>
+  <span class="n">_typeDef</span><span class="p">.</span><span class="n">Events</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">eventDef</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+<p>Here we add the field for the event handler, and we create an event which hooks up to two methods for adding and removing event handlers, respectively. We’re still not done, though – in fact, the bulk of the nitty gritty work remains.</p>
+<p>That bulk is the implementation of the <em>add</em> and <em>remove</em> methods. If you examine the IL, you’ll see that the implementations are virtually identical, except for a single method call in the middle somewhere (<em>add</em> calls a method called <strong>Combine</strong>, <em>remove</em> calls <strong>Remove</strong>). We can abstract that out, like so:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">private</span> <span class="n">MethodDefinition</span> <span class="nf">CreateAddPropertyChangedMethod</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="nf">CreatePropertyChangedEventHookupMethod</span><span class="p">(</span>
+    <span class="s">"add_PropertyChanged"</span><span class="p">,</span> 
+    <span class="s">"Combine"</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="n">MethodDefinition</span> <span class="nf">CreateRemovePropertyChangedMethod</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="nf">CreatePropertyChangedEventHookupMethod</span><span class="p">(</span>
+    <span class="s">"remove_PropertyChanged"</span><span class="p">,</span> 
+    <span class="s">"Remove"</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="n">MethodDefinition</span> <span class="nf">CreatePropertyChangedEventHookupMethod</span><span class="p">(</span>
+  <span class="kt">string</span> <span class="n">eventHookupMethodName</span><span class="p">,</span> 
+  <span class="kt">string</span> <span class="n">delegateMethodName</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="c1">// .method public final hidebysig specialname newslot virtual </span>
+  <span class="c1">//   instance void add_PropertyChanged (</span>
+  <span class="c1">//     class [System]System.ComponentModel.PropertyChangedEventHandler 'value'</span>
+  <span class="c1">//   ) cil managed </span>
+  <span class="kt">var</span> <span class="n">methodDef</span> <span class="p">=</span> <span class="k">new</span> <span class="n">MethodDefinition</span><span class="p">(</span><span class="n">eventHookupMethodName</span><span class="p">,</span>
+    <span class="n">MethodAttributes</span><span class="p">.</span><span class="n">Public</span> <span class="p">|</span>
+    <span class="n">MethodAttributes</span><span class="p">.</span><span class="n">Final</span> <span class="p">|</span>
+    <span class="n">MethodAttributes</span><span class="p">.</span><span class="n">HideBySig</span> <span class="p">|</span>
+    <span class="n">MethodAttributes</span><span class="p">.</span><span class="n">SpecialName</span> <span class="p">|</span>
+    <span class="n">MethodAttributes</span><span class="p">.</span><span class="n">NewSlot</span> <span class="p">|</span>
+    <span class="n">MethodAttributes</span><span class="p">.</span><span class="n">Virtual</span><span class="p">,</span>
+    <span class="n">_types</span><span class="p">.</span><span class="n">Void</span><span class="p">);</span>
+  <span class="kt">var</span> <span class="n">paramDef</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ParameterDefinition</span><span class="p">(</span><span class="s">"value"</span><span class="p">,</span> 
+    <span class="n">ParameterAttributes</span><span class="p">.</span><span class="n">None</span><span class="p">,</span> 
+    <span class="n">_types</span><span class="p">.</span><span class="n">PropertyChangedEventHandler</span><span class="p">);</span>
+  <span class="n">methodDef</span><span class="p">.</span><span class="n">Parameters</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">paramDef</span><span class="p">);</span>
+  <span class="n">methodDef</span><span class="p">.</span><span class="n">Body</span><span class="p">.</span><span class="n">MaxStackSize</span> <span class="p">=</span> <span class="m">3</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="m">3</span><span class="p">;</span> <span class="n">i</span><span class="p">++)</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">v</span> <span class="p">=</span> <span class="k">new</span> <span class="n">VariableDefinition</span><span class="p">(</span><span class="n">_types</span><span class="p">.</span><span class="n">PropertyChangedEventHandler</span><span class="p">);</span>
+    <span class="n">methodDef</span><span class="p">.</span><span class="n">Body</span><span class="p">.</span><span class="n">Variables</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">v</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="n">methodDef</span><span class="p">.</span><span class="n">Body</span><span class="p">.</span><span class="n">InitLocals</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+  <span class="kt">var</span> <span class="n">il</span> <span class="p">=</span> <span class="n">methodDef</span><span class="p">.</span><span class="n">Body</span><span class="p">.</span><span class="n">GetILProcessor</span><span class="p">();</span>
+  <span class="n">Action</span><span class="p">&lt;</span><span class="n">OpCode</span><span class="p">&gt;</span> <span class="n">op</span> <span class="p">=</span> <span class="n">x</span> <span class="p">=&gt;</span> <span class="n">il</span><span class="p">.</span><span class="n">Append</span><span class="p">(</span><span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">x</span><span class="p">));</span>
+  <span class="c1">// IL_0000: ldarg.0</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldarg_0</span><span class="p">);</span>
+  <span class="c1">// IL_0001: ldfld class [System]System.ComponentModel.PropertyChangedEventHandler Voodoo.ViewModel.GoalViewModel::PropertyChanged</span>
+  <span class="kt">var</span> <span class="n">eventHandlerFieldDef</span> <span class="p">=</span> <span class="n">_typeDef</span><span class="p">.</span><span class="n">Fields</span>
+    <span class="p">.</span><span class="n">FirstOrDefault</span><span class="p">(</span><span class="n">f</span> <span class="p">=&gt;</span> <span class="n">f</span><span class="p">.</span><span class="n">Name</span> <span class="p">==</span> <span class="n">PropertyChangedFieldName</span><span class="p">);</span>
+  <span class="n">il</span><span class="p">.</span><span class="n">Append</span><span class="p">(</span><span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldfld</span><span class="p">,</span> <span class="n">eventHandlerFieldDef</span><span class="p">));</span>
+  <span class="c1">// IL_0006: stloc.0</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Stloc_0</span><span class="p">);</span>
+  <span class="c1">// // loop start (head: IL_0007)</span>
+  <span class="c1">//    IL_0007: ldloc.0</span>
+  <span class="kt">var</span> <span class="n">loopTargetInsn</span> <span class="p">=</span> <span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldloc_0</span><span class="p">);</span>
+  <span class="n">il</span><span class="p">.</span><span class="n">Append</span><span class="p">(</span><span class="n">loopTargetInsn</span><span class="p">);</span>
+  <span class="c1">//    IL_0008: stloc.1</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Stloc_1</span><span class="p">);</span>
+  <span class="c1">//    IL_0009: ldloc.1</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldloc_1</span><span class="p">);</span>
+  <span class="c1">//    IL_000a: ldarg.1</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldarg_1</span><span class="p">);</span>
+  <span class="c1">//    IL_000b: call class [mscorlib]System.Delegate [mscorlib]System.Delegate::Combine(class [mscorlib]System.Delegate, class [mscorlib]System.Delegate)</span>
+  <span class="kt">var</span> <span class="n">combineMethodReference</span> <span class="p">=</span> <span class="k">new</span> <span class="n">MethodReference</span><span class="p">(</span>
+    <span class="n">delegateMethodName</span><span class="p">,</span> 
+    <span class="n">_types</span><span class="p">.</span><span class="n">Delegate</span><span class="p">,</span> 
+    <span class="n">_types</span><span class="p">.</span><span class="n">Delegate</span><span class="p">);</span>
+  <span class="kt">var</span> <span class="n">delegateParamDef</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ParameterDefinition</span><span class="p">(</span><span class="n">_types</span><span class="p">.</span><span class="n">Delegate</span><span class="p">);</span>
+  <span class="n">combineMethodReference</span><span class="p">.</span><span class="n">Parameters</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">delegateParamDef</span><span class="p">);</span>
+  <span class="n">combineMethodReference</span><span class="p">.</span><span class="n">Parameters</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">delegateParamDef</span><span class="p">);</span>
+  <span class="n">il</span><span class="p">.</span><span class="n">Append</span><span class="p">(</span><span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Call</span><span class="p">,</span> <span class="n">combineMethodReference</span><span class="p">));</span>
+  <span class="c1">//    IL_0010: castclass [System]System.ComponentModel.PropertyChangedEventHandler</span>
+  <span class="n">il</span><span class="p">.</span><span class="n">Append</span><span class="p">(</span><span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Castclass</span><span class="p">,</span> 
+    <span class="n">_types</span><span class="p">.</span><span class="n">PropertyChangedEventHandler</span><span class="p">));</span>
+  <span class="c1">//    IL_0015: stloc.2</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Stloc_2</span><span class="p">);</span>
+  <span class="c1">//    IL_0016: ldarg.0</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldarg_0</span><span class="p">);</span>
+  <span class="c1">//    IL_0017: ldflda class [System]System.ComponentModel.PropertyChangedEventHandler Voodoo.ViewModel.GoalViewModel::PropertyChanged</span>
+  <span class="n">il</span><span class="p">.</span><span class="n">Append</span><span class="p">(</span><span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldflda</span><span class="p">,</span> <span class="n">eventHandlerFieldDef</span><span class="p">));</span>
+  <span class="c1">//    IL_001c: ldloc.2</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldloc_2</span><span class="p">);</span>
+  <span class="c1">//    IL_001d: ldloc.1</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldloc_1</span><span class="p">);</span>
+  <span class="c1">//    IL_001e: call !!0 [mscorlib]System.Threading.Interlocked::CompareExchange&lt;class [System]System.ComponentModel.PropertyChangedEventHandler&gt;(!!0&amp;, !!0, !!0)</span>
+  <span class="c1">//    var declaringTypeRef = _typeDef.Module.Import(typeof(Interlocked));</span>
+  <span class="kt">var</span> <span class="n">declaringTypeRef</span> <span class="p">=</span> <span class="n">_types</span><span class="p">.</span><span class="n">Interlocked</span><span class="p">;</span>
+  <span class="kt">var</span> <span class="n">elementMethodRef</span> <span class="p">=</span> <span class="k">new</span> <span class="n">MethodReference</span><span class="p">(</span>
+    <span class="s">"CompareExchange"</span><span class="p">,</span> 
+    <span class="n">_types</span><span class="p">.</span><span class="n">Void</span><span class="p">,</span> 
+    <span class="n">declaringTypeRef</span><span class="p">);</span>
+  <span class="kt">var</span> <span class="n">genParam</span> <span class="p">=</span> <span class="k">new</span> <span class="n">GenericParameter</span><span class="p">(</span><span class="s">"!!0"</span><span class="p">,</span> <span class="n">elementMethodRef</span><span class="p">);</span>
+  <span class="n">elementMethodRef</span><span class="p">.</span><span class="n">ReturnType</span> <span class="p">=</span> <span class="n">genParam</span><span class="p">;</span>
+  <span class="n">elementMethodRef</span><span class="p">.</span><span class="n">GenericParameters</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">genParam</span><span class="p">);</span>
+  <span class="kt">var</span> <span class="n">firstParamDef</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ParameterDefinition</span><span class="p">(</span>
+    <span class="k">new</span> <span class="nf">ByReferenceType</span><span class="p">(</span><span class="n">genParam</span><span class="p">));</span>
+  <span class="kt">var</span> <span class="n">otherParamDef</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ParameterDefinition</span><span class="p">(</span><span class="n">genParam</span><span class="p">);</span>
+  <span class="n">elementMethodRef</span><span class="p">.</span><span class="n">Parameters</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">firstParamDef</span><span class="p">);</span>
+  <span class="n">elementMethodRef</span><span class="p">.</span><span class="n">Parameters</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">otherParamDef</span><span class="p">);</span>
+  <span class="n">elementMethodRef</span><span class="p">.</span><span class="n">Parameters</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">otherParamDef</span><span class="p">);</span>
+  <span class="kt">var</span> <span class="n">genInstanceMethod</span> <span class="p">=</span> <span class="k">new</span> <span class="n">GenericInstanceMethod</span><span class="p">(</span><span class="n">elementMethodRef</span><span class="p">);</span>
+  <span class="n">genInstanceMethod</span><span class="p">.</span><span class="n">GenericArguments</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span>
+    <span class="n">_types</span><span class="p">.</span><span class="n">PropertyChangedEventHandler</span><span class="p">);</span>
+  <span class="n">il</span><span class="p">.</span><span class="n">Append</span><span class="p">(</span><span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Call</span><span class="p">,</span> <span class="n">genInstanceMethod</span><span class="p">));</span>
+  <span class="c1">//    IL_0023: stloc.0</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Stloc_0</span><span class="p">);</span>
+  <span class="c1">//    IL_0024: ldloc.0</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldloc_0</span><span class="p">);</span>
+  <span class="c1">//    IL_0025: ldloc.1</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldloc_1</span><span class="p">);</span>
+  <span class="c1">//    IL_0026: bne.un.s IL_0007</span>
+  <span class="n">il</span><span class="p">.</span><span class="n">Append</span><span class="p">(</span><span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Bne_Un_S</span><span class="p">,</span> <span class="n">loopTargetInsn</span><span class="p">));</span>
+  <span class="c1">// // end loop</span>
+  <span class="c1">// IL_0028: ret</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ret</span><span class="p">);</span>
+    
+  <span class="k">return</span> <span class="n">methodDef</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+<p>It looks a little bit icky at first glance, but it’s actually quite straightforward. You just need to accurately and painstakingly reconstruct the IL statement by statement. As you can see, I’ve left the original IL in the source code as comments, to make it clear what we’re trying to reproduce. It takes patience more than brains.</p>
+<p>The final piece of the implementation puzzle is to implement a method for firing the event. Again, Silver.Needle tries to play along with any hand-written code you have. So if you have implemented a method so-and-so to do view notification, it’s quite likely that Silver.Needle will discover it and use it. Basically it will scan all methods in the inheritance chain for your view model, and assume that a method which accepts a single string parameter, returns void and calls <strong>PropertyChangedEventHandler.Invoke</strong> somewhere in the method body is indeed a notification method.</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">private</span> <span class="k">static</span> <span class="n">MethodDefinition</span> <span class="nf">FindNotificationMethod</span><span class="p">(</span>
+  <span class="n">TypeDefinition</span> <span class="n">typeDef</span><span class="p">,</span> 
+  <span class="kt">bool</span> <span class="n">includePrivateMethods</span> <span class="p">=</span> <span class="k">true</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">m</span> <span class="k">in</span> <span class="n">typeDef</span><span class="p">.</span><span class="n">Methods</span><span class="p">.</span><span class="n">Where</span><span class="p">(</span><span class="n">m</span> <span class="p">=&gt;</span> <span class="n">includePrivateMethods</span> 
+    <span class="p">||</span> <span class="n">m</span><span class="p">.</span><span class="n">Attributes</span><span class="p">.</span><span class="n">HasFlag</span><span class="p">(</span><span class="n">MethodAttributes</span><span class="p">.</span><span class="n">Public</span><span class="p">)))</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">IsProbableNotificationMethod</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+    <span class="p">{</span>
+      <span class="k">return</span> <span class="n">m</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="kt">var</span> <span class="n">baseTypeRef</span> <span class="p">=</span> <span class="n">typeDef</span><span class="p">.</span><span class="n">BaseType</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">baseTypeRef</span><span class="p">.</span><span class="n">FullName</span> <span class="p">!=</span> <span class="s">"System.Object"</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="nf">FindNotificationMethod</span><span class="p">(</span><span class="n">baseTypeRef</span><span class="p">.</span><span class="n">Resolve</span><span class="p">(),</span> <span class="k">false</span><span class="p">);</span>
+  <span class="p">}</span> 
+  <span class="k">return</span> <span class="k">null</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="k">static</span> <span class="kt">bool</span> <span class="nf">IsProbableNotificationMethod</span><span class="p">(</span>
+  <span class="n">MethodDefinition</span> <span class="n">methodDef</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="n">methodDef</span><span class="p">.</span><span class="n">HasBody</span> 
+   <span class="p">&amp;&amp;</span> <span class="n">IsProbableNotificationMethodWithBody</span><span class="p">(</span><span class="n">methodDef</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="k">static</span> <span class="kt">bool</span> <span class="nf">IsProbableNotificationMethodWithBody</span><span class="p">(</span>
+  <span class="n">MethodDefinition</span> <span class="n">methodDef</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">insn</span> <span class="k">in</span> <span class="n">methodDef</span><span class="p">.</span><span class="n">Body</span><span class="p">.</span><span class="n">Instructions</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">insn</span><span class="p">.</span><span class="n">OpCode</span> <span class="p">==</span> <span class="n">OpCodes</span><span class="p">.</span><span class="n">Callvirt</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="kt">var</span> <span class="n">callee</span> <span class="p">=</span> <span class="p">(</span><span class="n">MethodReference</span><span class="p">)</span> <span class="n">insn</span><span class="p">.</span><span class="n">Operand</span><span class="p">;</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">callee</span><span class="p">.</span><span class="n">Name</span> <span class="p">==</span> <span class="s">"Invoke"</span> 
+        <span class="p">&amp;&amp;</span> <span class="n">callee</span><span class="p">.</span><span class="n">DeclaringType</span><span class="p">.</span><span class="n">Name</span> <span class="p">==</span> <span class="s">"PropertyChangedEventHandler"</span><span class="p">)</span>
+      <span class="p">{</span>
+        <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>    
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+<p>Should Silver.Needle fail to identify an existing notification method, though, there is no problem. After all, it’s perfectly OK to have more than one method that can be used to fire the event. Hence if no notification method is found, one is injected. No sleep lost.</p>
+<p>In case no existing notification method was found, we need to provide one. We’re getting used to this kind of code by now:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">private</span> <span class="n">MethodDefinition</span> <span class="nf">CreateNotificationMethodDefinition</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="k">const</span> <span class="kt">string</span> <span class="n">MethodName</span> <span class="p">=</span> <span class="s">"NotifyViewableProperty"</span><span class="p">;</span>
+  <span class="kt">var</span> <span class="n">methodDef</span> <span class="p">=</span> <span class="k">new</span> <span class="n">MethodDefinition</span><span class="p">(</span><span class="n">MethodName</span><span class="p">,</span>
+    <span class="n">MethodAttributes</span><span class="p">.</span><span class="n">Private</span> <span class="p">|</span>
+    <span class="n">MethodAttributes</span><span class="p">.</span><span class="n">HideBySig</span><span class="p">,</span>
+    <span class="k">this</span><span class="p">.</span><span class="n">_types</span><span class="p">.</span><span class="n">Void</span><span class="p">);</span>
+  <span class="kt">var</span> <span class="n">paramDef</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ParameterDefinition</span><span class="p">(</span><span class="s">"propertyName"</span><span class="p">,</span> 
+    <span class="n">ParameterAttributes</span><span class="p">.</span><span class="n">None</span><span class="p">,</span> 
+    <span class="n">_types</span><span class="p">.</span><span class="n">String</span><span class="p">);</span>
+  <span class="n">methodDef</span><span class="p">.</span><span class="n">Parameters</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">paramDef</span><span class="p">);</span>
+  <span class="n">methodDef</span><span class="p">.</span><span class="n">Body</span><span class="p">.</span><span class="n">MaxStackSize</span> <span class="p">=</span> <span class="m">4</span><span class="p">;</span>
+  <span class="kt">var</span> <span class="n">v</span> <span class="p">=</span> <span class="k">new</span> <span class="n">VariableDefinition</span><span class="p">(</span><span class="n">_types</span><span class="p">.</span><span class="n">PropertyChangedEventHandler</span><span class="p">);</span>
+  <span class="n">methodDef</span><span class="p">.</span><span class="n">Body</span><span class="p">.</span><span class="n">Variables</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">v</span><span class="p">);</span>
+  <span class="n">methodDef</span><span class="p">.</span><span class="n">Body</span><span class="p">.</span><span class="n">InitLocals</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+
+  <span class="kt">var</span> <span class="n">il</span> <span class="p">=</span> <span class="n">methodDef</span><span class="p">.</span><span class="n">Body</span><span class="p">.</span><span class="n">GetILProcessor</span><span class="p">();</span>
+  <span class="n">Action</span><span class="p">&lt;</span><span class="n">OpCode</span><span class="p">&gt;</span> <span class="n">op</span> <span class="p">=</span> <span class="n">x</span> <span class="p">=&gt;</span> <span class="n">il</span><span class="p">.</span><span class="n">Append</span><span class="p">(</span><span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">x</span><span class="p">));</span>
+  <span class="c1">// IL_0000: ldarg.0</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldarg_0</span><span class="p">);</span>
+  <span class="c1">// IL_0001: ldfld class [System]System.ComponentModel.PropertyChangedEventHandler Voodoo.ViewModel.GoalViewModel::PropertyChanged</span>
+  <span class="kt">var</span> <span class="n">eventHandlerFieldDef</span> <span class="p">=</span> <span class="n">FindEventFieldDeclaration</span><span class="p">(</span><span class="n">_typeDef</span><span class="p">);</span>
+  <span class="n">il</span><span class="p">.</span><span class="n">Append</span><span class="p">(</span><span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldfld</span><span class="p">,</span> <span class="n">eventHandlerFieldDef</span><span class="p">));</span>
+  <span class="c1">// IL_0006: stloc.0</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Stloc_0</span><span class="p">);</span>
+  <span class="c1">// IL_0007: ldloc.0</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldloc_0</span><span class="p">);</span>
+  <span class="c1">//IL_0008: brfalse.s IL_0017</span>
+  <span class="kt">var</span> <span class="n">jumpTargetInsn</span> <span class="p">=</span> <span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ret</span><span class="p">);</span> <span class="c1">// See below, IL_0017</span>
+  <span class="n">il</span><span class="p">.</span><span class="n">Append</span><span class="p">(</span><span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Brfalse_S</span><span class="p">,</span> <span class="n">jumpTargetInsn</span><span class="p">));</span>
+  <span class="c1">// IL_000a: ldloc.0</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldloc_0</span><span class="p">);</span>
+  <span class="c1">// IL_000b: ldarg.0</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldarg_0</span><span class="p">);</span>
+  <span class="c1">// IL_000c: ldarg.1</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldarg_1</span><span class="p">);</span>
+  <span class="c1">// IL_000d: newobj instance void [System]System.ComponentModel.PropertyChangedEventArgs::.ctor(string)</span>
+  <span class="kt">var</span> <span class="n">eventArgsTypeRef</span> <span class="p">=</span> <span class="n">_types</span><span class="p">.</span><span class="n">PropertyChangedEventArgs</span><span class="p">;</span>
+  <span class="kt">var</span> <span class="n">ctorRef</span> <span class="p">=</span> <span class="k">new</span> <span class="n">MethodReference</span><span class="p">(</span><span class="s">".ctor"</span><span class="p">,</span> 
+    <span class="n">_types</span><span class="p">.</span><span class="n">Void</span><span class="p">,</span> 
+    <span class="n">eventArgsTypeRef</span><span class="p">);</span>
+  <span class="kt">var</span> <span class="n">ctorParamDef</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ParameterDefinition</span><span class="p">(</span><span class="s">"propertyName"</span><span class="p">,</span> 
+    <span class="n">ParameterAttributes</span><span class="p">.</span><span class="n">None</span><span class="p">,</span> 
+    <span class="n">_types</span><span class="p">.</span><span class="n">String</span><span class="p">);</span>
+  <span class="n">ctorRef</span><span class="p">.</span><span class="n">Parameters</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">ctorParamDef</span><span class="p">);</span>
+  <span class="n">ctorRef</span><span class="p">.</span><span class="n">HasThis</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+  <span class="n">il</span><span class="p">.</span><span class="n">Append</span><span class="p">(</span><span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Newobj</span><span class="p">,</span> <span class="n">ctorRef</span><span class="p">));</span>
+  <span class="c1">// IL_0012: callvirt instance void [System]System.ComponentModel.PropertyChangedEventHandler::Invoke(object, class [System]System.ComponentModel.PropertyChangedEventArgs)</span>
+  <span class="kt">var</span> <span class="n">invokeMethodRef</span> <span class="p">=</span> <span class="k">new</span> <span class="n">MethodReference</span><span class="p">(</span><span class="s">"Invoke"</span><span class="p">,</span> 
+    <span class="n">_types</span><span class="p">.</span><span class="n">Void</span><span class="p">,</span> 
+    <span class="n">_types</span><span class="p">.</span><span class="n">PropertyChangedEventHandler</span><span class="p">);</span>
+  <span class="n">invokeMethodRef</span><span class="p">.</span><span class="n">Parameters</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span>
+    <span class="k">new</span> <span class="nf">ParameterDefinition</span><span class="p">(</span><span class="n">_types</span><span class="p">.</span><span class="n">Object</span><span class="p">));</span>
+  <span class="n">invokeMethodRef</span><span class="p">.</span><span class="n">Parameters</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span>
+    <span class="k">new</span> <span class="nf">ParameterDefinition</span><span class="p">(</span><span class="n">eventArgsTypeRef</span><span class="p">));</span>
+  <span class="n">invokeMethodRef</span><span class="p">.</span><span class="n">HasThis</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+  <span class="n">il</span><span class="p">.</span><span class="n">Append</span><span class="p">(</span><span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Callvirt</span><span class="p">,</span> <span class="n">invokeMethodRef</span><span class="p">));</span>
+  <span class="c1">// IL_0017: ret</span>
+  <span class="n">il</span><span class="p">.</span><span class="n">Append</span><span class="p">(</span><span class="n">jumpTargetInsn</span><span class="p">);</span>
+  <span class="k">return</span> <span class="n">methodDef</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+<p>This produces IL for a <strong>NotifyViewableProperty</strong> method just like the one we wrote in C# in the “hand-implemented” <strong>PersonViewModel</strong> above.</p>
+<h2>Injecting notification</h2>
+<p>With the interface implementation and notification method in place, we finally come to the fun part – injecting the property notification itself!</p>
+<p>Unless you’re the kind of person who use <a href="http://wiki.sharpdevelop.net/ilspy.ashx">ILSpy</a> or <a href="http://msdn.microsoft.com/en-us/library/aa309387%28v=vs.71%29.aspx">ILDasm</a> regularly, you might wonder if and how it will work with auto-properties – properties where you don’t actually provide any body for the getters and setters. Well, it doesn’t matter. Auto-properties are a C# feature, they don’t exist in IL. So you’ll find there’s a backing field there (albeit with a weird name) that the C# compiler conjured up for you. It’s just syntactic sugar to reduce typing.</p>
+<p>What about get-only properties? That is, properties that have getters but no setters? Well, first of all, can they change? Even if they’re get-only? Sure they can. Say you have a property which derives its value from another property. For instance, you might have an <strong>Age</strong> property which depends upon a <strong>BirthDate</strong> property, like so:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">private</span> <span class="n">DateTime</span> <span class="n">_birthDate</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="n">DateTime</span> <span class="n">BirthDate</span>
+<span class="p">{</span>
+  <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_birthDate</span><span class="p">;</span> <span class="p">}</span>
+  <span class="k">set</span> <span class="p">{</span> <span class="n">_birthDate</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="na">[Viewable]</span>
+<span class="k">public</span> <span class="kt">int</span> <span class="n">Age</span>
+<span class="p">{</span> 
+  <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="n">DateTime</span><span class="p">.</span><span class="n">Now</span><span class="p">.</span><span class="n">Years</span> <span class="err">–</span> <span class="n">BirthDate</span><span class="p">.</span><span class="n">Years</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+<p>In the (admittedly unlikely) scenario that the <strong>BirthDate</strong> changes, the <strong>Age</strong> will change too. And if <strong>Age</strong> is a property on a view model that a view will bind to, you’ll want any display of <strong>Age</strong> to update itself automatically whenever <strong>BirthDate</strong> changes. How can we do that? Well, if we implemented this by hand, we could add a notification call in <strong>BirthDate</strong>‘s setter to say that <strong>Age</strong> changed.</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">private</span> <span class="n">DateTime</span> <span class="n">_birthDate</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="n">DateTime</span> <span class="n">BirthDate</span>
+<span class="p">{</span>
+    <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_birthDate</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">set</span> 
+    <span class="p">{</span> 
+        <span class="n">_birthDate</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span>
+        <span class="n">Notify</span><span class="p">(</span><span class="s">"Age"</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+<p>It feels a little iffy, since it sort of goes the wrong way – the observed knowing about the observer rather than the other way around. But that’s how you’d do it.</p>
+<p>Silver.Needle does the same thing for you automatically. That is, for get-only properties, Silver.Needle will inspect the getter to find any calls to getters on other properties on the same object instance. If those properties turn out to have setters, notifications to update the get-only property will be injected there. If those properties are get-only too, the process repeats itself recursively. So you could have chains of properties that depend on properties that depend on properties etc.</p>
+<p>To do this correctly, the injection process has two steps. First, we identify which properties depend on which, second, we do the actual IL manipulation to insert the notification calls.</p>
+<p>So, first we identify dependencies between properties. In the normal case of a property with a setter of its own, the property will simply depend on itself. (Of course, there might be other properties that depend on it as well.) So for each property with a setter, we build a list of dependent properties – that is, properties that we need to inject notification calls for. Note that while we only do notification for properties tagged as <strong>Viewable</strong>, we might inject notification calls into the setters of any property on the view model, <strong>Viewable</strong> or not. (In the example above, you’ll notice that <strong>BirthDate</strong> is not, in fact, tagged <strong>Viewable</strong>. When the setter is called, it will announce that <strong>Age</strong> changed, but not itself!)</p>
+<p>The code to register the dependencies between properties is as follows:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">private</span> <span class="k">void</span> <span class="nf">HandlePropertyToNotify</span><span class="p">(</span><span class="n">PropertyDefinition</span> <span class="n">prop</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">affector</span> <span class="k">in</span> <span class="n">FindAffectingProperties</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;()))</span>
+  <span class="p">{</span>
+    <span class="n">AddDependency</span><span class="p">(</span><span class="n">affector</span><span class="p">,</span> <span class="n">prop</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="k">void</span> <span class="nf">AddDependency</span><span class="p">(</span><span class="n">PropertyDefinition</span> <span class="n">key</span><span class="p">,</span> 
+  <span class="n">PropertyDefinition</span> <span class="k">value</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(!</span><span class="n">_map</span><span class="p">.</span><span class="n">ContainsKey</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="n">_map</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">PropertyDefinition</span><span class="p">&gt;();</span>
+  <span class="p">}</span>
+  <span class="n">_map</span><span class="p">[</span><span class="n">key</span><span class="p">].</span><span class="n">Add</span><span class="p">(</span><span class="k">value</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">PropertyDefinition</span><span class="p">&gt;</span> <span class="n">FindAffectingProperties</span><span class="p">(</span>
+  <span class="n">PropertyDefinition</span> <span class="n">prop</span><span class="p">,</span> 
+  <span class="n">IList</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">seen</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">seen</span><span class="p">.</span><span class="n">Any</span><span class="p">(</span><span class="n">n</span> <span class="p">=&gt;</span> <span class="n">n</span> <span class="p">==</span> <span class="n">prop</span><span class="p">.</span><span class="n">Name</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">PropertyDefinition</span><span class="p">&gt;();</span>    
+  <span class="p">}</span>
+  <span class="n">seen</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">prop</span><span class="p">.</span><span class="n">Name</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">prop</span><span class="p">.</span><span class="n">SetMethod</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">PropertyDefinition</span><span class="p">&gt;</span> <span class="p">{</span><span class="n">prop</span><span class="p">};</span>
+  <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">prop</span><span class="p">.</span><span class="n">GetMethod</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="nf">FindAffectingPropertiesFromGetter</span><span class="p">(</span><span class="n">prop</span><span class="p">.</span><span class="n">GetMethod</span><span class="p">,</span> <span class="n">seen</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">PropertyDefinition</span><span class="p">&gt;();</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">PropertyDefinition</span><span class="p">&gt;</span> <span class="n">FindAffectingPropertiesFromGetter</span><span class="p">(</span>
+  <span class="n">MethodDefinition</span> <span class="n">getter</span><span class="p">,</span> 
+  <span class="n">IList</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">seen</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">result</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">PropertyDefinition</span><span class="p">&gt;();</span>
+  <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">insn</span> <span class="k">in</span> <span class="n">getter</span><span class="p">.</span><span class="n">Body</span><span class="p">.</span><span class="n">Instructions</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">insn</span><span class="p">.</span><span class="n">OpCode</span> <span class="p">==</span> <span class="n">OpCodes</span><span class="p">.</span><span class="n">Call</span><span class="p">)</span>
+    <span class="p">{</span>
+       <span class="kt">var</span> <span class="n">methodRef</span> <span class="p">=</span> <span class="p">(</span><span class="n">MethodReference</span><span class="p">)</span><span class="n">insn</span><span class="p">.</span><span class="n">Operand</span><span class="p">;</span>
+       <span class="k">if</span> <span class="p">(</span><span class="n">methodRef</span><span class="p">.</span><span class="n">Name</span><span class="p">.</span><span class="n">StartsWith</span><span class="p">(</span><span class="n">PropertyGetterPrefix</span><span class="p">))</span>
+       <span class="p">{</span>
+         <span class="c1">// Found an affecting getter inside the current getter!</span>
+         <span class="c1">// Get list of dependencies from this getter.</span>
+         <span class="kt">string</span> <span class="n">affectingPropName</span> <span class="p">=</span> <span class="n">methodRef</span><span class="p">.</span><span class="n">Name</span>
+           <span class="p">.</span><span class="n">Substring</span><span class="p">(</span><span class="n">PropertyGetterPrefix</span><span class="p">.</span><span class="n">Length</span><span class="p">);</span>
+         <span class="kt">var</span> <span class="n">affectingProp</span> <span class="p">=</span> <span class="n">_typeDef</span><span class="p">.</span><span class="n">Properties</span>
+           <span class="p">.</span><span class="n">FirstOrDefault</span><span class="p">(</span><span class="n">p</span> <span class="p">=&gt;</span> <span class="n">p</span><span class="p">.</span><span class="n">Name</span> <span class="p">==</span> <span class="n">affectingPropName</span><span class="p">);</span>
+         <span class="k">if</span> <span class="p">(</span><span class="n">affectingProp</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
+         <span class="p">{</span>
+           <span class="n">result</span><span class="p">.</span><span class="n">AddRange</span><span class="p">(</span><span class="n">FindAffectingProperties</span><span class="p">(</span><span class="n">affectingProp</span><span class="p">,</span> <span class="n">seen</span><span class="p">));</span>
+         <span class="p">}</span>
+       <span class="p">}</span>
+     <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+<p>So you can see that it’s a recursive process to walk the dependency graph for a get-only property. You’ll notice that there is some code there to recognize that we’ve seen a certain property before, to avoid infinite loops when walking the graph. Of course, it might happen that we don’t find any setters to inject notification into. For instance, it may turn out that a viewable property actually depends on constant values only. In that case, Silver.Needle will simply give up, since there is no place to inject the notification.</p>
+<p>When we have the complete list of properties and dependant properties, we can do the actual IL manipulation. That is, for each affecting property, we can inject notifications for all affected properties.</p>
+<p>There are two possible strategies for the injection itself: simple and sophisticated. The simple strategy employed by Silver.Needle is to do notification regardless of whether any state change occurs as a result of calling the property setter. For instance, you might have some guard clause deciding whether or not to actually update the field backing the property – a conditional setter if you will. Perhaps you want to write to the backing field only when the value has actually changed. Silver.Needle doesn’t care about that. If the setter is called the view is notified. I believe this makes sense, since the setter is the abstraction boundary for the operation you’re performing, not whatever backing field you may or may not write to. Also, I reckon that it doesn’t <em>hurt</em> much to do a couple of superfluous view refreshes.</p>
+<p>It would be entirely possible to do something a little bit more sophisticated, though – I just don’t think it’s worth the effort (plus it violates encapsulation, doesn’t it?). If we wanted to, we could use a simple program analysis to distinguish between paths that may or may not result in the view model altering state. Technically, we could take the presence of a <strong>stfld</strong> IL instruction (which stores a value to a field) as evidence for state change. We could even throw in a little bit of data flow analysis to see if the value passed to the setter was actually on the stack when to the <strong>stfld</strong> was executed. In that case, we’d interpret “property change” to mean “some field acquires the value passed to the setter”, which may or may not seem right to you. So it could be done, within reason.</p>
+<p>Notice, though, the appeal to reason. It’s easy to come up with a setter which results in an observable state change without ever calling <strong>stfld</strong>. For instance, you could push the value onto a stack instead of storing it in a field, and have the getter return the top element of the stack. Sort of contrived, but it could be done. Or you could pass the value to some method, which may or may not store it somewhere. So you see, it’s hard to do properly in the general case. Hence Silver.Needle keeps things simple, and says that the view should be notified of property change whenever the setter is called. That way, we might do a couple of superfluous notifications, but at least we don’t miss any.</p>
+<p>Now we just need to figure out where to inject the notification calls. Obviously it needs to be the last thing you do in the setter, to ensure that any state change has actually occurred before we do the notification (otherwise we’d refresh the view to show a stale property value!). That’s easy if you have a single return point from your setter, somewhat harder if there are are several.</p>
+<p>You could of course inject notification calls before each return point. That would give the correct semantics but is a bit brutish and not particularly elegant. Instead, Silver.Needle will essentially perform an extract method refactoring if there is more than one return point. The original body of the property setter is moved to a new method with a name derived from the property name. The property setter is then given a new body, consisting of a call to the new method, followed by necessary notification calls. Nice and tidy.</p>
+<p>A third alternative would be to wrap the body of the setter in a try block and perform notification in a finally block. Yes, that would mean that notifications would be given even if an exception is thrown during the execution of the setter. Would that be a problem? No. Why not? Because you shouldn’t throw exceptions in your setters. Again, if you have complex logic in the setters of your view models, I have a meme for you: “View models, you’re doing it wrong”.</p>
+<p>So, implementation-wise, we need to support two scenarios: with or without refactoring. In either case, we end up with a setter that has a single return point preceeded by notification calls. As usual, it’s pretty straight-forward to do the necessary alternations to the body of the setter using Mono.Cecil. Here’s the code:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">private</span> <span class="k">void</span> <span class="nf">InjectNotification</span><span class="p">(</span><span class="n">MethodDefinition</span> <span class="n">methodDef</span><span class="p">,</span> 
+  <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">propNames</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">_notifyMethodDef</span> <span class="p">==</span> <span class="k">null</span> <span class="p">||</span> <span class="n">methodDef</span> <span class="p">==</span> <span class="k">null</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">return</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">HasMultipleReturnPoints</span><span class="p">(</span><span class="n">methodDef</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="n">RefactorSetterAndInjectNotification</span><span class="p">(</span><span class="n">methodDef</span><span class="p">,</span> <span class="n">propNames</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">else</span>
+  <span class="p">{</span>
+    <span class="n">InjectNotificationDirectly</span><span class="p">(</span><span class="n">methodDef</span><span class="p">,</span> <span class="n">propNames</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="kt">bool</span> <span class="nf">HasMultipleReturnPoints</span><span class="p">(</span><span class="n">MethodDefinition</span> <span class="n">methodDef</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="n">methodDef</span><span class="p">.</span><span class="n">Body</span><span class="p">.</span><span class="n">Instructions</span><span class="p">.</span><span class="n">Count</span><span class="p">(</span>
+    <span class="n">insn</span> <span class="p">=&gt;</span> <span class="n">insn</span><span class="p">.</span><span class="n">OpCode</span> <span class="p">==</span> <span class="n">OpCodes</span><span class="p">.</span><span class="n">Ret</span><span class="p">)</span> <span class="p">&gt;</span> <span class="m">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="k">void</span> <span class="nf">RefactorSetterAndInjectNotification</span><span class="p">(</span>
+  <span class="n">MethodDefinition</span> <span class="n">oldMethodDef</span><span class="p">,</span> 
+  <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">propNames</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">methodName</span> <span class="p">=</span> <span class="s">"Refactored"</span> <span class="p">+</span> <span class="n">oldMethodDef</span><span class="p">.</span><span class="n">Name</span>
+    <span class="p">.</span><span class="n">Substring</span><span class="p">(</span><span class="n">PropertySetterPrefix</span><span class="p">.</span><span class="n">Length</span><span class="p">)</span> <span class="p">+</span> <span class="s">"Setter"</span><span class="p">;</span>
+  <span class="kt">var</span> <span class="n">methodDef</span> <span class="p">=</span> <span class="k">new</span> <span class="n">MethodDefinition</span><span class="p">(</span><span class="n">methodName</span><span class="p">,</span>
+    <span class="n">oldMethodDef</span><span class="p">.</span><span class="n">Attributes</span><span class="p">,</span> 
+    <span class="n">oldMethodDef</span><span class="p">.</span><span class="n">ReturnType</span><span class="p">);</span>
+  <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">oldParamDef</span> <span class="k">in</span> <span class="n">oldMethodDef</span><span class="p">.</span><span class="n">Parameters</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">paramDef</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ParameterDefinition</span><span class="p">(</span>
+      <span class="n">oldParamDef</span><span class="p">.</span><span class="n">Name</span><span class="p">,</span> 
+      <span class="n">oldParamDef</span><span class="p">.</span><span class="n">Attributes</span><span class="p">,</span> 
+      <span class="n">oldParamDef</span><span class="p">.</span><span class="n">ParameterType</span><span class="p">);</span>
+    <span class="n">methodDef</span><span class="p">.</span><span class="n">Parameters</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">paramDef</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="n">methodDef</span><span class="p">.</span><span class="n">Body</span> <span class="p">=</span> <span class="n">oldMethodDef</span><span class="p">.</span><span class="n">Body</span><span class="p">;</span>
+  <span class="n">_typeDef</span><span class="p">.</span><span class="n">Methods</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">methodDef</span><span class="p">);</span>
+
+  <span class="n">oldMethodDef</span><span class="p">.</span><span class="n">Body</span> <span class="p">=</span> <span class="k">new</span> <span class="n">MethodBody</span><span class="p">(</span><span class="n">oldMethodDef</span><span class="p">);</span>
+  <span class="kt">var</span> <span class="n">il</span> <span class="p">=</span> <span class="n">oldMethodDef</span><span class="p">.</span><span class="n">Body</span><span class="p">.</span><span class="n">GetILProcessor</span><span class="p">();</span>
+  <span class="n">Action</span><span class="p">&lt;</span><span class="n">OpCode</span><span class="p">&gt;</span> <span class="n">op</span> <span class="p">=</span> <span class="n">x</span> <span class="p">=&gt;</span> <span class="n">il</span><span class="p">.</span><span class="n">Append</span><span class="p">(</span><span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">x</span><span class="p">));</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldarg_0</span><span class="p">);</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldarg_1</span><span class="p">);</span>
+  <span class="n">il</span><span class="p">.</span><span class="n">Append</span><span class="p">(</span><span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Call</span><span class="p">,</span> <span class="n">methodDef</span><span class="p">));</span>
+  <span class="n">op</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ret</span><span class="p">);</span>
+
+  <span class="n">InjectNotificationDirectly</span><span class="p">(</span><span class="n">oldMethodDef</span><span class="p">,</span> <span class="n">propNames</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="k">void</span> <span class="nf">InjectNotificationDirectly</span><span class="p">(</span><span class="n">MethodDefinition</span> <span class="n">methodDef</span><span class="p">,</span> 
+  <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">propNames</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">il</span> <span class="p">=</span> <span class="n">methodDef</span><span class="p">.</span><span class="n">Body</span><span class="p">.</span><span class="n">GetILProcessor</span><span class="p">();</span>
+  <span class="kt">var</span> <span class="n">returnInsn</span> <span class="p">=</span> <span class="n">il</span><span class="p">.</span><span class="n">Body</span><span class="p">.</span><span class="n">Instructions</span><span class="p">.</span><span class="n">Last</span><span class="p">();</span>
+  <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">s</span> <span class="k">in</span> <span class="n">propNames</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">loadThis</span> <span class="p">=</span> <span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldarg_0</span><span class="p">);</span>
+    <span class="kt">var</span> <span class="n">loadString</span> <span class="p">=</span> <span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldstr</span><span class="p">,</span> <span class="n">s</span><span class="p">);</span>
+    <span class="kt">var</span> <span class="n">callMethod</span> <span class="p">=</span> <span class="n">il</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">OpCodes</span><span class="p">.</span><span class="n">Call</span><span class="p">,</span> <span class="n">_notifyMethodDef</span><span class="p">);</span>
+    <span class="n">il</span><span class="p">.</span><span class="n">InsertBefore</span><span class="p">(</span><span class="n">returnInsn</span><span class="p">,</span> <span class="n">loadThis</span><span class="p">);</span>
+    <span class="n">il</span><span class="p">.</span><span class="n">InsertBefore</span><span class="p">(</span><span class="n">returnInsn</span><span class="p">,</span> <span class="n">loadString</span><span class="p">);</span>
+    <span class="n">il</span><span class="p">.</span><span class="n">InsertBefore</span><span class="p">(</span><span class="n">returnInsn</span><span class="p">,</span> <span class="n">callMethod</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+<p>The code isn’t too complicated. The <strong>MethodDefinition</strong> passed to <strong>InjectionNotification</strong> is the setter method for the property, and <strong>propNames</strong> contains the names of properties to notify change for when the setter is called. In case of multiple return points from the setter, we perform a bit of crude surgery to separate the method body from the method declaration. We provide a new method definition for the body, with a name derived from the name of the property. While in Dr Frankenstein mode, we proceed to assemble a new method body for the setter. That body consists of three instructions: push the <strong>this</strong> reference onto the stack, push the value passed to the setter onto the stack, and invoke the new method we just created out of the original method body.</p>
+<p>Now we know that the setter has a single return point, and we can inject the notification calls. We just need to loop over the properties to notify, and inject a trio of 1) push <strong>this</strong>, 2) push property name and 3) invoke notification method for each.</p>
+<p>And that’s it, really. We’re done. Mission accomplished, view model complete.</p>
+<p>Of course, to make things practical, you’re gonna need a build task and a Visual Studio template as well. I’ll get to that some day.</p>
+</body></html>

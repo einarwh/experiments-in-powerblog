@@ -1,0 +1,38 @@
+<!DOCTYPE html><html lang="en" prefix="og: http://ogp.me/ns#"><head><title>Rethrow recoil | @einarwh</title><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Rethrow recoil"><meta property="og:url" content="https://www.example.com/blog-posts/rethrow-recoil/"><link rel="stylesheet" href="/bundles/c5b7698bdf4e/app.css"></head><body><header><a href="/">@einarwh</a></header><h1>Rethrow recoil</h1>
+<p>Posted: June 30, 2014</p>
+<p>The closure-based exception handling scheme in the <a href="/blog-posts/linq-to-exceptions/">previous blog post</a> works almost perfectly, and it would have worked entirely perfectly if a catch block were an ordinary block of code. But alas, it is not. Not quite. A catch block is special in that there is one statement that you can make inside a catch block that you cannot make anywhere else in your program. Unfortunately, it is also a fairly common statement to use inside catch blocks: the rethrow statement – that is, a <strong>throw</strong> statement with no operand. We cannot simply use a throw statement with an operand instead, since that has different semantics. In fact, it’s not a rethrow at all, it’s a brand new throw (even when we’re using the exception we just caught). The consequence is that the original stack trace is lost. In other words, we lose trace of where the exception originally occurred, which is almost never what we want.</p>
+<p>So that’s unfortunate. Unacceptable even. Can we fix it? Of course we can fix it! We’re programmers, we can fix anything!</p>
+<p>There’s no way to put a rethrow into our lambda expession though, so we need to do something else. That something else turns out to be trivial. We do have a genuine catch-block available, so we’ll just put it there. Or rather, we’ll create a new try-catch block with a hard-coded rethrow inside, and put that block inside a new extension method which complements the one we created last time. Like so:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">public</span> <span class="k">static</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">TR</span><span class="p">&gt;</span> <span class="n">Touch</span><span class="p">&lt;</span><span class="n">TR</span><span class="p">,</span> <span class="n">TE</span><span class="p">&gt;(</span><span class="k">this</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">TR</span><span class="p">&gt;</span> <span class="n">f</span><span class="p">,</span> <span class="n">Action</span><span class="p">&lt;</span><span class="n">TE</span><span class="p">&gt;</span> <span class="n">h</span><span class="p">)</span>
+  <span class="k">where</span> <span class="n">TE</span> <span class="p">:</span> <span class="n">Exception</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="p">()</span> <span class="p">=&gt;</span>
+  <span class="p">{</span>
+    <span class="k">try</span>
+    <span class="p">{</span>
+      <span class="k">return</span> <span class="nf">f</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">catch</span> <span class="p">(</span><span class="n">TE</span> <span class="n">e</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">h</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
+      <span class="k">throw</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre>
+<p>In this case, we use an <strong>Action&lt;TE&gt;</strong> instead of a <strong>Func&lt;TE, TR&gt;</strong>, because obviously the exception handler won’t be returning anything – we just hard-coded a rethrow in there!</p>
+<p>Why <strong>Touch</strong> and not an overload of the <strong>Catch</strong> method we saw before? Well, first of all we’re not catching the exception, we’re merely touching it on the way through – hence <strong>Catch</strong> is not really a suitable name for what we’re doing. And besides, the following code snippet would be ambiguous, at least to the reader of the code. Assuming we had overloaded the <strong>Catch</strong> method, how should we interpret something like this?</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="n">Catch</span><span class="p">((</span><span class="n">Exception</span> <span class="n">ex</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span> <span class="k">throw</span> <span class="n">ex</span><span class="p">;</span> <span class="p">})</span>
+</code></pre>
+<p>Is that an <strong>Action&lt;TE&gt;</strong> or a <strong>Func&lt;TE, TR&gt;</strong>? I have no idea. It turns out that the compiler is OK with the ambivalence – it decides it must be an <strong>Action&lt;TE&gt;</strong> (which leaves us with a rather strange catch block where the <strong>throw ex</strong> statement in the handler terminates the block before the rethrow occurs). But I’m not! Better to be explicit. <strong>Touch</strong> it is.</p>
+<p>Now we can write code like this:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="kt">var</span> <span class="n">g</span> <span class="p">=</span> <span class="n">f</span>
+  <span class="p">.</span><span class="n">Catch</span><span class="p">((</span><span class="n">ArgumentException</span> <span class="n">ex</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="s">"Something"</span><span class="p">)</span>
+  <span class="p">.</span><span class="n">Touch</span><span class="p">((</span><span class="n">NullReferenceException</span> <span class="n">ex</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">"I saw you!"</span><span class="p">))</span>
+  <span class="p">.</span><span class="n">Catch</span><span class="p">((</span><span class="n">Exception</span> <span class="n">ex</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="s">"ex"</span><span class="p">);</span>
+
+<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">g</span><span class="p">());</span>
+</code></pre>
+<p>So what happens in the last line? Well, if an <strong>ArgumentException</strong> is thrown, we’ll see the string “Something” written. If a <strong>NullReferenceException</strong> is thrown, however, we’ll see the “I saw you” string, in addition to “ex”, since the exception percolates up to the outer handler where it is caught and swallowed.</p>
+<p>Fixed!</p>
+</body></html>

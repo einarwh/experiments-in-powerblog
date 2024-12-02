@@ -8,15 +8,15 @@
 
 Posted: November 6, 2011
 
-The [previous blog post](/blog-posts/pix-it-war/) introduced **PixItHandler**, a custom HTTP handler for ASP.NET. The handler responds to HTTP POST requests containing a JSON description of a 8-bit style image with an actual PNG image. Provided you know the expected JSON format, it’s pretty easy to use a tool like [Fiddler](http://www.fiddler2.com/fiddler2/) (or [cURL](http://curl.haxx.se/) for that matter) to generate renderings of your favorite retro game characters. However, while you might (and should) find those tools on the machine of a web developer, they have somewhat limited penetration among more conventional users. Web browsers have better reach, if you will.
+The [previous blog post](/blog-posts/pix-it-war/) introduced **PixItHandler**, a custom HTTP handler for ASP.NET. The handler responds to HTTP POST requests containing a JSON description of a 8-bit style image with an actual PNG image. Provided you know the expected JSON format, it's pretty easy to use a tool like [Fiddler](http://www.fiddler2.com/fiddler2/) (or [cURL](http://curl.haxx.se/) for that matter) to generate renderings of your favorite retro game characters. However, while you might (and should) find those tools on the machine of a web developer, they have somewhat limited penetration among more conventional users. Web browsers have better reach, if you will.
 
-So a challenge remains before the **PixItHandler** is ready to take over the world. Say we wanted to include a pix-it image in a regular HTML page? That is, we would like the user to make the request from a plain ol’ web browser, and use it to display the resulting image to the user. We can’t just use an HTML **img** tag as we normally would, since it issues an HTTP GET request for the resource specified in the **src** attribute. Moreover, we lack a way of including the JSON payload with the request. We can use another approach though. Using JQuery, we can issue the appropriate POST request with the JSON payload to the HTTP handler. So that means we’re halfway there.
+So a challenge remains before the **PixItHandler** is ready to take over the world. Say we wanted to include a pix-it image in a regular HTML page? That is, we would like the user to make the request from a plain ol' web browser, and use it to display the resulting image to the user. We can't just use an HTML **img** tag as we normally would, since it issues an HTTP GET request for the resource specified in the **src** attribute. Moreover, we lack a way of including the JSON payload with the request. We can use another approach though. Using JQuery, we can issue the appropriate POST request with the JSON payload to the HTTP handler. So that means we're halfway there.
 
-We’re not quite done, though. We still need to figure out what to do with the response. The HTTP response from the **PixItHandler** is a binary file – it’s not something you can easily inject into the DOM for rendering. So that’s our next challenge.
+We're not quite done, though. We still need to figure out what to do with the response. The HTTP response from the **PixItHandler** is a binary file – it's not something you can easily inject into the DOM for rendering. So that's our next challenge.
 
-Luckily, a little-known HTML feature called the [data URI scheme](http://tools.ietf.org/html/rfc2397) comes to the rescue! Basically, data URIs allow you to jam a blob of binary data representing a resource in where you’d normally put the URI for that resource. So in our case, we can use a data URI in the **src** attribute of our **img** tag. To do so, we must base64-encode the PNG image and prefix it with some appropriate incantations identifying the text string as a data URI. Base64-encoding is straightforward to do, and there are [JavaScript implementations](http://www.webtoolkit.info/javascript-base64.html) you could steal right off the Internet. Good stuff.
+Luckily, a little-known HTML feature called the [data URI scheme](http://tools.ietf.org/html/rfc2397) comes to the rescue! Basically, data URIs allow you to jam a blob of binary data representing a resource in where you'd normally put the URI for that resource. So in our case, we can use a data URI in the **src** attribute of our **img** tag. To do so, we must base64-encode the PNG image and prefix it with some appropriate incantations identifying the text string as a data URI. Base64-encoding is straightforward to do, and there are [JavaScript implementations](http://www.webtoolkit.info/javascript-base64.html) you could steal right off the Internet. Good stuff.
 
-You might think I’d declare victory at this point, but there’s one more obstacle in our way. Unfortunately, it seems that JQuery isn’t entirely happy funnelling the binary response through to us. Loading up binary data isn’t really the scenario the XMLHttpRequest object was designed to support, and so different browsers may or may not allow this to proceed smoothly. I haven’t really gone down to the bottom of the rabbit hole on this issue, because there’s a much simpler solution available: do the base64-encoding server side and pass the image data as text. So I’ve written a **BixItHandler** which is almost identical to the **PixItHandler**, except it base64-encodes the result before writing it to the response stream:
+You might think I'd declare victory at this point, but there's one more obstacle in our way. Unfortunately, it seems that JQuery isn't entirely happy funnelling the binary response through to us. Loading up binary data isn't really the scenario the XMLHttpRequest object was designed to support, and so different browsers may or may not allow this to proceed smoothly. I haven't really gone down to the bottom of the rabbit hole on this issue, because there's a much simpler solution available: do the base64-encoding server side and pass the image data as text. So I've written a **BixItHandler** which is almost identical to the **PixItHandler**, except it base64-encodes the result before writing it to the response stream:
 
 ```csharp
 private static void WriteResponse(
@@ -29,7 +29,7 @@ private static void WriteResponse(
 }
 ```
 
-Problem solved! Now we can easily create an HTML page with some JQuery to showcase our pix-it images. Here’s one way to do it:
+Problem solved! Now we can easily create an HTML page with some JQuery to showcase our pix-it images. Here's one way to do it:
 
 ```html
 <html>
@@ -56,7 +56,7 @@ Problem solved! Now we can easily create an HTML page with some JQuery to showca
 </html>
 ```
 
-Not much going on in the HTML file, as you can see. Three innocuous-looking **div**‘s that aren’t even visible yet, that’s all. As you might imagine, they are just placeholders that our JavaScript code can work with. That’s where _pixit.js_ comes in:
+Not much going on in the HTML file, as you can see. Three innocuous-looking **div**‘s that aren't even visible yet, that's all. As you might imagine, they are just placeholders that our JavaScript code can work with. That's where _pixit.js_ comes in:
 
 ```javascript
 var PixIt = {

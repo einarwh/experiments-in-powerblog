@@ -8,11 +8,11 @@
 
 Posted: October 5, 2017
 
-So there you are, a pragmatic C# programmer out to provide business value for your end users and all that stuff. That’s great.
+So there you are, a pragmatic C# programmer out to provide business value for your end users and all that stuff. That's great.
 
-One of the (admittedly many) things you might want to do is reduce a bunch of things of some type into a single thing of that type. For instance, you might want to add a bunch of numbers together, or concatinate a bunch of strings and so on. How would you do that? (Assuming there’s no built-in `Aggregate` method available, that is.) Well, you’d write a `Reduce` function, right? And since we haven’t specified in advance what kinds of things we should reduce, we better make it generic. So it could work on an `IEnumerable<T>` of things.
+One of the (admittedly many) things you might want to do is reduce a bunch of things of some type into a single thing of that type. For instance, you might want to add a bunch of numbers together, or concatinate a bunch of strings and so on. How would you do that? (Assuming there's no built-in `Aggregate` method available, that is.) Well, you'd write a `Reduce` function, right? And since we haven't specified in advance what kinds of things we should reduce, we better make it generic. So it could work on an `IEnumerable<T>` of things.
 
-Now how should the actual reduction take place? An obvious idea is to do it stepwise. It’s both a good problem solving strategy in general, and kind of necessary when dealing with an `IEnumerable`. For that to work, though, you need some way of taking two values and combining them to produce a single value. So `Reduce` needs to be a higher-order function. The caller should pass in a `combine` function, as well as some initial value to combine with the first element. And then the completed function might look something like this:
+Now how should the actual reduction take place? An obvious idea is to do it stepwise. It's both a good problem solving strategy in general, and kind of necessary when dealing with an `IEnumerable`. For that to work, though, you need some way of taking two values and combining them to produce a single value. So `Reduce` needs to be a higher-order function. The caller should pass in a `combine` function, as well as some initial value to combine with the first element. And then the completed function might look something like this:
 
 ```csharp
 public static T Reduce(this IEnumerable<T> things, 
@@ -35,7 +35,7 @@ var integers = new [] { 1, 2, 3, 4 };
 var sum = integers.Reduce((a, b) => a + b, 0);
 ```
 
-If, on the other hand, you have a bunch of lists, you’d do something like this instead:
+If, on the other hand, you have a bunch of lists, you'd do something like this instead:
 
 ```csharp
 var lists = new [] {
@@ -54,7 +54,7 @@ var sum = lists.Reduce((a, b) =>
 
 And this would give you the list of elements `1`, `2`, `3`. Great.
 
-Now there are other things you might wonder about with respect to the combine function. For whatever reason, you might want to consider alternative implementations of `Reduce`. For instance, you’d might like to create batches of _n_ things, reduce each batch, and then reduce those results for the final result. It would be nice to have that freedom of implementation. For that to be an option, though, you need your combine function to be _associative_.
+Now there are other things you might wonder about with respect to the combine function. For whatever reason, you might want to consider alternative implementations of `Reduce`. For instance, you'd might like to create batches of _n_ things, reduce each batch, and then reduce those results for the final result. It would be nice to have that freedom of implementation. For that to be an option, though, you need your combine function to be _associative_.
 
 Assume you have three values `t1`, `t2`, `t3`. Your combine function is associative if the following holds:
 
@@ -64,7 +64,7 @@ combine(t1, combine(t2, t3)) == combine(combine(t1, t2), t3)
 
 Unfortunately there is nothing in the C# type system that lets us specify and verify that a function is associative, so we need to rely on documentation and discipline for that.
 
-Alternatively, we can turn to mathematics. It turns out that mathematicians have a name for precisely the kind of thing we’re talking about. A _semigroup_ is a structure that consists of a set of values and an associative binary operation for combining such values. Granted, it’s a strange-sounding name, but it identifies a very precise concept that gives us something to reason about. So it’s a useful abstraction that actually gives us some guarantees that we can rely on when programming.
+Alternatively, we can turn to mathematics. It turns out that mathematicians have a name for precisely the kind of thing we're talking about. A _semigroup_ is a structure that consists of a set of values and an associative binary operation for combining such values. Granted, it's a strange-sounding name, but it identifies a very precise concept that gives us something to reason about. So it's a useful abstraction that actually gives us some guarantees that we can rely on when programming.
 
 To represent a semigroup in our program, we can introduce an interface:
 
@@ -138,9 +138,9 @@ class FuncSemigroup<T> : ISemigroup<Func<T, T>>
 }
 ```
 
-So that’s quite nice. We can rely on meaningful and precise abstractions to give us some guarantees in our programs.
+So that's quite nice. We can rely on meaningful and precise abstractions to give us some guarantees in our programs.
 
-There is still a small problem when working with semigroups for reduction though. What should the initial value be? We really just want to reduce a bunch of values of some type, we don’t want to be bothered with some additional value.
+There is still a small problem when working with semigroups for reduction though. What should the initial value be? We really just want to reduce a bunch of values of some type, we don't want to be bothered with some additional value.
 
 One approach, I guess, would be to just pick the first value and then perform reduce on the rest.
 
@@ -152,11 +152,11 @@ public static T Reduce(this IEnumerable<T> things,
 }
 ```
 
-This would work for non-empty bunches of things. But that means we’d have to check for that in some way before calling `Reduce`. That’s quite annoying.
+This would work for non-empty bunches of things. But that means we'd have to check for that in some way before calling `Reduce`. That's quite annoying.
 
 What would be useful is some sort of harmless value that we could combine with any other value and just end up with the other value. So we could just use that magical value as the initial value for our `Reduce`.
 
-Luckily, it turns out that there are such magical values for all the semigroups we’ve looked at. In fact, we’ve seen two such values already. For integers under addition, it’s zero. For lists under concatination, it’s the empty list. But there are others. For integers under multiplication, it’s one. For strings under concatination, it’s the empty string. And for functions under composition, it’s the identity function, which just returns whatever value you hand it. Now if you can provide such a value, which is called the unit value, for your semigroup, you get what the mathematicians call a _monoid_. It’s another intensely unfamiliar-sounding name, but again the meaning is very precise.
+Luckily, it turns out that there are such magical values for all the semigroups we've looked at. In fact, we've seen two such values already. For integers under addition, it's zero. For lists under concatination, it's the empty list. But there are others. For integers under multiplication, it's one. For strings under concatination, it's the empty string. And for functions under composition, it's the identity function, which just returns whatever value you hand it. Now if you can provide such a value, which is called the unit value, for your semigroup, you get what the mathematicians call a _monoid_. It's another intensely unfamiliar-sounding name, but again the meaning is very precise.
 
 We can represent monoids in our programs by introducing another interface:
 
@@ -167,7 +167,7 @@ public interface IMonoid<T> : ISemigroup<T>
 }
 ```
 
-So there is nothing more to a monoid than exactly this: it’s a semigroup with a unit value. And the contract that the unit value operates under is this:
+So there is nothing more to a monoid than exactly this: it's a semigroup with a unit value. And the contract that the unit value operates under is this:
 
 ```csharp
 Compose(Unit, t) == Compose(t, Unit) == t
@@ -185,7 +185,7 @@ public static T Reduce(this IEnumerable<T> things,
 }
 ```
 
-This is quite nice, because we don’t have to worry any more about whether or not the bunch of things is empty. We can proceed to implement concrete monoids that we might want to use.
+This is quite nice, because we don't have to worry any more about whether or not the bunch of things is empty. We can proceed to implement concrete monoids that we might want to use.
 
 ```csharp
 class IntegerUnderAdditionMonoid 

@@ -1,0 +1,141 @@
+<!DOCTYPE html><html lang="en" prefix="og: http://ogp.me/ns#"><head><title>Aspects without aspects | @einarwh</title><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Aspects without aspects"><meta property="og:url" content="https://www.example.com/blog-posts/aspects-without-aspects/"><link rel="stylesheet" href="/bundles/c5b7698bdf4e/app.css"></head><body><header><a href="/">@einarwh</a></header><h1>Aspects without aspects</h1>
+<p>Posted: July 5, 2014</p>
+<p>In the previous blog posts, we saw that we could hide the problematic concrete exception type from the C# compiler by tucking it inside a transformation from a closure of type <strong>Func&lt;TR&gt;</strong> to another closure of the same type. But of course we can use such transformations for many things besides exception handling. Any old behaviour that we would like to throw on top of the business logic, we can apply in layers using this approach.</p>
+<p>This capability is so cool that I took a break from writing this blog post to share my enthusiasm with my wife. She was like, “what are you blogging about?”, and I was like “there’s this really cool thing you can do, where you apply this transformation to some method call, and then you can like, do additional stuff with it, entirely transparently!”, and she was like “like what?”, and I was like “like anything!”, and she was like “like what?”, and I was like “anything you want!”, but she was still like “like what though?” and then I turned more like “uh… uh… like say you had this method that returned a string – you could easily transform that into a method that looked exactly the same, but returned the reversed string instead”, and she was like “…the reversed string? why?” and I was like “or-or-or maybe you could return the uppercase string instead…?”, and she was like “uppercase?” with totally uppercase eyebrows and I was like “nonono! I got it! say you had this method that did a really expensive and slow computation, you could turn that into a method that would keep along the result that computation, so you didn’t have to do the actual computation all the time”, and she was like “oh, that’s cool” and I was like “phew! I’m never talking to her about blogging again!”.</p>
+<p>So that was a close call. But yes, you can totally use this for caching. All we need is a suitable transformation thing.</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">public</span> <span class="k">static</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">Caching</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="k">this</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">f</span><span class="p">)</span> 
+<span class="p">{</span>
+  <span class="kt">bool</span> <span class="n">cached</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+  <span class="n">T</span> <span class="n">t</span> <span class="p">=</span> <span class="k">default</span><span class="p">(</span><span class="n">T</span><span class="p">);</span>
+  <span class="k">return</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">cached</span><span class="p">)</span> <span class="k">return</span> <span class="n">t</span><span class="p">;</span>
+    <span class="n">t</span> <span class="p">=</span> <span class="n">f</span><span class="p">();</span>
+    <span class="n">cached</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">t</span><span class="p">;</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre>
+<p>Here, we’re taking advantage of the fact that C# has <em>mutable closures</em> – that is, that we can write to <strong>cached</strong> and <strong>t</strong> from inside the body of the lambda expression.</p>
+<p>To verify that it works, we need a suitable example – something that’s really expensive and slow to compute. And as we all know, one of the most computationally intensive things we can do in a code example is to sleep:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="n">Func</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">q</span> <span class="p">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+  <span class="n">Thread</span><span class="p">.</span><span class="n">Sleep</span><span class="p">(</span><span class="m">2000</span><span class="p">);</span>
+  <span class="k">return</span> <span class="s">"Hard-obtained string"</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">q</span><span class="p">());</span>
+<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">q</span><span class="p">());</span>
+<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">q</span><span class="p">());</span>
+
+<span class="n">q</span> <span class="p">=</span> <span class="n">q</span><span class="p">.</span><span class="n">Caching</span><span class="p">();</span>
+
+<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">q</span><span class="p">());</span>
+<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">q</span><span class="p">());</span>
+<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">q</span><span class="p">());</span>
+</code></pre>
+<p>Well, what kind of behaviour should we expect from this code? Obviously, the first three <strong>q</strong> calls will be slow. But what about the three last? The three last execute the caching closure instead. When we execute the forth call, <strong>cached</strong> is <strong>false</strong>, and so the if test fails, and we proceed to evaluate the original, non-caching <strong>q</strong> (which is slow), tuck away the result value for later, set the <strong>cached</strong> flag to <strong>true</strong>, and return the computed result – the hard-obtained string. But the fifth and sixth calls should be quick, since <strong>cached</strong> is now <strong>true</strong>, and we have a cached result value to return to the caller, without ever having to resort to the original <strong>q</strong>.</p>
+<p>That’s theory. Here’s practice:</p>
+<p>TODO: Video</p>
+<p>So that seems to work according to plan. What else can we do? We’ve seen exception handling in the previous posts and caching in this one – both examples of so-called “cross-cutting concerns” in our applications. Cross-cutting concerns was hot terminology ten years ago, when the enterprise world discovered the power of the meta-object protocol (without realizing it, of course). It did so in the guise of <em>aspect-oriented programming</em>, which carried with it a whole vocabulary besides the term “cross-cutting concerns” itself, including “advice” (additional behaviour to handle), “join points” (places in your code where the additional behaviour may be applied) and “pointcuts” (a way of specifying declaratively which join points the advice applies to). And indeed, we can use these transformations that we’ve been doing to implement a sort of poor man’s aspects.</p>
+<p>Why a poor man’s aspects? What’s cheap about them? Well, we will be applying advice at various join points, but we won’t be supporting pointcuts to select them. Rather, we will be applying advice to the join points manually. Arguably, therefore, it’s not really aspects at all, and yet we get some of the same capabilities. That’s why we’ll call them aspects without aspects. Makes sense?</p>
+<p>Let’s consider wrapping some closure <strong>f</strong> in a hypothetical try-finally-block, and see where we might want to add behaviour.</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="c1">// 1. Before calling f.</span>
+<span class="k">try</span> <span class="p">{</span>
+  <span class="n">f</span><span class="p">();</span>
+  <span class="c1">// 2. After successful call to f.</span>
+<span class="p">}</span>
+<span class="k">finally</span> <span class="p">{</span>
+  <span class="c1">// 3. After any call to f.</span>
+<span class="p">}</span>
+</code></pre>
+<p>So we’ll create extension methods to add behaviour in those three places. We’ll call them <strong>Before</strong>, <strong>Success</strong> and <strong>After</strong>, respectively.</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">public</span> <span class="k">static</span> <span class="k">class</span> <span class="nc">AspectExtensions</span> <span class="p">{</span>
+
+  <span class="k">public</span> <span class="k">static</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">Before</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="k">this</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">f</span><span class="p">,</span> <span class="n">Action</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span> <span class="n">a</span><span class="p">();</span> <span class="k">return</span> <span class="n">f</span><span class="p">();</span> <span class="p">};</span>
+  <span class="p">}</span> 		
+
+  <span class="k">public</span> <span class="k">static</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">Success</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="k">this</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">f</span><span class="p">,</span> <span class="n">Action</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span> 
+      <span class="kt">var</span> <span class="n">result</span> <span class="p">=</span> <span class="n">f</span><span class="p">();</span>
+      <span class="n">a</span><span class="p">();</span>
+      <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+    <span class="p">};</span>
+  <span class="p">}</span> 
+
+  <span class="k">public</span> <span class="k">static</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">Success</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="k">this</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">f</span><span class="p">,</span> <span class="n">Action</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span> 
+      <span class="kt">var</span> <span class="n">result</span> <span class="p">=</span> <span class="n">f</span><span class="p">();</span>
+      <span class="n">a</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+      <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+    <span class="p">};</span>
+  <span class="p">}</span> 
+
+  <span class="k">public</span> <span class="k">static</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">After</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="k">this</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">f</span><span class="p">,</span> <span class="n">Action</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span> 
+      <span class="k">try</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nf">f</span><span class="p">();</span>
+      <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+        <span class="n">a</span><span class="p">();</span>
+      <span class="p">}</span>
+    <span class="p">};</span>
+  <span class="p">}</span> 
+  
+  <span class="k">public</span> <span class="k">static</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">After</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="k">this</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">f</span><span class="p">,</span> <span class="n">Action</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span> 
+      <span class="n">T</span> <span class="n">result</span> <span class="p">=</span> <span class="k">default</span><span class="p">(</span><span class="n">T</span><span class="p">);</span>
+      <span class="k">try</span> <span class="p">{</span>
+        <span class="n">result</span> <span class="p">=</span> <span class="n">f</span><span class="p">();</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+      <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+        <span class="n">a</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">};</span>
+  <span class="p">}</span> 
+<span class="p">}</span>
+</code></pre>
+<p>Note that we have two options for each of the join points that occur after the call to the original <strong>f</strong> closure. In some cases you might be interested in the value returned by <strong>f</strong>, in others you might not be.</p>
+<p>How does it work in practice? Let’s look at a contrived example.</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span> <span class="p">(</span><span class="kt">string</span><span class="p">[]</span> <span class="n">args</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">Func</span><span class="p">&lt;</span><span class="n">Func</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;,</span> <span class="n">Func</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;&gt;</span> <span class="n">wrap</span> <span class="p">=</span> <span class="n">fn</span> <span class="p">=&gt;</span> <span class="n">fn</span>
+    <span class="p">.</span><span class="n">Before</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">"I'm happening early on."</span><span class="p">))</span>
+    <span class="p">.</span><span class="n">Success</span><span class="p">(</span><span class="n">r</span> <span class="p">=&gt;</span> <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">"Successfully obtained: "</span> <span class="p">+</span> <span class="n">r</span><span class="p">))</span>
+    <span class="p">.</span><span class="n">Before</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">"When do I occur???"</span><span class="p">))</span>
+    <span class="p">.</span><span class="n">After</span><span class="p">(</span><span class="n">r</span> <span class="p">=&gt;</span> <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">"What did I get? "</span> <span class="p">+</span> <span class="n">r</span><span class="p">));</span>
+
+  <span class="kt">var</span> <span class="n">m1</span> <span class="p">=</span> <span class="n">wrap</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="p">{</span> 
+    <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">"Executing m1..."</span><span class="p">);</span> 
+    <span class="k">return</span> <span class="s">"Hello Kiczales!"</span><span class="p">;</span>
+  <span class="p">});</span>
+
+  <span class="kt">var</span> <span class="n">m2</span> <span class="p">=</span> <span class="n">wrap</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="p">{</span> 
+    <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">"Executing m2..."</span><span class="p">);</span> 
+    <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">(</span><span class="s">"Boom"</span><span class="p">);</span> 
+  <span class="p">});</span>
+
+  <span class="n">Call</span><span class="p">(</span><span class="s">"m1"</span><span class="p">,</span> <span class="n">m1</span><span class="p">);</span> 
+  <span class="n">Call</span><span class="p">(</span><span class="s">"m2"</span><span class="p">,</span> <span class="n">m2</span><span class="p">);</span> 
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="k">void</span> <span class="nf">Call</span><span class="p">(</span><span class="kt">string</span> <span class="n">name</span><span class="p">,</span> <span class="n">Func</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">m</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">name</span> <span class="p">+</span> <span class="s">" returned: "</span> <span class="p">+</span> <span class="n">m</span><span class="p">());</span>
+  <span class="p">}</span>
+  <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">ex</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">"Exception in {0}: {1}"</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">ex</span><span class="p">.</span><span class="n">Message</span><span class="p">);</span>
+  <span class="p">}</span>			
+  <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre>
+<p>So here we have a transformation thing that takes a <strong>Func&lt;string&gt;</strong> closure and returns another <strong>Func&lt;string&gt;</strong> closure, with several pieces of advice applied. Can you work out when the different closures will be executed?</p>
+<p>We start with some closure <strong>fn</strong>, but before <strong>fn</strong> executes, the first <strong>Before</strong> must execute (that’s why we call it <strong>Before</strong>!). Assuming both of these execute successfully (without throwing an exception), the <strong>Success</strong> will execute. But before all these things, the second <strong>Before</strong> must execute! And finally, regardless of how the execution turns out with respect to exceptions, the <strong>After</strong> should execute.</p>
+<p>In the case of <strong>m1</strong>, no exception occurs, so we should see the message “Successfully obtained: Hello Kiczales!” in between “Executing m1…” and “What did I get? Hello Kiczales!”. In the case of <strong>m2</strong>, on the other hand, we do get an exception, so the <strong>Success</strong> closure is never executed.</p>
+<p>A screenshot of my console verifies this:</p>
+<p><img src="/images/0934a3fe9216/screenshot-hello-kiczales.png" alt="Console screenshot"></p>
+<p>So we’ve seen that we can do fluent exception handling, caching and aspects without aspects using the same basic idea: we take something of type <strong>Func&lt;TR&gt;</strong> and produce something else of the same type. Of course, this means that we’re free to mix and match all of these things if we wanted to, and compose them all using Linq’s <strong>Aggregate</strong> method! For once, though, I think I’ll leave that as an exercise for the reader.</p>
+<p>And of course, we can transform other things besides closures as well – we can use the same approach to transform any instance of type <strong>T</strong> to some other <strong>T</strong> instance. In fact, let’s declare a delegate to capture such a generalized concept:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">delegate</span> <span class="n">T</span> <span class="n">Decorate</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">T</span> <span class="n">t</span><span class="p">);</span>
+</code></pre>
+<p>Why <strong>Decorate</strong>? Well, nothing is ever new on this blog. I’m just rediscovering old ideas and reinventing flat tires as <a href="https://en.wikipedia.org/wiki/Alan_Kay">Alan Kay</a> put it. In this case, it turns out that all we’ve been doing is looking at the good old <a href="https://www.google.com/search?client=firefox-b-d&amp;q=decorator+pattern">Decorator pattern</a> from the <a href="https://en.wikipedia.org/wiki/Design_Patterns">GoF book</a> in a new or unfamiliar guise.</p>
+</body></html>

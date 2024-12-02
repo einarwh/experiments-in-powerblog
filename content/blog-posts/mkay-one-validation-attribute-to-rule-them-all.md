@@ -39,7 +39,7 @@ public class Person
 
 In case it's not terribly obvious, the rules indicate that the length of the **Name** property must be less than _10_, the **BirthDate** must be later than _31.01.1900_, the **DeathDate** must be before the current date, and **LastSeen** must understandably be some time between birth and death. Makes sense?
 
-If you've never seen a LISP expression before, note that LISP operators are put in front of, rather than in between, the values they operate on. This is known as prefix notation as opposed to infix notation (or postfix notation, where the operator comes at the end). An expression like “(< . (now))” should be interpreted as “the value of the **DeathDate** property should be less than the value of (now)”. From this, you might deduce (correctly) that “.” is used as shorthand for the name of the property being validated. This is the first of three spoonfuls of syntactic sugar employed by Mkay to simplify the syntax for validation rules. The second spoonful is implicit “.” for comparisons, which means that you can actually write “(< (now))” instead of “(< . (now))”. And finally, the third spoonful lets you drop the outermost parentheses, so you end up with “< (now)”. Using simplified syntax, the example looks like this:
+If you've never seen a LISP expression before, note that LISP operators are put in front of, rather than in between, the values they operate on. This is known as prefix notation as opposed to infix notation (or postfix notation, where the operator comes at the end). An expression like "(< . (now))" should be interpreted as "the value of the **DeathDate** property should be less than the value of (now)". From this, you might deduce (correctly) that "." is used as shorthand for the name of the property being validated. This is the first of three spoonfuls of syntactic sugar employed by Mkay to simplify the syntax for validation rules. The second spoonful is implicit "." for comparisons, which means that you can actually write "(< (now))" instead of "(< . (now))". And finally, the third spoonful lets you drop the outermost parentheses, so you end up with "< (now)". Using simplified syntax, the example looks like this:
 
 ```csharp
 public class Person
@@ -94,7 +94,7 @@ public class MkayAttribute : ValidationAttribute, IClientValidatable
 
 The **MkayAttribute** constructor takes a single string parameter, which is supposed to contain a valid Mkay expression. Things will blow up at runtime if it doesn't. The **ExpParser** class is responsible for parsing the Mkay expression into a suitable data structure known as an abstract syntax tree; AST for short. This happens lazily whenever someone tries to access the AST, which in practice means in the **GetClientValidationRules** and **IsValid** methods.
 
-Due to LISP envy, **ExpParser** (simple as it is) uses lists and atoms as building blocks for the AST. Atoms represent simple things, such as a constant value (such as _10_), the name of a property (such as **BirthDate**) or a symbol representing some operation (such as >). Lists are simply sequences of things, that is, sequences of lists and atoms. In Mkay, lists are built from so-called cons cells which are linked together in a chain. Each cons cell consists of two things, the first of which may be considered the content of the cell (a list or an atom), and the second of which is a reference to another cons cell or a special thing called **Nil**. So for instance, the Mkay expression “(< (len .) 5)” is represented by the following AST:
+Due to LISP envy, **ExpParser** (simple as it is) uses lists and atoms as building blocks for the AST. Atoms represent simple things, such as a constant value (such as _10_), the name of a property (such as **BirthDate**) or a symbol representing some operation (such as >). Lists are simply sequences of things, that is, sequences of lists and atoms. In Mkay, lists are built from so-called cons cells which are linked together in a chain. Each cons cell consists of two things, the first of which may be considered the content of the cell (a list or an atom), and the second of which is a reference to another cons cell or a special thing called **Nil**. So for instance, the Mkay expression "(< (len .) 5)" is represented by the following AST:
 
 ![Cons cells for an Mkay expression](/images/cons-cells.png)
 
@@ -228,7 +228,7 @@ public IEnumerable<ModelClientValidationRule> GetClientValidationRules(
 }
 ```
 
-The string “mkay” that is set for the **ValidationType** is essentially a magic string that you need to match up on the JavaScript side. The same goes for the string “rule” that is used as a key for the **ValidationParameters** dictionary.
+The string "mkay" that is set for the **ValidationType** is essentially a magic string that you need to match up on the JavaScript side. The same goes for the string "rule" that is used as a key for the **ValidationParameters** dictionary.
 
 ```javascript
 jQuery.validator.addMethod("mkay", function (value, element, param) {
@@ -245,7 +245,7 @@ jQuery.validator.unobtrusive.adapters.add("mkay", ["rule"], function (options) {
 });
 ```
 
-On the JavaScript side, we have to hook up our client-side validation code to the machinery that is called unobtrusive validation in jQuery. As you can see, the magic strings “mkay” and “rule” appear at various places in the code. Apart from the plumbing, nothing much happens here. A payload of JSON is picked up, deserialized, and passed to a validation function factory thing called **MKAY.getValidator**. That's where the JSON AST is turned into an actual JavaScript function. First, though, let's see an example of a JSON AST.
+On the JavaScript side, we have to hook up our client-side validation code to the machinery that is called unobtrusive validation in jQuery. As you can see, the magic strings "mkay" and "rule" appear at various places in the code. Apart from the plumbing, nothing much happens here. A payload of JSON is picked up, deserialized, and passed to a validation function factory thing called **MKAY.getValidator**. That's where the JSON AST is turned into an actual JavaScript function. First, though, let's see an example of a JSON AST.
 
 ```json
 {
@@ -278,11 +278,11 @@ On the JavaScript side, we have to hook up our client-side validation code to th
 }
 ```
 
-This example shows the JSON AST for the Mkay expression “(> X (+ A B C))”. So in other words, the rule states that the value of X should be greater than the sum of A, B and C.
+This example shows the JSON AST for the Mkay expression "(> X (+ A B C))". So in other words, the rule states that the value of X should be greater than the sum of A, B and C.
 
 As we saw earlier, the deserialized JSON is passed to a validation function factory. The transformation process is conceptually pretty simple: every node in the JSON AST becomes a function. A function may be composed from simpler functions, or it may simply return a value, such as a string or an integer. The final validation function corresponds to the root node of the AST.
 
-Let's look at an example. Below, you see pseudo-code for the validation function produced from the JSON AST for the Mkay expression “(> X (+ A B C))”.
+Let's look at an example. Below, you see pseudo-code for the validation function produced from the JSON AST for the Mkay expression "(> X (+ A B C))".
 
 ```javascript
 function() {

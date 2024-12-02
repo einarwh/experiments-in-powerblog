@@ -1,0 +1,239 @@
+<!DOCTYPE html><html lang="en" prefix="og: http://ogp.me/ns#"><head><title>Another wild tail chase | @einarwh</title><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Another wild tail chase"><meta property="og:url" content="https://www.example.com/blog-posts/another-wild-tail-chase/"><link rel="stylesheet" href="/bundles/c5b7698bdf4e/app.css"></head><body><header><a href="/">@einarwh</a></header><h1>Another wild tail chase</h1>
+<p>Posted: December 19, 2013</p>
+<p>It appears I’ve been waiting in vain! It’s been more than a month since my last <a href="/blog-posts/chasing-your-tail-with-bytecode-manipulation/">blog post</a>, and still no pull requests for TailCop! In particular, no pulls requests that implement rewriting of recursive calls to loops for instance methods. I don’t know why.</p>
+<p>I guess it’s up to me, then.</p>
+<p>To recap, <a href="https://github.com/einarwh/tailcop">TailCop</a> is a simple utility I wrote to rewrite tail-recursive static methods to use loops instead (which prevents stack overflow in cases where the recursion goes very deep). The reason we shied away from instance methods last time is dynamic dispatch, which complicates matters a bit. We’ll tackle that in this blog post. To do so, however, we need to impose a couple of constraints.</p>
+<p>First, we need to make sure that the instance method is <em>non-virtual</em>, that is, that it cannot be overridden in a subclass. Why? Well, let’s suppose you let <strong>Add</strong> be virtual, so that people may override it. Sounds reasonable? If it isn’t overridden, then it will behave just the same whether or not it’s rewritten. If it <em>is</em> overridden, then it shouldn’t matter if we override the recursive or the rewritten version, right? Well, you’d think, but unfortunately that’s not the case.</p>
+<p>Say you decided to make <strong>Add</strong> virtual and rewrote it using TailCop. A few months pass by. Along comes your enthusiastic, dim-witted co-worker, ready to redefine the semantics of <strong>Add</strong>. He’s been reading up on object-orientation and is highly motivated to put all his hard-won knowledge to work. Unfortunately, he didn’t quite get to <a href="http://en.wikipedia.org/wiki/Liskov_substitution_principle">the Liskov thing</a>, and so he ends up with this:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">class</span> <span class="nc">Adder</span>
+<span class="p">{</span>
+  <span class="k">virtual</span> <span class="kt">int</span> <span class="nf">Add</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="p">&gt;</span> <span class="m">0</span> <span class="p">?</span> <span class="n">Add</span><span class="p">(</span><span class="n">x</span> <span class="err">–</span> <span class="m">1</span><span class="p">,</span> <span class="n">y</span> <span class="p">+</span> <span class="m">1</span><span class="p">)</span> <span class="p">:</span> <span class="n">y</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">class</span> <span class="nc">BlackAdder</span> <span class="p">:</span> <span class="n">Adder</span>
+<span class="p">{</span>
+  <span class="k">override</span> <span class="kt">int</span> <span class="nf">Add</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="k">base</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span> <span class="p">&gt;</span> <span class="m">0</span> <span class="p">?</span> <span class="n">y</span> <span class="p">+</span> <span class="m">1</span> <span class="p">:</span> <span class="n">y</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+<p>So while he overrides the <strong>Add</strong> method in a subclass, he doesn’t replace it wholesale – he still invokes the original <strong>Add</strong> method as well. But then we have a problem. Due to dynamic dispatch, the recursive <strong>Add</strong> call in <strong>Adder</strong> will invoke <strong>BlackAdder.Add</strong> which will then invoke <strong>Adder.Add</strong> and so forth. Basically we’re taking the elevator up and down in the inheritance hierarchy. If we rewrite <strong>Adder.Add</strong> to use a loop, we will never be allowed to take the elevator back down to <strong>BlackAdder.Add</strong>. Obviously, then, the rewrite is not safe. Running <code>BlackAdder.Add(30, 30)</code> yields 90 with the original recursive version of <strong>Adder.Add</strong> and 61 with the rewritten version. Long story short: we will not rewrite virtual methods.</p>
+<p>Our second constraint is that, obviously, the recursive call has to be made on the same object instance. If we call the <em>same</em> method on a <em>different</em> instance, there’s no guarantee that we’ll get the same result. For instance, if the calculation relies on object state in any way, we’re toast. So we need to invoke the method on <strong>this</strong>, not <strong>that</strong>. So how do we ensure that a recursive call is always made on the same instance – that is, on <strong>this</strong>? Well, obviously we need to be in a situation where the evaluation stack contains a reference to <strong>this</strong> in the right place when we’re making the recursive call. In IL, the <strong>this</strong> parameter to instance methods is always passed explicitly, unlike in C#. So a C# instance method with <em>n</em> parameters is represented as a method with <em>n+1</em> parameters on the IL level. The additional parameter in IL is for the <strong>this</strong> reference, and is passed as the first parameter to the instance method. (This is similar to Python, where the <strong>self</strong> parameter is always passed explicitly to instance methods.) So anyways, if we take the evaluation stack at the point of a call to an instance methods and pop off <em>n</em> values (corresponding to the <em>n</em> parameters in the C# method), we should find a <strong>this</strong> there. If we find something else, we won’t rewrite.</p>
+<p>While the first constraint is trivial to check for, the second one is a bit more involved. What we have at hand is a <a href="http://en.wikipedia.org/wiki/Data-flow_analysis">data-flow</a> problem, which is a big thing in program analysis. In our case, we need to identify places in the code where <strong>this</strong> references are pushed onto the stack, and emulate how the stack changes when different opcodes are executed. To model the flow of data in a method (in particular: flow of <strong>this</strong> references), we first need to construct a <em>control flow graph</em> (CFG for short). A CFG shows (statically) the different possible execution paths through the method. It consists of nodes that represents blocks of instructions and edges that represents paths from one such block to another. A method without branching instructions has a trivial CFG, consisting of a single node representing a block with all the instructions in the method. Once we have branching instructions, however, things become a little more interesting. For instance, consider the code below:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">public</span> <span class="k">static</span> <span class="kt">int</span> <span class="nf">Loop</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">while</span> <span class="p">(</span><span class="n">x</span> <span class="p">&gt;</span> <span class="m">0</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="err">–</span><span class="n">x</span><span class="p">;</span>
+    <span class="p">++</span><span class="n">y</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="n">y</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+<p>The CFG for (the IL representation of) that code looks like this:</p>
+<p><img src="/images/c51df9ddd294/cfg.png" alt="Control flow graph for the Loop method."></p>
+<p>As you can see, some nodes now have multiple inbound edges. This matters when we try to describe how data flows through the method. Let’s see if we can sketch it out by looking at what happens inside a single node first. A node represents a block of n instructions. Each instruction can be thought of as a function f : S -&gt; S’ that accepts a stack as input and produces a stack as output. We can then produce an aggregated stack transformation function for an entire node in the CFG by composing such functions. Since each node represents a block of n instructions, we have a corresponding sequence of functions f<sub>0</sub>, f<sub>1</sub>, …, f<sub>n-1</sub> of stack transformations. We can use this sequence to compose a new function g : S -&gt; S’ by applying each function f<sub>i</sub> in order, as follows: g(s) = f<sub>n-1</sub>(…(f<sub>1</sub>(f<sub>0</sub>(s)))). In superior languages, this is sometimes written g = f<sub>n-1</sub> o … o f<sub>1</sub> o f<sub>0</sub>, where o is the composition operator.</p>
+<p>Each node in the CFG is associated with such a transformation function g. Now the edges come into play: since it is possible to arrive at some node <em>n</em> in the CFG by following different paths, we may end up with more than a single stack as potential input for <em>n</em>’s g function – and hence more than a single stack as potential output. In general, therefore, we associate with each node a set <strong>I</strong> of distinct input stacks and a set <strong>O</strong> of distinct output stacks. Obviously, if there is an edge from node <em>n</em> to node <em>m</em> in CFG, then all stacks in <em>n</em>’s output set will be elements in <em>m</em>’s input set. To determine the sets <strong>I</strong> and <strong>O</strong> for each node in the CFG, we traverse the edges in the CFG until the various <strong>I</strong>’s and <strong>O</strong>’s stabilize, that is, until we no longer produce additional distinct stacks in any of the sets.</p>
+<p>This gives us the following pseudocode for processing a node in the CFG, given a set <strong>S</strong> of stacks as input:</p>
+<pre class="codehilite"><code><span></span>def process S
+  if exists s in S where not I contains s
+    I = I union S
+    O = map g I
+    foreach e in edges
+      process e.target O
+    end
+  end
+end
+</code></pre>
+<p>Initially, <strong>I</strong> and <strong>O</strong> for all nodes will be empty sets. We start processing at the entry node, with <strong>S</strong> containing just the empty stack. When we’re done, each node will have their appropriate sets <strong>I</strong> and <strong>O</strong>.</p>
+<p>So now we have the theory pretty much in place. We still need a way to dermine the potential stack state(s) at the place in the code where it matters, though: at the call instruction for the recursive method call. It’s very easy at this point – we already have all the machinery we need. Assuming that a recursive call happens as the <em>k</em>’th instruction in some node, all we have to do is compose the function h(s) = f<sub>k-1</sub>(…f<sub>1</sub>(f<sub>0</sub>(s))), alternatively h = f<sub>k-1</sub> o … o f<sub>1</sub> o f<sub>0</sub>. Mapping h onto the stack elements of the node’s <strong>I</strong> set, we get a set <strong>C</strong> of stack elements at the call site. Now we pop off any “regular” argument values for the method call off the stacks in <strong>C</strong> to produce a new set <strong>C'</strong>. Finally we verify that for all elements in <strong>C'</strong>, we have a <strong>this</strong> reference at the top of the stack.</p>
+<p>Now we should be in good shape to tackle the practicalities of our implementation. One thing we obviously need is a data type to represent our evaluation stack – after all, our description above is littered with stack instances. The stack can be really simple, in that it only needs to distinguish between two kinds of values: <strong>this</strong> and anything else. So it’s easy, we’ll just use the plain ol’ <strong>Stack&lt;bool&gt;</strong>, right? Unfortunately we can’t, since <strong>Stack&lt;bool&gt;</strong> is mutable (in that <strong>push</strong> and <strong>pop</strong> mutate the stack they operate on). That’s definitely not going to work. When producing the stack instances in <strong>O</strong>, we don’t want the g function to mutate the actual stack instances in <strong>I</strong> in the process. We might return later on with stack instances we’ll want to compare to the instances in <strong>I</strong>, so we need to preserve those as-is. Hence we need an immutable data structure. So we should use <strong>ImmutableStack&lt;bool&gt;</strong> from the <a href="https://learn.microsoft.com/en-us/dotnet/api/system.collections.immutable">Immutable Collections</a>, right? I wish! Unfortunately, <strong>ImmutableStack&lt;bool&gt;.Equals</strong> has another problem (which <strong>Stack&lt;bool&gt;</strong> also has) – it implements reference equality, whereas we really need value equality (so that two distinct stack instances containing the same values are considered equal). So I ended up throwing together my own <strong>EvalStack</strong> class instead, highly unoptimized and probably buggy, but still serving our needs.</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">class</span> <span class="nc">EvalStack</span>
+<span class="p">{</span>
+  <span class="k">private</span> <span class="k">const</span> <span class="kt">char</span> <span class="n">YesThis</span> <span class="p">=</span> <span class="sc">'1'</span><span class="p">;</span>
+  <span class="k">private</span> <span class="k">const</span> <span class="kt">char</span> <span class="n">NotThis</span> <span class="p">=</span> <span class="sc">'0'</span><span class="p">;</span>
+  <span class="k">private</span> <span class="k">readonly</span> <span class="kt">string</span> <span class="n">_</span><span class="p">;</span>
+
+  <span class="k">private</span> <span class="nf">EvalStack</span><span class="p">(</span><span class="kt">string</span> <span class="n">s</span><span class="p">)</span> <span class="p">{</span> <span class="n">_</span> <span class="p">=</span> <span class="n">s</span><span class="p">;</span> <span class="p">}</span>
+
+  <span class="k">public</span> <span class="nf">EvalStack</span><span class="p">()</span> <span class="p">:</span> <span class="k">this</span><span class="p">(</span><span class="s">""</span><span class="p">)</span> <span class="p">{}</span>
+
+  <span class="k">public</span> <span class="kt">bool</span> <span class="nf">Peek</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">IsEmpty</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">(</span><span class="s">"Cannot Peek an empty stack."</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">_</span><span class="p">[</span><span class="m">0</span><span class="p">]</span> <span class="p">==</span> <span class="n">YesThis</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="n">EvalStack</span> <span class="nf">Pop</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">IsEmpty</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="p">(</span><span class="s">"Cannot Pop an empty stack."</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">EvalStack</span><span class="p">(</span><span class="n">_</span><span class="p">.</span><span class="n">Substring</span><span class="p">(</span><span class="m">1</span><span class="p">));</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="n">EvalStack</span> <span class="nf">Push</span><span class="p">(</span><span class="kt">bool</span> <span class="n">b</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">char</span> <span class="n">c</span> <span class="p">=</span> <span class="n">b</span> <span class="p">?</span> <span class="n">YesThis</span> <span class="p">:</span> <span class="n">NotThis</span><span class="p">;</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">EvalStack</span><span class="p">(</span><span class="n">c</span> <span class="p">+</span> <span class="n">_</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="kt">bool</span> <span class="n">IsEmpty</span>
+  <span class="p">{</span>
+    <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_</span><span class="p">.</span><span class="n">Length</span> <span class="p">==</span> <span class="m">0</span><span class="p">;</span> <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">override</span> <span class="kt">bool</span> <span class="nf">Equals</span><span class="p">(</span><span class="kt">object</span> <span class="n">that</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="nf">Equals</span><span class="p">(</span><span class="n">that</span> <span class="k">as</span> <span class="n">EvalStack</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="kt">bool</span> <span class="nf">Equals</span><span class="p">(</span><span class="n">EvalStack</span> <span class="n">that</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="n">_</span><span class="p">.</span><span class="n">Equals</span><span class="p">(</span><span class="n">that</span><span class="p">.</span><span class="n">_</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">override</span> <span class="kt">int</span> <span class="nf">GetHashCode</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">_</span> <span class="p">!=</span> <span class="k">null</span> <span class="p">?</span> <span class="n">_</span><span class="p">.</span><span class="n">GetHashCode</span><span class="p">()</span> <span class="p">:</span> <span class="m">0</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">public</span> <span class="k">override</span> <span class="kt">string</span> <span class="nf">ToString</span><span class="p">()</span>
+  <span class="p">{</span>
+    <span class="k">return</span> <span class="s">"["</span> <span class="p">+</span> <span class="n">_</span> <span class="p">+</span> <span class="s">"]"</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+<p>I’m particularly happy about the way the code for the <strong>ToString</strong> method ended up.</p>
+<p>Now that we have a data structure for the evaluation stack, we can proceed to look at how to implement the functions f : S -&gt; S’ associated with each instruction in the method body. At first glance, this might seem like a gargantuan task – in fact, panic might grip your heart – as there are rather a lot of different opcodes in IL. I haven’t bothered to count them, but it’s more than 200. Luckily, we don’t have to implement unique functions for all of them. Instead, we’ll treat groups of them in bulk. At a high level, we’ll distinguish between three groups of instructions: <em>generators</em>, <em>propagators</em> and <em>consumers</em>.</p>
+<p>The <em>generators</em> are instructions that conjure up <strong>this</strong> references out of thin air and push them onto the stack. The prime example is <strong>ldarg.0</strong> which loads the first argument to the method and pushes it. For instance methods, the first argument is always this. In addition to <strong>ldarg.0</strong>, there are a few other instructions that in principle could perform the same task (such as <strong>ldarg n</strong>).</p>
+<p>The <em>propagators</em> are instructions that can derive or pass on a <strong>this</strong> reference from an existing <strong>this</strong> reference. The <strong>dup</strong> instruction is such an instruction. It duplicates whatever is currently at the top of the stack. If that happens to be a <strong>this</strong> reference, the result will be <strong>this</strong> references at the two topmost locations in the stack.</p>
+<p>The vast majority of the instructions, however, are mere <em>consumers</em> in our scenario. They might vary in their exact effect on the stack (how many values they pop and push), but they’ll never produce a <strong>this</strong> reference. Hence we can treat them generically, as long as we know the number of pops and pushes for each – we’ll just pop values regardless of whether or not there they are <strong>this</strong> references, and we’ll push zero or more non-<strong>this</strong> values onto the stack.</p>
+<p>At this point, it’s worth considering the <em>soundness</em> of our approach. In particular, what happens if I fail to identify a <em>generator</em> or a <em>propagator</em>? Will the resulting code still be correct? Yes! Why? Because we’re always erring on the conservative side. As long as we don’t falsely produce a <strong>this</strong> reference that shouldn’t be there, we’re good. Failing to produce a <strong>this</strong> reference that should be there is not much of a problem, since the worst thing that can happen is that we miss a tail call that could have been rewritten. For instance, I’m not even bothering to try to track <strong>this</strong> references that are written to fields with <strong>stflda</strong> (for whatever reason!) and then read back and pushed onto the stack with <strong>ldflda</strong>.</p>
+<p>Does this mean TailCop is safe to use and you should apply it to your business critical applications to benefit from the immense speed benefits and reduced risk for stack overflows that stems from rewriting recursive calls to loops? Absolutely not! Are you crazy? Expect to find bugs, oversights and gaffes all over the place. In fact, TailCop is very likely to crash when run on code examples that deviate much at all from the simplistic examples found in this post. All I’m saying is that the principles should be sound.</p>
+<p><a href="https://github.com/jbevain/cecil">Mono.Cecil</a> does try to make our implementation task as simple as possible, though. The <strong>OpCode</strong> class makes it almost trivial to write f-functions for most consumers – which is terrific news, since so many instructions end up in that category. Each <strong>OpCode</strong> in Mono.Cecil knows how many values it pops and pushes, and so we can easily compose each f from the primitive functions pop and push. For instance, assume we want to create the function f<sub>add</sub> for the <strong>add</strong> instruction. Since Mono.Cecil is kind enough to tell us that <strong>add</strong> pops two values and pushes one value, we’ll use that information to compose the function f<sub>add</sub>(s) = push(*non-this*, pop(pop(s))).</p>
+<p>Here’s how we compose such f-functions for consumer instructions in TailCop:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">public</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">EvalStack</span><span class="p">,</span> <span class="n">EvalStack</span><span class="p">&gt;</span> <span class="n">CreateConsumerF</span><span class="p">(</span><span class="kt">int</span> <span class="n">pops</span><span class="p">,</span> <span class="kt">int</span> <span class="n">pushes</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">Func</span><span class="p">&lt;</span><span class="n">EvalStack</span><span class="p">,</span> <span class="n">EvalStack</span><span class="p">&gt;</span> <span class="n">pop</span> <span class="p">=</span> <span class="n">stack</span> <span class="p">=&gt;</span> <span class="n">stack</span><span class="p">.</span><span class="n">Pop</span><span class="p">();</span>
+  <span class="n">Func</span><span class="p">&lt;</span><span class="n">EvalStack</span><span class="p">,</span> <span class="n">EvalStack</span><span class="p">&gt;</span> <span class="n">push</span> <span class="p">=</span> <span class="n">stack</span> <span class="p">=&gt;</span> <span class="n">stack</span><span class="p">.</span><span class="n">Push</span><span class="p">(</span><span class="k">false</span><span class="p">);</span>
+  <span class="n">Func</span><span class="p">&lt;</span><span class="n">EvalStack</span><span class="p">,</span> <span class="n">EvalStack</span><span class="p">&gt;</span> <span class="n">result</span> <span class="p">=</span> <span class="n">stack</span> <span class="p">=&gt;</span> <span class="n">stack</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="n">pops</span><span class="p">;</span> <span class="n">i</span><span class="p">++)</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">fresh</span> <span class="p">=</span> <span class="n">result</span><span class="p">;</span>
+    <span class="n">result</span> <span class="p">=</span> <span class="n">stack</span> <span class="p">=&gt;</span> <span class="n">pop</span><span class="p">(</span><span class="n">fresh</span><span class="p">(</span><span class="n">stack</span><span class="p">));</span>
+  <span class="p">}</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="n">pushes</span><span class="p">;</span> <span class="n">i</span><span class="p">++)</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">fresh</span> <span class="p">=</span> <span class="n">result</span><span class="p">;</span>
+    <span class="n">result</span> <span class="p">=</span> <span class="n">stack</span> <span class="p">=&gt;</span> <span class="n">push</span><span class="p">(</span><span class="n">fresh</span><span class="p">(</span><span class="n">stack</span><span class="p">));</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+<p>Notice the two <strong>fresh</strong> variables, which are there to avoid problems related to closure modification. Eric Lippert explains the problem <a href="https://ericlippert.com/2009/11/12/closing-over-the-loop-variable-considered-harmful-part-one/">here</a> and <a href="https://ericlippert.com/2009/11/16/closing-over-the-loop-variable-considered-harmful-part-two/">here</a>. TL;DR is: we need a fresh variable to capture each intermediate <strong>result</strong> closure.</p>
+<p>We’ll call the <strong>CreateConsumerF</strong> method from the general <strong>CreateF</strong> method which also handles generators and propagators. The simplest possible version looks like this:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">private</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">EvalStack</span><span class="p">,</span> <span class="n">EvalStack</span><span class="p">&gt;</span> <span class="n">CreateF</span><span class="p">(</span><span class="n">Instruction</span> <span class="n">insn</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">op</span> <span class="p">=</span> <span class="n">insn</span><span class="p">.</span><span class="n">OpCode</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">op</span> <span class="p">==</span> <span class="n">OpCodes</span><span class="p">.</span><span class="n">Ldarg_0</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Prototypical *this* generator!!</span>
+    <span class="k">return</span> <span class="n">stack</span> <span class="p">=&gt;</span> <span class="n">stack</span><span class="p">.</span><span class="n">Push</span><span class="p">(</span><span class="k">true</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="n">op</span> <span class="p">==</span> <span class="n">OpCodes</span><span class="p">.</span><span class="n">Dup</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="c1">// Prototypical *this* propagator!!</span>
+    <span class="k">return</span> <span class="n">stack</span> <span class="p">=&gt;</span> <span class="n">stack</span><span class="p">.</span><span class="n">Push</span><span class="p">(</span><span class="n">stack</span><span class="p">.</span><span class="n">Peek</span><span class="p">());</span>
+  <span class="p">}</span>
+ 
+  <span class="k">return</span> <span class="nf">CreateConsumerF</span><span class="p">(</span><span class="n">insn</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+<p>You’ll note that I’ve only included a single generator and a single propagator! I might add more later on. The minimal <strong>CreateF</strong> version is sufficient to handle our naïve <strong>Add</strong> method though.</p>
+<p>Now that we have a factory that produces f-functions for us, we’re all set to compose g-functions for each node in the CFG.</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">private</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">EvalStack</span><span class="p">,</span> <span class="n">EvalStack</span><span class="p">&gt;</span> <span class="n">CreateG</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="nf">CreateComposite</span><span class="p">(</span><span class="n">_first</span><span class="p">,</span> <span class="n">_last</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">private</span> <span class="n">Func</span><span class="p">&lt;</span><span class="n">EvalStack</span><span class="p">,</span> <span class="n">EvalStack</span><span class="p">&gt;</span> <span class="n">CreateComposite</span><span class="p">(</span>
+  <span class="n">Instruction</span> <span class="n">first</span><span class="p">,</span> 
+  <span class="n">Instruction</span> <span class="n">last</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">Instruction</span> <span class="n">insn</span> <span class="p">=</span> <span class="n">first</span><span class="p">;</span>
+  <span class="n">Func</span><span class="p">&lt;</span><span class="n">EvalStack</span><span class="p">,</span> <span class="n">EvalStack</span><span class="p">&gt;</span> <span class="n">fun</span> <span class="p">=</span> <span class="n">stack</span> <span class="p">=&gt;</span> <span class="n">stack</span><span class="p">;</span>
+  <span class="k">while</span> <span class="p">(</span><span class="n">insn</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">var</span> <span class="n">f</span> <span class="p">=</span> <span class="n">CreateF</span><span class="p">(</span><span class="n">insn</span><span class="p">);</span>
+    <span class="kt">var</span> <span class="n">fresh</span> <span class="p">=</span> <span class="n">fun</span><span class="p">;</span>
+    <span class="n">fun</span> <span class="p">=</span> <span class="n">stack</span> <span class="p">=&gt;</span> <span class="n">f</span><span class="p">(</span><span class="n">fresh</span><span class="p">(</span><span class="n">stack</span><span class="p">));</span>
+    <span class="n">insn</span> <span class="p">=</span> <span class="p">(</span><span class="n">insn</span> <span class="p">==</span> <span class="n">last</span><span class="p">)</span> <span class="p">?</span> <span class="k">null</span> <span class="p">:</span> <span class="n">insn</span><span class="p">.</span><span class="n">Next</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="n">fun</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+<p>Once we have the g-function for each node, we can proceed to turn the pseudocode for processing nodes into actual C# code. In fact the C# code looks remarkably similar to the pseudocode.</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">public</span> <span class="k">void</span> <span class="nf">Process</span><span class="p">(</span><span class="n">ImmutableHashSet</span><span class="p">&lt;</span><span class="n">EvalStack</span><span class="p">&gt;</span> <span class="k">set</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">x</span> <span class="p">=</span> <span class="k">set</span><span class="p">.</span><span class="n">Except</span><span class="p">(</span><span class="n">_I</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(!</span><span class="n">x</span><span class="p">.</span><span class="n">IsEmpty</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_I</span> <span class="p">=</span> <span class="n">_I</span><span class="p">.</span><span class="n">Union</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+    <span class="n">_O</span> <span class="p">=</span> <span class="n">_I</span><span class="p">.</span><span class="n">Select</span><span class="p">(</span><span class="n">s</span> <span class="p">=&gt;</span> <span class="n">G</span><span class="p">(</span><span class="n">s</span><span class="p">)).</span><span class="n">ToImmutableHashSet</span><span class="p">();</span>
+    <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">n</span> <span class="k">in</span> <span class="n">_targets</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">n</span><span class="p">.</span><span class="n">Process</span><span class="p">(</span><span class="n">_O</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+<p>We process the nodes in the CFG, starting at the root node, until the <strong>I</strong>-sets of input stacks and the <strong>O</strong>-sets of output stacks stabilize. At that point, we can determine the stack state (with respect to this references) for any given instruction in the method – including for any recursive method call. We determine whether or not it is safe to rewrite a recursive call to a loop like this:</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="k">public</span> <span class="kt">bool</span> <span class="nf">SafeToRewrite</span><span class="p">(</span><span class="n">Instruction</span> <span class="n">call</span><span class="p">,</span> 
+  <span class="n">Dictionary</span><span class="p">&lt;</span><span class="n">Instruction</span><span class="p">,</span> <span class="n">Node</span><span class="p">&gt;</span> <span class="n">map</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">insn</span> <span class="p">=</span> <span class="n">call</span><span class="p">;</span>
+  <span class="k">while</span> <span class="p">(!</span><span class="n">map</span><span class="p">.</span><span class="n">Keys</span><span class="p">.</span><span class="n">Contains</span><span class="p">(</span><span class="n">insn</span><span class="p">))</span>
+  <span class="p">{</span>
+    <span class="n">insn</span> <span class="p">=</span> <span class="n">insn</span><span class="p">.</span><span class="n">Previous</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kt">var</span> <span class="n">node</span> <span class="p">=</span> <span class="n">map</span><span class="p">[</span><span class="n">insn</span><span class="p">];</span>
+  <span class="kt">var</span> <span class="n">stacks</span> <span class="p">=</span> <span class="n">node</span><span class="p">.</span><span class="n">GetPossibleStacksAt</span><span class="p">(</span><span class="n">call</span><span class="p">);</span>
+  <span class="kt">var</span> <span class="n">callee</span> <span class="p">=</span> <span class="p">(</span><span class="n">MethodReference</span><span class="p">)</span><span class="n">call</span><span class="p">.</span><span class="n">Operand</span><span class="p">;</span>
+  <span class="kt">var</span> <span class="n">pops</span> <span class="p">=</span> <span class="n">callee</span><span class="p">.</span><span class="n">Parameters</span><span class="p">.</span><span class="n">Count</span><span class="p">;</span>
+  <span class="k">return</span> <span class="n">stacks</span><span class="p">.</span><span class="n">Select</span><span class="p">(</span><span class="n">s</span> <span class="p">=&gt;</span>
+    <span class="p">{</span>
+      <span class="kt">var</span> <span class="n">st</span> <span class="p">=</span> <span class="n">s</span><span class="p">;</span>
+      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="n">pops</span><span class="p">;</span> <span class="n">i</span><span class="p">++)</span>
+      <span class="p">{</span>
+        <span class="n">st</span> <span class="p">=</span> <span class="n">st</span><span class="p">.</span><span class="n">Pop</span><span class="p">();</span>
+      <span class="p">}</span>
+      <span class="k">return</span> <span class="n">st</span><span class="p">;</span>
+    <span class="p">}).</span><span class="n">All</span><span class="p">(</span><span class="n">s</span> <span class="p">=&gt;</span> <span class="n">s</span><span class="p">.</span><span class="n">Peek</span><span class="p">());</span>
+<span class="p">}</span>
+</code></pre>
+<p>We find the node that the call instruction belongs to, find the possible stack states at the call site, pop off any values intended to be passed as arguments to the method, and verify that we find a this reference at the top of each stack. Simple! To find the possible stack states, we need to compose the h-function for the call, but that’s easy at this point.</p>
+<pre class="codehilite"><code class="language-csharp"><span></span><span class="n">ImmutableHashSet</span><span class="p">&lt;</span><span class="n">EvalStack</span><span class="p">&gt;</span> <span class="n">GetPossibleStacksAt</span><span class="p">(</span><span class="n">Instruction</span> <span class="n">call</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">var</span> <span class="n">h</span> <span class="p">=</span> <span class="n">CreateH</span><span class="p">(</span><span class="n">call</span><span class="p">);</span>
+  <span class="k">return</span> <span class="n">_I</span><span class="p">.</span><span class="n">Select</span><span class="p">(</span><span class="n">h</span><span class="p">).</span><span class="n">ToImmutableHashSet</span><span class="p">();</span>
+<span class="p">}</span> 
+
+<span class="n">Func</span><span class="p">&lt;</span><span class="n">EvalStack</span><span class="p">,</span> <span class="n">EvalStack</span><span class="p">&gt;</span> <span class="n">CreateH</span><span class="p">(</span><span class="n">Instruction</span> <span class="n">call</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="nf">CreateComposite</span><span class="p">(</span><span class="n">_first</span><span class="p">,</span> <span class="n">call</span><span class="p">.</span><span class="n">Previous</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+<p>And with that, we’re done. Does it work? It works on my machine. You’ll have to download TailCop and try for yourself.</p>
+</body></html>
