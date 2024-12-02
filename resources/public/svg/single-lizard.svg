@@ -1,13 +1,4 @@
-:page/title Title
-:blog-post/tags [:tech]
-:blog-post/author {:person/id :einarwh}
-:blog-post/hidden? true
-:page/body
-
-# Title
-
-Text
-
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg width="400px" height="400px" viewBox="0 0 400 400" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title></title>
     <description></description>

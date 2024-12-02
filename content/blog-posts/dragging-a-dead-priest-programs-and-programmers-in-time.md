@@ -30,4 +30,4 @@ Speaking of help: the program is interwoven with the organization that creates t
 
 What changes brush up against and confront all this inertia? All kinds: functional requirements, non-functional requirements, vulnerabilities in third party components, fashions and trends, legislation, macro and micro economic developments, funding, people leaving and joining - anything that changes the relationship between the program (or our part of it, anyway), the organization and the world they both operate in. The world is an engine that creates constant gaps, and we must keep running to stand relatively still. Or rather to maintain our balance, since the world is spinning, never where it was a moment ago.
 
-What happens if we can't keep up? If the gaps between expectations and reality becomes too large, and the illusion of the living program breaks down? Is it a second death that awaits when the priest has become too heavy for us to move?
+What happens if we can't keep up? If the gaps between expectations and reality become too large, and the illusion of the living program breaks down? Is it a second death that awaits when the priest has become too heavy for us to move?
