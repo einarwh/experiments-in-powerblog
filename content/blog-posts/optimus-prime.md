@@ -104,7 +104,7 @@ That's not terribly interesting, though. Although it might be worth noting that 
 
 > n, 2n, 3n, 4n, 5n…
 
-instead (without exciting people too much, I guess). We could even provide an additional constructor to enable you to set a start value k, so you'd get the sequence
+instead (without exciting people too much, I guess). We could even provide an additional constructor to enable you to set a start value _k_, so you'd get the sequence
 
 > n+k, 2n+k, 3n+k, 4n+k, 5n+k…
 
@@ -300,7 +300,7 @@ Now, a problem with the Sieve of Eratosthenes as it is formulated here, is that 
 
 Essentially, we maintain an infinite sequence of prime-multiples for each prime we encounter. For each new number we want to check, we check to see if there are pending prime-multiples (i.e. obvious non-primes) matching the number. If there are, the number is _not_ a prime (since we're looking at a number that would have been eliminated in the finite Sieve of Erastosthenes). The number is discarded just-in-time, and the eliminating sequence(s) of prime-multiples are advanced to the next prime-multiple. If there is no matching prime-multiple in any of the sequences, the number _is_ a brand new prime. This means that we need to add a new infinite sequence of prime-multiples to our collection. In other words, we're aggregating such sequences as we go along. Luckily, they each hold on to no more than a single integer value (See, I told you that was useful. And you wouldn't believe me!)
 
-Now how do we keep track of our prime-multiple-sequences? A naive approach would be to keep them all in a list, and just check them all for each candidate number. That wouldn't be too bad for a small number of primes. However, say you're looking to see if a number n is the 1001th prime - you'd have to go through all 1000 prime-multiple sequences to see if any of them eliminate n as a candidate. That's a lot of unnecessary work! What we really need to do, is check the one(s) with the smallest pending prime-multiple. Using a priority queue to hold our sequences makes this an O(1) operation. Unfortunately, the .NET framework doesn't contain an implementation of a priority queue. Fortunately, the [C5 Generic Collection Library](http://www.itu.dk/research/c5/) does. So we'll use that.
+Now how do we keep track of our prime-multiple-sequences? A naive approach would be to keep them all in a list, and just check them all for each candidate number. That wouldn't be too bad for a small number of primes. However, say you're looking to see if a number _n_ is the 1001th prime - you'd have to go through all 1000 prime-multiple sequences to see if any of them eliminate _n_ as a candidate. That's a lot of unnecessary work! What we really need to do, is check the one(s) with the smallest pending prime-multiple. Using a priority queue to hold our sequences makes this an O(1) operation. Unfortunately, the .NET framework doesn't contain an implementation of a priority queue. Fortunately, the [C5 Generic Collection Library](http://www.itu.dk/research/c5/) does. So we'll use that.
 
 Here, then, is how we could implement an **IEnumerable&lt;int&gt;** that represents an infinite sequence of primes:
 
@@ -369,7 +369,7 @@ public class SimplePrimeEnumerator : IEnumerator<int>
 
 An interesting thing to point out is that the prime-multiple sequence doesn't have to start until prime\*prime. Why? Because smaller multiples of the prime will already be covered by previously considered primes! For instance, the prime-multiple sequence for 17 doesn't have to contain the multiple 17\*11 since the prime-multiple sequence for 11 will contain the same number.
 
-Now this implementation is actually pretty decent. There's just one thing that leaps to mind as sort of wasted effort. We're checking _every number there is_ to see if it could possibly be a prime. Yet we know that 2 is the only even number that is a prime (all the others, well, they'd be divisible by 2, right?). So half of our checks are completely in vain.
+Now this implementation is actually pretty decent. There's just one thing that leaps to mind as sort of wasted effort. We're checking _every number there is_ to see if it could possibly be a prime. Yet we know that 2 is the _only_ even number that is a prime (all the others, well, they'd be divisible by 2, right?). So half of our checks are completely in vain.
 
 What if we baked in a little bit of smarts to handle this special case? Say we create a *PrimeSequence* like so:
 

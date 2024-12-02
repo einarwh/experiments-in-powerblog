@@ -56,7 +56,7 @@ I guess you could argue that the [demoscene](https://en.wikipedia.org/wiki/Demos
 
 Those are just a few of the questions that can be asked to delve at least a little deeper into the reading of programming as art. And we could do the same for programming as science.
 
-A more pressing issue is: why on earth would we stop at just those two? It seems to me that we suffer from extreme lack of imagination if those are the only two readings of programming that we can give, and that we are somehow condemned to repeat those two readings forever, in tandem. It's like you could _never_ analyze Hamlet from anything else than a Freudian angle, as an Oedipus drama. I think we desperately need to break out and look at other perspectives. What is programming as neither art nor science? What is it then?
+A more pressing issue is: why on earth would we stop at just those two? It seems to me that we suffer from extreme lack of imagination if those are the only two readings of programming that we can give, and that we are somehow condemned to repeat those two readings forever, in tandem. It's like you could _never_ analyze Hamlet from _anything else_ than a Freudian angle, as an Oedipus drama. I think we desperately need to break out and look at other perspectives. What is programming as neither art nor science? What is it then?
 
 What happens if we think of programming as something else entirely, or even as the negation or absence of something? Are there aspects of programming that somehow escape our attempts to capture or describe them with metaphors? What is the irreducible _other_ of programming?
 
@@ -64,7 +64,7 @@ Eventually we might ask ourselves - as we perform these readings, these attempts
 
 That might seem silly, because surely we do it to understand programming better, right? It's an act of interpretation aimed at answering the question "what is programming?".
 
-But that's not the only possible explanation. Another way to look at it is that we are reading - interpreting - programming to be something ourselves. Because programming is something that we, programmers, do. Whatever programming is determines who or what we are. Programming makes the programmer. Whatever metaphor we apply acts a mirror, and we want to like what we see in the mirror.
+But that's not the only possible explanation. Another way to look at it is that we are reading - interpreting - programming to _be_ something ourselves. Because programming is something that we, programmers, do. Whatever programming _is_ determines who or what we _are_. Programming makes the programmer. Whatever metaphor we apply acts a mirror, and we want to like what we see in the mirror.
 
 For instance, viewing programming as art makes the programmer an artist. This is clearly a desirable identity for some, with [Paul Graham](http://www.paulgraham.com/hp.html) being the most prominent example. Unfortunately, borrowed clothes often fit poorly, and borrowed identities are often hollow. You risk that someone will [call your bluff](https://idlewords.com/2005/04/dabblers_and_blowhards.htm). Programmers are first and foremost programmers. And why shouldn't that be enough? I am curious as to where this impulse to borrow legitimacy and status from other identities comes from. Why aren't we content to be mere programmers? Why do we feel the need to borrow feathers from others?
 

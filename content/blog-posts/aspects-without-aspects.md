@@ -170,7 +170,7 @@ A screenshot of my console verifies this:
 
 ![Console screenshot](/images/screenshot-hello-kiczales.png)
 
-So we've seen that we can do fluent exception handling, caching and aspects without aspects using the same basic idea: we take something of type **Func&lt;TR&gt;** and produce something else of the same type. Of course, this means that we're free to mix and match all of these things if we wanted to, and compose them all using Linq's **Aggregate** method! For once, though, I think I'll leave that as an exercise for the reader.
+So we've seen that we can do fluent exception handling, caching and aspects without aspects using the same basic idea: we take something of type **Func&lt;TR&gt;** and produce something else of the same type. Of course, this means that we're free to mix and match _all_ of these things if we wanted to, and compose them all using Linq's **Aggregate** method! For once, though, I think I'll leave that as an exercise for the reader.
 
 And of course, we can transform other things besides closures as well - we can use the same approach to transform any instance of type **T** to some other **T** instance. In fact, let's declare a delegate to capture such a generalized concept:
 

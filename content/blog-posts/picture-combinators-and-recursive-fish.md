@@ -245,7 +245,7 @@ We proceed to compose simple pictures into more complex ones. We define two basi
 
 TODO: above-beside.png
 
-Here we see the F placed above the turned F, and the F placed beside the turned F. Notice that each composed picture forms a square, whereas each original picture is placed within a half of that square. What happens is that the bounding box given to the composite picture is split in two, with each original picture receiving one of the split boxes as their bounding box. The example shows an even split, but in general we can assign a fraction of the bounding box to the first argument picture, and the remainder to the second.
+Here we see the F placed above the turned F, and the F placed beside the turned F. Notice that each composed picture forms a square, whereas each original picture is placed within a half of that square. What happens is that the bounding box given to the composite picture is split in two, with each original picture receiving one of the split boxes as _their_ bounding box. The example shows an even split, but in general we can assign a fraction of the bounding box to the first argument picture, and the remainder to the second.
 
 For implementation details, we'll just look at **above**:
 
@@ -305,7 +305,7 @@ TODO: Henderson's fish (turned, flipped and tossed)
 
 But there's more to the fish than might be immediately obvious. After all, it's not just any fish, it's an Escher fish. An interesting property of the fish is shown if we overlay it with itself turned twice.
 
-We define a combinator **over** that takes two pictures and places _both_ pictures with respect to the same bounding box. And voila:
+We define a combinator **over** that takes two pictures and places _both_ pictures with respect to the _same_ bounding box. And voila:
 
 TODO: overlay-fish
 
@@ -438,7 +438,7 @@ Here's what I came up with.
 
 TODO: escher-fish-all.png
 
-To support different hues of the same fish requires a bit of thinking - we can't just follow Henderson's instructions any more. But we can use exactly the same approach! In addition to transforming the shape of the picture, we need to be able to transform the _coloring_ of the picture. For this, we introduce a new abstraction, that we will call a **Lens**.
+To support different hues of the same fish requires a bit of thinking - we can't just follow Henderson's instructions any more. But we can use exactly the same approach! In addition to transforming the _shape_ of the picture, we need to be able to transform the _coloring_ of the picture. For this, we introduce a new abstraction, that we will call a **Lens**.
 
 ```fsharp
 type Hue = Blackish | Greyish | Whiteish

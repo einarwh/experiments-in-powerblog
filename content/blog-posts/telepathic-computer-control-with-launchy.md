@@ -38,7 +38,7 @@ Sometimes I won't hit ENTER directly - instead I'll hit TAB and type in some mor
 
 ## Type a command
 
-That's really just half the story. I'll type in the name of a command, followed by TAB and some text. I use this mostly for search (and quick web navigation in general, see below). I launch a Google search by typing "g TAB search term". For instance, to dig up some info on Windows Phone 7 and the MVVM pattern, I'd do this:
+That's really just half the story. I'll type in the name of a command, followed by TAB and some text. I use this mostly for search (and quick web navigation in general, see below). I launch a Google search by typing "g TAB &lt;search term&gt;". For instance, to dig up some info on Windows Phone 7 and the MVVM pattern, I'd do this:
 
 ![Using Launchy for a Google search.](/images/launchy-wp7-mvvm.png)
 

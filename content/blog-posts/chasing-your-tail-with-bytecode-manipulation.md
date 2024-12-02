@@ -26,7 +26,7 @@ The algorithm exploits two simple facts:
 
 So basically we just decrement _x_ and increment _y_ until we run out of _x_, and then all we have left is _y_. Pretty simple.
 
-This algorithm works really well for lots of integers, but the physical world of the computer puts a limit on how big _x_ can be. The problem is this: each time we call **Add**, the .NET runtime will allocate a bit of memory known as a stack frame for the execution of the method. To illustrate, consider the addition of two small numbers, 6 + 6. If we imagine the stack frames -uh- stacked on top of each other, it might look something like this:
+This algorithm works really well for lots of integers, but the physical world of the computer puts a limit on how big _x_ can be. The problem is this: each time we call **Add**, the .NET runtime will allocate a bit of memory known as a _stack frame_ for the execution of the method. To illustrate, consider the addition of two small numbers, 6 + 6. If we imagine the stack frames -uh- stacked on top of each other, it might look something like this:
 
 ![Call stack for the recursive Add method](/images/add-call-stack.png)
 

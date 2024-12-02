@@ -12,7 +12,7 @@ I read this tweet today:
 
 > More and more, I don't particularly like the label "programmer." We are developers, not programmers. We develop systems that help people. Those systems may or may not involve programming. All too often, programming is a hammer in search of a nail.
 >
-> -- <cite>Allen Holub (@allenholub)</cite>
+> -- Allen Holub (@allenholub) Feb 10, 2021
 
 I've seen variations of that statement many times over the years. It's a statement that resonnates with many people. It's easy to see why. After all, we're not mere programmers. We do lots of things.
 
@@ -36,4 +36,4 @@ Here's how I think about it these days: If we really mean that programming isn't
 
 Hence, the reason I've started referring to myself as a programmer again is not that I'm not a software developer. I am. It's that I'm not the only software developer. By referring to myself as a software developer, I feel like I'm perpetuating the view that as a programmer, I am somehow special in this effort. Like I'm the one doing the real work. I'd like to get away from that. It's not true.
 
-The one activity that I _do_ do that people with other specialities don't do, is program. I am a programmer. Some of the other software developers I work with are not.
+The one activity that I _do_ do that people with other specialities _don't_ do, is program. I am a programmer. Some of the other software developers I work with are not.

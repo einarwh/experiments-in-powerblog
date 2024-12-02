@@ -30,7 +30,7 @@ This makes the code extraordinarily difficult to reason about. Hence, it would s
 >
 >— @sarahmei
 
-In DDD terms, modelling debt indicates that insufficient [knowledge crunching](http://www.informit.com/articles/article.aspx?p=102604&seqNum=2) has taken place. Knowledge crunching involves learning about the problem domain and capturing that knowledge in a suitable domain model. This is a communication-driven process that involves identifying and resolving ambiguity in the problem domain, and expressing the domain as clearly as possible. Most of all, it is a chaotic and messy process that involves people and discussion. Insufficient knowledge crunching in turn points towards the ultimate cause of technical debt: poor communication.
+In DDD terms, _modelling debt_ indicates that insufficient [knowledge crunching](http://www.informit.com/articles/article.aspx?p=102604&seqNum=2) has taken place. Knowledge crunching involves learning about the problem domain and capturing that knowledge in a suitable domain model. This is a communication-driven process that involves identifying and resolving ambiguity in the problem domain, and expressing the domain as clearly as possible. Most of all, it is a chaotic and messy process that involves _people_ and _discussions_. Insufficient knowledge crunching in turn points towards the ultimate cause of _technical debt_: poor communication.
 
 > Communication is the principal portion of the "technical debt." Messy code is just the ever-increasing interest. 
 >

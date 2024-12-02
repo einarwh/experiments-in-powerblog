@@ -18,7 +18,7 @@ This a field vole:
 
 ![A field vole up close](/images/field-vole.jpg)
 
-I'm not really sure if it's _technically_ a mouse or just a really close relative, but for all our intents and purposes, it sure is. A small, very reproductive mouse.
+I'm not really sure if it's _technically_ a mouse or just a really close relative, but for all _our_ intents and purposes, it sure is. A small, very reproductive mouse.
 
 So, do you have an answer to the problem? _No_?
 

@@ -75,7 +75,7 @@ public interface ISemigroup<T>
 }
 ```
 
-And we can modify our `Reduce` function to work with semigroups, which by definition guarantees that the `Combine` function is associative.
+And we can modify our `Reduce` function to work with semigroups, which _by definition_ guarantees that the `Combine` function is associative.
 
 ```csharp
 public static T Reduce<T>(this IEnumerable<T> things, 

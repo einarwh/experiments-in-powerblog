@@ -61,7 +61,7 @@ Which is kind of neat and yields the desired result:
 
 ![Better tag nesting with composition.](/images/good-tag-nesting.png)
 
-But we can attack the problem more directly. There's not a whole lot we can do to prevent our **Tag** object from capturing the subsequent method calls to **Tag**. But we are free to respond to those method calls in any ol' way we like. A trivial change to **TryInvokeMember** will do just nicely:
+But we can attack the problem more directly. There's not a whole lot we can do to prevent our **Tag** object from capturing the subsequent method calls to **Tag**. But we _are_ free to respond to those method calls in any ol' way we like. A trivial change to **TryInvokeMember** will do just nicely:
 
 ```csharp
 public override bool TryInvokeMember(
@@ -86,4 +86,4 @@ public override bool TryInvokeMember(
 }
 ```
 
-So we just single out calls for a method named **Tag** with a single string parameter. For those method calls, we're not going to do the regular fluent collection of method names and parameters thing. Instead, we'll convert the existing **Tag** to a string, and return a brand new **Tag** to wrap that string. And now we can go a-nesting tags as much as we'd like, and still get the result we wanted. Win!
+So we just single out calls for a method named **Tag** with a single string parameter. For those method calls, we're not going to do the regular fluent collection of method names and parameters thing. Instead, we'll convert the existing **Tag** to a string, and return a brand new **Tag** to wrap _that_ string. And now we can go a-nesting tags as much as we'd like, and still get the result we wanted. Win!

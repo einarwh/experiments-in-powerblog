@@ -60,7 +60,7 @@ In design meetings, most people still use the term "horse that's short and stubb
 
 ![Mule](/images/mule-only.png)
 
-What is it? Well, it's the offspring from a horse and a horse that's short and stubborn and says hee-haw. It shares some properties with the former kind of horse and some with the latter, so obviously there will be much reuse! And a few customizations and adjustments unique for this new new kind of horse. At this point you're getting worried. You sense there will be trouble if you can't speak clearly about this horse, so you cry out "let's call it a half hee-haw!" But it doesn't catch on. Talking about things is getting a bit cumbersome.
+What is it? Well, it's the offspring from a horse and a horse that's short and stubborn and says hee-haw. It shares some properties with the former kind of horse and some with the latter, so obviously there will be much reuse! And a few customizations and adjustments unique for this _new_ new kind of horse. At this point you're getting worried. You sense there will be trouble if you can't speak clearly about this horse, so you cry out "let's call it a half hee-haw!" But it doesn't catch on. Talking about things is getting a bit cumbersome.
 
 "But at least I can still implement it," you think for yourself. "And I can mostly guess what kind of horses the UX people are thinking about when they say ‘horse' anyway, I'll just map it in my head to the right thing". You add a **Sire** and a **Dam** property to **Horse**. And you proceed to update existing logic and write new logic.
 

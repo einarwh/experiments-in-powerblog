@@ -255,7 +255,7 @@ Frob TraditionalSafeMethod4() {
 
 So there's nothing very complicated going on here. In fact, I bet you can see how similar the two methods really are - the structure is identical! All we've done is replace the familiar _try-catch_ construct with our own **Call**-construct.
 
-As an aside, we should note that the composed try-catch approach has slightly different semantics than the sequential, coupled try-catch approach. The difference in semantics is due to decoupling provided by the composed try-catch approach - each catch-block is completely independent. Therefore, there is nothing stopping us from having multiple catch-handlers for the same type of exception should we so desire.
+As an aside, we should note that the composed try-catch approach has slightly different semantics than the sequential, coupled try-catch approach. The difference in semantics is due to decoupling provided by the composed try-catch approach - each catch-block is completely independent. Therefore, there is nothing stopping us from having multiple catch-handlers for the _same_ type of exception should we so desire.
 
 Now, to work on the readability a bit. What we really would like is some way to attach catch-handlers for various exception types to our function call. So assuming that we wrap up our original function call in a closure using a delegate of type **Func&lt;TR&gt;**, we would like to be able to attach a catch-handler for some exception type **TE**, and end up with a new closure that still has the type **Func&lt;TR&gt;**. Then we would have encapsulated the exception handling completely. Our unambitious **Call**-method from above is almost what we need, but not quite. Instead, let's define an extension method on the type that we would like to extend! **Func&lt;TR&gt;**, that is:
 
@@ -336,7 +336,7 @@ Func<TR> Protect<TR>(Func<TR> it) {
 }
 ```
 
-However, it's surprisingly difficult to provide a suitable type for that sequence of catch-handlers - in fact, the C# compiler fails to do so! The problem is that delegates are contravariant in their parameters, which means that a delegate **D1** is considered a subtype of delegate **D2** if the parameters of **D1** are supertypes of the parameters of **D2**. That's all a bit abstract, so perhaps an example will help:
+However, it's surprisingly difficult to provide a suitable type for that sequence of catch-handlers - in fact, the C# compiler fails to do so! The problem is that delegates are contravariant in their parameters, which means that a delegate **D1** is considered a _subtype_ of delegate **D2** if the parameters of **D1** are _supertypes_ of the parameters of **D2**. That's all a bit abstract, so perhaps an example will help:
 
 ```csharp
 Action<object> d1 = (object o) => {}; 
@@ -346,7 +346,7 @@ d1 = d2; // This won't compile.
 d2 = d1; // This is OK.
 ```
 
-To make sense of the abstract description above, assume that **D1** is Action&lt;object&gt; and D2 is Action&lt;string>. Since the **D1** parameter (object) is a supertype of the **D2** parameter (string), it follows that **D1** is a subtype of **D2** - and not the other way around, as we might have guessed. This is why the C# compiler won't let us assign a **D2** instance to a **D1** reference.
+To make sense of the abstract description above, assume that **D1** is **Action&lt;object&gt;** and **D2** is **Action&lt;string&gt;**. Since the **D1** parameter (**object**) is a supertype of the **D2** parameter (**string**), it follows that **D1** is a subtype of **D2** - and not the other way around, as we might have guessed. This is why the C# compiler won't let us assign a **D2** instance to a **D1** reference.
 
 The implication is that the C# compiler will fail to find a type that will reconcile the catch handlers above. In particular, due to the contravariance of delegate parameters, we cannot type the sequence as **Func&lt;Exception, TR&gt;**, since neither **Func&lt;NullReferenceException, TR&gt;**, nor **Func&lt;InvalidOperationException, TR&gt;**, nor **Func&lt;FormatException, TR&gt;** are assignable to **Func&lt;Exception, TR&gt;**. It would go the other way around: we could assign a **Func&lt;Exception, TR&gt;** to all three of the other types, but which one should the compiler pick? If it (arbitrarily) picked **Func<&lt;NullReferenceException, TR&gt;**, clearly it wouldn't work for the two other delegates - and all other choices have the same problem.
 
