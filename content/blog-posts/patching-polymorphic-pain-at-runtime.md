@@ -14,7 +14,7 @@ In the last post, we saw that data binding in ASP.NET doesn't support polymorphi
 
 As an example, let's revisit our two four-legged friends and one enemy from the previous post: the **Dog**, the **Chihuahua** and the **Wolf**. They all implement **ICanine**.
 
-The canines have gained a skill since last time, though – they can now indicate whether or not they'll enjoy a particular kind of food. The code looks like this:
+The canines have gained a skill since last time, though - they can now indicate whether or not they'll enjoy a particular kind of food. The code looks like this:
 
 ```csharp
 public enum Food { Biscuit, Meatballs, You }
@@ -238,7 +238,7 @@ It's time to start worrying about the box itself, though. Of course, this is whe
 
 So the goal is to create a type at runtime. The type should be used to wrap each item in an **IEnumerable&lt;T&gt;**, so that the control's **DataSource** is set to a perfectly homogenous **IEnumerable**. That is, it will only contain instances of the same concrete type. The wrapper type won't have any intelligence of its own, it will merely delegate to the wrapped instance of **T**.
 
-To support auto-generation of columns, the wrapper type must have the same public properties as **T**. (We won't consider the option of masking or renaming properties – that's a use case that goes beyond just fixing what is broken.) In the case of **T** being an interface, a viable option would be for the wrapper type to implement **T**. However, we need the wrapper to work for all kinds of **T**, including when **T** is a base class with one or more non-virtual members. In the general case, therefore, the wrapper must simply mimic the same properties, duck typing-style.
+To support auto-generation of columns, the wrapper type must have the same public properties as **T**. (We won't consider the option of masking or renaming properties - that's a use case that goes beyond just fixing what is broken.) In the case of **T** being an interface, a viable option would be for the wrapper type to implement **T**. However, we need the wrapper to work for all kinds of **T**, including when **T** is a base class with one or more non-virtual members. In the general case, therefore, the wrapper must simply mimic the same properties, duck typing-style.
 
 Auto-generation of columns is pretty nifty, and a property-mimicking wrapper is sufficient for that scenario. For more sophisticated data binding scenarios, though, you need to be able to call arbitrary methods on the item we're binding to. To do so in the general case (where **T** might be a class), we need some way of shedding the wrapper. We can't simply call the methods on the wrapper itself, since we don't have access to the name of the dynamically generated wrapper type at compile time. The C# compiler wouldn't let us (well, we could use **dynamic**, but then we're giving up static typing). So we'll be using an **Unwrap** method, giving us access to the bare **T**. (Note that we can't use a property, since that would show up when auto-generating columns!)
 
@@ -281,7 +281,7 @@ public class BoxedICanine : Box<ICanine>, ICanine
 }
 ```
 
-Of course, the boxes we generate at runtime will never actually have a C# manifestation – they will be bytecode only. At this point though, the hand-written example will prove useful as target for our dynamically generated type.
+Of course, the boxes we generate at runtime will never actually have a C# manifestation - they will be bytecode only. At this point though, the hand-written example will prove useful as target for our dynamically generated type.
 
 Note that we're going to try to be a little clever in our implementation. In the case where **T** is an interface (like **ICanine**), we're going to let the dynamically generated box implement the original interface **T**, in addition to extending **Box&lt;T&gt;**. This will allow us to pretend that the box isn't even there during data binding. You might recall that we're casting to **ICanine** rather than calling **Unwrap** in the **FoodColumnTemplate**, even though the data item is our dynamically generated type rather than the original canine. Obviously we won't be able to pull off that trick when **T** is a class, since C# has single inheritance.
 
@@ -358,7 +358,7 @@ private EmptyBoxFactory()
 }
 ```
 
-**AssemblyBuilderAccess.Run** indicates that we're creating a transient assembly – it won't be persisted to disk. We're holding on to the module builder, which we'll use when creating types later on. Assuming that we'll be using the **BoxEnumerable&lt;T&gt;** in multiple data binding scenarios (for various **T**s), the module will be accumulating types over time.
+**AssemblyBuilderAccess.Run** indicates that we're creating a transient assembly - it won't be persisted to disk. We're holding on to the module builder, which we'll use when creating types later on. Assuming that we'll be using the **BoxEnumerable&lt;T&gt;** in multiple data binding scenarios (for various **T**s), the module will be accumulating types over time.
 
 The public API of **EmptyBoxFactory** is limited to a single method, **CreateEmptyBox**. It uses reflection to create an instance of the appropriate type.
 
@@ -388,7 +388,7 @@ private Type GetBoxType<T>()
 }
 ```
 
-We're still treading the waters, though. Specifically, we're just checking if the module already contains the suitable box type – meaning that we've been down this road before. Assuming we haven't (and we haven't, have we?), we'll go on to **CreateBoxType**. Hopefully we'll see something interesting there.
+We're still treading the waters, though. Specifically, we're just checking if the module already contains the suitable box type - meaning that we've been down this road before. Assuming we haven't (and we haven't, have we?), we'll go on to **CreateBoxType**. Hopefully we'll see something interesting there.
 
 ```csharp
 public Type CreateBoxType(Type t, Type boxType, string typeName)
@@ -485,9 +485,9 @@ class BoxTypeFactory
 }
 ```
 
-Oh. That's almost anti-climatic – it's not really hard at all. The **Create** method is super-simple: create proxy methods for any public methods in the type we're wrapping, wire up any properties to the corresponding getter and/or setter methods, and we're done! **CreateProxyMethod** seems like it might warrant some explanation; however, all we're really doing is copying verbatim the IL we looked at in our walkthrough of **get_Bark** earlier. The wiring up of properties is necessary because a property consists of two parts at the IL level, a **.property** thing and a **.method** thing for each accessor. That, too, we saw in the IL of the hand-written class. So there's really not much to it.
+Oh. That's almost anti-climatic - it's not really hard at all. The **Create** method is super-simple: create proxy methods for any public methods in the type we're wrapping, wire up any properties to the corresponding getter and/or setter methods, and we're done! **CreateProxyMethod** seems like it might warrant some explanation; however, all we're really doing is copying verbatim the IL we looked at in our walkthrough of **get_Bark** earlier. The wiring up of properties is necessary because a property consists of two parts at the IL level, a **.property** thing and a **.method** thing for each accessor. That, too, we saw in the IL of the hand-written class. So there's really not much to it.
 
-You might note that we're explicitly _not_ creating a proxy for the **GetType** method, defined on **System.Object**. This applies to the case where the type we're boxing is a class, not an interface. In general, we shouldn't proxy _any_ non-virtual methods inherited from **System.Object**, but in practice that's just **GetType**. So we're taking the easy way out. (Note that the .NET runtime wouldn't actually be fooled if we _did_ inject a lying **GetType** implementation – it would still reveal the actual type of the object. Still, it's better to play by the book.)
+You might note that we're explicitly _not_ creating a proxy for the **GetType** method, defined on **System.Object**. This applies to the case where the type we're boxing is a class, not an interface. In general, we shouldn't proxy _any_ non-virtual methods inherited from **System.Object**, but in practice that's just **GetType**. So we're taking the easy way out. (Note that the .NET runtime wouldn't actually be fooled if we _did_ inject a lying **GetType** implementation - it would still reveal the actual type of the object. Still, it's better to play by the book.)
 
 We _will_ be providing proxies for virtual methods, though (e.g. **Equals**, **GetHashCode** and **ToString**). This makes the box as invisible as possible.
 
@@ -513,7 +513,7 @@ Note that you don't add any custom columns in this case, it's all auto-generated
 
 ![Table of food preferences for canines, with anonymous types.](/images/food-table-anon.png)
 
-It's not exactly the same as before, but it's pretty close. Unfortunately, the approach isn't very flexible – it breaks down as soon as you want to display something that's not just text in the grid. For instance, say you want something like this:
+It's not exactly the same as before, but it's pretty close. Unfortunately, the approach isn't very flexible - it breaks down as soon as you want to display something that's not just text in the grid. For instance, say you want something like this:
 
 ![Table of food with dropdown meny.](/images/food-dropdown.png)
 

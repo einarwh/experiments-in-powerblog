@@ -66,7 +66,7 @@ public class Voles
   }
 
   private static long F0(int days) {
-    int end = days – _daysBeforeFirst;
+    int end = days - _daysBeforeFirst;
     if (end < 0) {
       return 1;
     }

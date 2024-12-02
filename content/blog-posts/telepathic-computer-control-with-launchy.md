@@ -34,7 +34,7 @@ Actually, I won't do that. I'll write some shorthand that Launchy is clever enou
 
 ![Using Launchy to launch Firefox.](/images/launchy-ff.png)
 
-Sometimes I won't hit ENTER directly – instead I'll hit TAB and type in some more text first. The extra text will be interpreted as a parameter to the application. For instance, I can type "ff TAB [http://www.launchy.net](http://www.launchy.net)" to go to the Launchy website.
+Sometimes I won't hit ENTER directly - instead I'll hit TAB and type in some more text first. The extra text will be interpreted as a parameter to the application. For instance, I can type "ff TAB [http://www.launchy.net](http://www.launchy.net)" to go to the Launchy website.
 
 ## Type a command
 

@@ -102,7 +102,7 @@ So now we can **map** the **mirror** function over the quarter diamond to produc
 
 Excellent. Now we're almost ready to do the second mirroring. The only problem is that the **mirror** function uses the head element as the pivot for mirroring, so we would end up with an X instead of a diamond!
 
-That's trivial to fix though. We'll just reverse the list first, and then do the mirroring. I'm not even going to write up the result for that – it is obviously the completed diamond. Instead, here's the complete **diamond** function, built from the parts we've seen so far:
+That's trivial to fix though. We'll just reverse the list first, and then do the mirroring. I'm not even going to write up the result for that - it is obviously the completed diamond. Instead, here's the complete **diamond** function, built from the parts we've seen so far:
 
 ```fsharp
 let diamond letters =

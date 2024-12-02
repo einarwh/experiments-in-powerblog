@@ -329,9 +329,9 @@ var paidCartDto1 = new PaidCart
 var paidCartDto1JsonText = JsonConvert.SerializeObject(paidCartDto1);
 ```
 
-It's pretty succinct and legible, and arguably looks quite similar to the JSON text it serializes to. However, there is a small caveat: our optional description is included with a `null` value in the JSON. That's not really what we aimed for. To change that behaviour, we can configure our JSON serializer to omit properties with `null` values from the serialized output. But now we have two problems. The first is that we had to resort to configuration, the second is that we've placed a bet: that all properties with `null` values should always be omitted from the output. That's the case today, but it could definitely change. To gain more fine-grained control, we'd have to dig out more granular and intrusive configuration options, like custom attributes or custom serializers. Or perhaps some combination? That's even worse, now our configuration is spread over multiple locations – who knows what the aggregated behavior is and why?
+It's pretty succinct and legible, and arguably looks quite similar to the JSON text it serializes to. However, there is a small caveat: our optional description is included with a `null` value in the JSON. That's not really what we aimed for. To change that behaviour, we can configure our JSON serializer to omit properties with `null` values from the serialized output. But now we have two problems. The first is that we had to resort to configuration, the second is that we've placed a bet: that all properties with `null` values should always be omitted from the output. That's the case today, but it could definitely change. To gain more fine-grained control, we'd have to dig out more granular and intrusive configuration options, like custom attributes or custom serializers. Or perhaps some combination? That's even worse, now our configuration is spread over multiple locations - who knows what the aggregated behavior is and why?
 
-What about DTO v2? The code looks very similar, except it follows C# property naming standards and at the same time deviates a little bit from the property names that we actually find in the JSON document. We'd have to look at the definition of the `PaidCart` to convince ourselves that it probably will serialize to the appropriate JSON text, since we find the JSON property names there – not at the place we're creating our DTO.
+What about DTO v2? The code looks very similar, except it follows C# property naming standards and at the same time deviates a little bit from the property names that we actually find in the JSON document. We'd have to look at the definition of the `PaidCart` to convince ourselves that it probably will serialize to the appropriate JSON text, since we find the JSON property names there - not at the place we're creating our DTO.
 
 ```csharp
 var paidCartDto2 = new PaidCart
@@ -563,7 +563,7 @@ var paidCartBag = new Dictionary<string, object> {
 
 It is more verbose than the versions using explicit or anonymous DTOs above. I'm using the dictionary initializer syntax in C# to make it as compact as possible, but still.
 
-It is very straightforward however. It makes no assumptions and places no bets against future changes to the JSON document format. Someone could decide to rename the `paidItems` property in the JSON to paid items and we wouldn't break a sweat. The code change would be trivial. Moreover the effect of the code change would obviously be local – there would be no surprise changes to the serialization of other properties.
+It is very straightforward however. It makes no assumptions and places no bets against future changes to the JSON document format. Someone could decide to rename the `paidItems` property in the JSON to paid items and we wouldn't break a sweat. The code change would be trivial. Moreover the effect of the code change would obviously be local - there would be no surprise changes to the serialization of other properties.
 
 What about the deserialization target scenario, which caused so much trouble for our DTOs? We would like to be able to write something like this:
 

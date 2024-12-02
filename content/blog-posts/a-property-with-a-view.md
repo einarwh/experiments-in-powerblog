@@ -458,7 +458,7 @@ private void InjectEventDeclaration()
 }
 ```
 
-Here we add the field for the event handler, and we create an event which hooks up to two methods for adding and removing event handlers, respectively. We're still not done, though – in fact, the bulk of the nitty gritty work remains.
+Here we add the field for the event handler, and we create an event which hooks up to two methods for adding and removing event handlers, respectively. We're still not done, though - in fact, the bulk of the nitty gritty work remains.
 
 That bulk is the implementation of the _add_ and _remove_ methods. If you examine the IL, you'll see that the implementations are virtually identical, except for a single method call in the middle somewhere (_add_ calls a method called **Combine**, _remove_ calls **Remove**). We can abstract that out, like so:
 
@@ -705,9 +705,9 @@ This produces IL for a **NotifyViewableProperty** method just like the one we wr
 
 ## Injecting notification
 
-With the interface implementation and notification method in place, we finally come to the fun part – injecting the property notification itself!
+With the interface implementation and notification method in place, we finally come to the fun part - injecting the property notification itself!
 
-Unless you're the kind of person who use [ILSpy](http://wiki.sharpdevelop.net/ilspy.ashx) or [ILDasm](http://msdn.microsoft.com/en-us/library/aa309387%28v=vs.71%29.aspx) regularly, you might wonder if and how it will work with auto-properties – properties where you don't actually provide any body for the getters and setters. Well, it doesn't matter. Auto-properties are a C# feature, they don't exist in IL. So you'll find there's a backing field there (albeit with a weird name) that the C# compiler conjured up for you. It's just syntactic sugar to reduce typing.
+Unless you're the kind of person who use [ILSpy](http://wiki.sharpdevelop.net/ilspy.ashx) or [ILDasm](http://msdn.microsoft.com/en-us/library/aa309387%28v=vs.71%29.aspx) regularly, you might wonder if and how it will work with auto-properties - properties where you don't actually provide any body for the getters and setters. Well, it doesn't matter. Auto-properties are a C# feature, they don't exist in IL. So you'll find there's a backing field there (albeit with a weird name) that the C# compiler conjured up for you. It's just syntactic sugar to reduce typing.
 
 What about get-only properties? That is, properties that have getters but no setters? Well, first of all, can they change? Even if they're get-only? Sure they can. Say you have a property which derives its value from another property. For instance, you might have an **Age** property which depends upon a **BirthDate** property, like so:
 
@@ -723,7 +723,7 @@ public DateTime BirthDate
 [Viewable]
 public int Age
 { 
-  get { return DateTime.Now.Years – BirthDate.Years; }
+  get { return DateTime.Now.Years - BirthDate.Years; }
 }
 ```
 
@@ -743,13 +743,13 @@ public DateTime BirthDate
 }
 ```
 
-It feels a little iffy, since it sort of goes the wrong way – the observed knowing about the observer rather than the other way around. But that's how you'd do it.
+It feels a little iffy, since it sort of goes the wrong way - the observed knowing about the observer rather than the other way around. But that's how you'd do it.
 
 Silver.Needle does the same thing for you automatically. That is, for get-only properties, Silver.Needle will inspect the getter to find any calls to getters on other properties on the same object instance. If those properties turn out to have setters, notifications to update the get-only property will be injected there. If those properties are get-only too, the process repeats itself recursively. So you could have chains of properties that depend on properties that depend on properties etc.
 
 To do this correctly, the injection process has two steps. First, we identify which properties depend on which, second, we do the actual IL manipulation to insert the notification calls.
 
-So, first we identify dependencies between properties. In the normal case of a property with a setter of its own, the property will simply depend on itself. (Of course, there might be other properties that depend on it as well.) So for each property with a setter, we build a list of dependent properties – that is, properties that we need to inject notification calls for. Note that while we only do notification for properties tagged as **Viewable**, we might inject notification calls into the setters of any property on the view model, **Viewable** or not. (In the example above, you'll notice that **BirthDate** is not, in fact, tagged **Viewable**. When the setter is called, it will announce that **Age** changed, but not itself!)
+So, first we identify dependencies between properties. In the normal case of a property with a setter of its own, the property will simply depend on itself. (Of course, there might be other properties that depend on it as well.) So for each property with a setter, we build a list of dependent properties - that is, properties that we need to inject notification calls for. Note that while we only do notification for properties tagged as **Viewable**, we might inject notification calls into the setters of any property on the view model, **Viewable** or not. (In the example above, you'll notice that **BirthDate** is not, in fact, tagged **Viewable**. When the setter is called, it will announce that **Age** changed, but not itself!)
 
 The code to register the dependencies between properties is as follows:
 
@@ -825,9 +825,9 @@ So you can see that it's a recursive process to walk the dependency graph for a 
 
 When we have the complete list of properties and dependant properties, we can do the actual IL manipulation. That is, for each affecting property, we can inject notifications for all affected properties.
 
-There are two possible strategies for the injection itself: simple and sophisticated. The simple strategy employed by Silver.Needle is to do notification regardless of whether any state change occurs as a result of calling the property setter. For instance, you might have some guard clause deciding whether or not to actually update the field backing the property – a conditional setter if you will. Perhaps you want to write to the backing field only when the value has actually changed. Silver.Needle doesn't care about that. If the setter is called the view is notified. I believe this makes sense, since the setter is the abstraction boundary for the operation you're performing, not whatever backing field you may or may not write to. Also, I reckon that it doesn't *hurt* much to do a couple of superfluous view refreshes.
+There are two possible strategies for the injection itself: simple and sophisticated. The simple strategy employed by Silver.Needle is to do notification regardless of whether any state change occurs as a result of calling the property setter. For instance, you might have some guard clause deciding whether or not to actually update the field backing the property - a conditional setter if you will. Perhaps you want to write to the backing field only when the value has actually changed. Silver.Needle doesn't care about that. If the setter is called the view is notified. I believe this makes sense, since the setter is the abstraction boundary for the operation you're performing, not whatever backing field you may or may not write to. Also, I reckon that it doesn't *hurt* much to do a couple of superfluous view refreshes.
 
-It would be entirely possible to do something a little bit more sophisticated, though – I just don't think it's worth the effort (plus it violates encapsulation, doesn't it?). If we wanted to, we could use a simple program analysis to distinguish between paths that may or may not result in the view model altering state. Technically, we could take the presence of a **stfld** IL instruction (which stores a value to a field) as evidence for state change. We could even throw in a little bit of data flow analysis to see if the value passed to the setter was actually on the stack when to the **stfld** was executed. In that case, we'd interpret "property change" to mean "some field acquires the value passed to the setter", which may or may not seem right to you. So it could be done, within reason.
+It would be entirely possible to do something a little bit more sophisticated, though - I just don't think it's worth the effort (plus it violates encapsulation, doesn't it?). If we wanted to, we could use a simple program analysis to distinguish between paths that may or may not result in the view model altering state. Technically, we could take the presence of a **stfld** IL instruction (which stores a value to a field) as evidence for state change. We could even throw in a little bit of data flow analysis to see if the value passed to the setter was actually on the stack when to the **stfld** was executed. In that case, we'd interpret "property change" to mean "some field acquires the value passed to the setter", which may or may not seem right to you. So it could be done, within reason.
 
 Notice, though, the appeal to reason. It's easy to come up with a setter which results in an observable state change without ever calling **stfld**. For instance, you could push the value onto a stack instead of storing it in a field, and have the getter return the top element of the stack. Sort of contrived, but it could be done. Or you could pass the value to some method, which may or may not store it somewhere. So you see, it's hard to do properly in the general case. Hence Silver.Needle keeps things simple, and says that the view should be notified of property change whenever the setter is called. That way, we might do a couple of superfluous notifications, but at least we don't miss any.
 

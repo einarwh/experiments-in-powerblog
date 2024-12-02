@@ -8,7 +8,7 @@
 
 Posted: April 17, 2011 
 
-I recently found out – the hard way, of course – that data binding in ASP.NET is broken with respect to polymorphism. It's not consistently broken, though – it depends on the particular control you're using. Makes life as a programmer that much more interesting, doesn't it?
+I recently found out - the hard way, of course - that data binding in ASP.NET is broken with respect to polymorphism. It's not consistently broken, though - it depends on the particular control you're using. Makes life as a programmer that much more interesting, doesn't it?
 
 Let's consider a very simple example. We have a type hierarchy like the following:
 

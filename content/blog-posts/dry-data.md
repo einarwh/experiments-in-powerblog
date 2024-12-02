@@ -268,7 +268,7 @@ public class Client2
 }
 ```
 
-So we've bloated the code a little bit – in fact, we just doubled the number of methods. But we're in a much better position to write new queries and commands. We're done with connections and usings and what have you. Later on, we can just reuse the same generic methods.
+So we've bloated the code a little bit - in fact, we just doubled the number of methods. But we're in a much better position to write new queries and commands. We're done with connections and usings and what have you. Later on, we can just reuse the same generic methods.
 
 However, we still have some glaring duplication hurting our eyes: the three execute methods are practically identical. So while the code is much DRYer than the original, there's still some moisture in there. And moisture leads to smell and rot.
 
@@ -369,7 +369,7 @@ public class Database
 }
 ```
 
-**ExecuteScalar** is pretty straightforward, but there are a few interesting details concerning the others. First, **ExecuteReader** derives a map from **IDataReader** to **IEnumerable** from the user-supplied map from **IDataRecord** to **T**. Second, **ExecuteNonQuery** doesn't really care about the result from calling **DbCommand.ExecuteNonQuery** against the database (which indicates the number of rows affected by the command/non-query). So we're providing the simplest possible map – the identity map – to the **Execute** method.
+**ExecuteScalar** is pretty straightforward, but there are a few interesting details concerning the others. First, **ExecuteReader** derives a map from **IDataReader** to **IEnumerable** from the user-supplied map from **IDataRecord** to **T**. Second, **ExecuteNonQuery** doesn't really care about the result from calling **DbCommand.ExecuteNonQuery** against the database (which indicates the number of rows affected by the command/non-query). So we're providing the simplest possible map - the identity map - to the **Execute** method.
 
 So the execution code is pretty DRY now. Basically, you're just passing in the stuff that varies. And there's a single method actually creating connections and commands and executing them against the database. Good stuff.
 

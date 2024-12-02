@@ -272,11 +272,11 @@ friend
 Hello
 ```
 
-Now you could put a finite sequence of numbers in there, or just about any sequence you like, in fact. Including, as it were, an infinite sequence of some sort – although that wouldn't be very meaningful, since you'd never see that thing starting over!
+Now you could put a finite sequence of numbers in there, or just about any sequence you like, in fact. Including, as it were, an infinite sequence of some sort - although that wouldn't be very meaningful, since you'd never see that thing starting over!
 
 So yeah, we're starting to see how we can create infinite sequences, and it's all very easy to do. But what can you do with it?
 
-Let's turn our attention to an archetypical academic exercise: generating a sequence of prime numbers. Now as you well know, prime numbers aren't as useless as they might seem to the untrained eye – there are practical applications in cryptography and what have you. But we're not interested in that right now; we're going for pure academic interest here. Let's not fool ourselves to think we're doing anything useful.
+Let's turn our attention to an archetypical academic exercise: generating a sequence of prime numbers. Now as you well know, prime numbers aren't as useless as they might seem to the untrained eye - there are practical applications in cryptography and what have you. But we're not interested in that right now; we're going for pure academic interest here. Let's not fool ourselves to think we're doing anything useful.
 
 A well-known technique for finding prime numbers is called the _Sieve of Eratosthenes_ (a sieve being a device that separates wanted elements from unwanted ones). In a nutshell, the Sieve of Eratosthenes works like this:
 
@@ -300,7 +300,7 @@ Now, a problem with the Sieve of Eratosthenes as it is formulated here, is that 
 
 Essentially, we maintain an infinite sequence of prime-multiples for each prime we encounter. For each new number we want to check, we check to see if there are pending prime-multiples (i.e. obvious non-primes) matching the number. If there are, the number is _not_ a prime (since we're looking at a number that would have been eliminated in the finite Sieve of Erastosthenes). The number is discarded just-in-time, and the eliminating sequence(s) of prime-multiples are advanced to the next prime-multiple. If there is no matching prime-multiple in any of the sequences, the number _is_ a brand new prime. This means that we need to add a new infinite sequence of prime-multiples to our collection. In other words, we're aggregating such sequences as we go along. Luckily, they each hold on to no more than a single integer value (See, I told you that was useful. And you wouldn't believe me!)
 
-Now how do we keep track of our prime-multiple-sequences? A naive approach would be to keep them all in a list, and just check them all for each candidate number. That wouldn't be too bad for a small number of primes. However, say you're looking to see if a number n is the 1001th prime – you'd have to go through all 1000 prime-multiple sequences to see if any of them eliminate n as a candidate. That's a lot of unnecessary work! What we really need to do, is check the one(s) with the smallest pending prime-multiple. Using a priority queue to hold our sequences makes this an O(1) operation. Unfortunately, the .NET framework doesn't contain an implementation of a priority queue. Fortunately, the [C5 Generic Collection Library](http://www.itu.dk/research/c5/) does. So we'll use that.
+Now how do we keep track of our prime-multiple-sequences? A naive approach would be to keep them all in a list, and just check them all for each candidate number. That wouldn't be too bad for a small number of primes. However, say you're looking to see if a number n is the 1001th prime - you'd have to go through all 1000 prime-multiple sequences to see if any of them eliminate n as a candidate. That's a lot of unnecessary work! What we really need to do, is check the one(s) with the smallest pending prime-multiple. Using a priority queue to hold our sequences makes this an O(1) operation. Unfortunately, the .NET framework doesn't contain an implementation of a priority queue. Fortunately, the [C5 Generic Collection Library](http://www.itu.dk/research/c5/) does. So we'll use that.
 
 Here, then, is how we could implement an **IEnumerable&lt;int&gt;** that represents an infinite sequence of primes:
 
@@ -632,6 +632,6 @@ public class WheelPrimeSequence : IEnumerable<int>
 
 That just about wraps it up. I should point out that the current implementation doesn't _really_ give you an infinite sequence of primes. Unfortunately, the abstraction is all a-leak like a broken faucet since the pesky real world of finite-sized integers causes it to break down at a certain point. In fact, for the current implementation, that point is after the 4.792th prime, which is 46.349. Why? Because then we start a prime-multiple sequence at 46.349\*46.349, which won't fit into the 32-bit integer we're currently using to store the current value. Hence we get a overflow, the prime-multiple sequence gets a negative number, and it's all messed up. We really should put an if-statement in there, to return **false** from **MoveNext** if and when we overflow, effectively terminating our not-so-infinite-infinite sequence.
 
-Of course we could use a 64-bit integer instead, but keep in mind that we're really just buying time – we're not fixing the underlying problem. C# doesn't have arbitrary-sized integers, end of story. Nevertheless, 64-bit integers will give you primes larger than 3.000.000.000. I'd say it's good enough for an academic exercise; or as I like to put it, large enough for all impractical purposes.
+Of course we could use a 64-bit integer instead, but keep in mind that we're really just buying time - we're not fixing the underlying problem. C# doesn't have arbitrary-sized integers, end of story. Nevertheless, 64-bit integers will give you primes larger than 3.000.000.000. I'd say it's good enough for an academic exercise; or as I like to put it, large enough for all impractical purposes.
 
 Do I certify?

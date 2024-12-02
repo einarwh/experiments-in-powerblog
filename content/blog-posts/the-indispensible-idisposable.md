@@ -37,9 +37,9 @@ finally {
 }
 ```
 
-The **using** statement has a lot of potential use cases beyond that, though – indeed, that's what this blog post is all about! The MSDN documentation states that "the primary use of **IDisposable** is to release unmanaged resources", but it is easy and fun to come up with interesting secondary uses. Basically any time you need something to happen before and after an operation, you got a potential use case for **using**. In other words, you can use it as sort of a poor man's [AOP](https://en.wikipedia.org/wiki/Aspect-oriented_programming).
+The **using** statement has a lot of potential use cases beyond that, though - indeed, that's what this blog post is all about! The MSDN documentation states that "the primary use of **IDisposable** is to release unmanaged resources", but it is easy and fun to come up with interesting secondary uses. Basically any time you need something to happen before and after an operation, you got a potential use case for **using**. In other words, you can use it as sort of a poor man's [AOP](https://en.wikipedia.org/wiki/Aspect-oriented_programming).
 
-Some people find the secondary uses for using to be abuse, others find it artistic. The most convincing argument I've read against liberal use of **using** is Eric Lippert's comment on [this stack overflow question](https://stackoverflow.com/questions/2101524/is-it-abusive-to-use-idisposable-and-using-as-a-means-for-getting-scoped-beha). Essentially, the argument is that a **Dispose** method should be called out of politeness, not necessity: the correctness of your code shouldn't depend upon **Dispose** being called. I won't let that stop me though! (Granted, you'd need to put 1024 me's in a cluster to get the brain equivalent of a Lippert, but hey – he's just this guy, you know?). After all, what does code correctness mean? If your application leaks scarce resources due to untimely disposal, it's broken – you'll find it necessary to explicitly dispose of them. There's a sliding scale between politeness and necessity, between art and abuse, and it's not always obvious when you're crossing the line. Also, I have to admit, I have a soft spot for cute solutions, especially when it makes for clean, readable code. I therefore lean towards the forgiving side. YMMW.
+Some people find the secondary uses for using to be abuse, others find it artistic. The most convincing argument I've read against liberal use of **using** is Eric Lippert's comment on [this stack overflow question](https://stackoverflow.com/questions/2101524/is-it-abusive-to-use-idisposable-and-using-as-a-means-for-getting-scoped-beha). Essentially, the argument is that a **Dispose** method should be called out of politeness, not necessity: the correctness of your code shouldn't depend upon **Dispose** being called. I won't let that stop me though! (Granted, you'd need to put 1024 me's in a cluster to get the brain equivalent of a Lippert, but hey - he's just this guy, you know?). After all, what does code correctness mean? If your application leaks scarce resources due to untimely disposal, it's broken - you'll find it necessary to explicitly dispose of them. There's a sliding scale between politeness and necessity, between art and abuse, and it's not always obvious when you're crossing the line. Also, I have to admit, I have a soft spot for cute solutions, especially when it makes for clean, readable code. I therefore lean towards the forgiving side. YMMW.
 
 So with that out of the way, let's start abusing **using**:
 
@@ -124,7 +124,7 @@ class Program
   {
     Tick(); Tick(); Tick();
     DateTime dt = DateTime.Now;
-    using (Timepiece.Replacement(() => dt.Add(dt – DateTime.Now))) 
+    using (Timepiece.Replacement(() => dt.Add(dt - DateTime.Now))) 
     {
       Tick(); Tick(); Tick();
     }
@@ -167,7 +167,7 @@ public static class Timepiece
 }
 ```
 
-The idea is that we eliminate uses of **DateTime.Now** in our code, and consistently use **Timepiece.Now** instead. By default, **Timepiece.Now** uses **DateTime.Now** to yield the current time, but you're free to replace it. You can pass in your own time provider to the **Replacement** method, and that we be used instead – until someone calls **Dispose** on the **TempTimepiece** instance returned from **Replacement**, that is. In the code above, we're causing time to go backwards for the three **Tick**s inside the **using** block. The output looks like this:
+The idea is that we eliminate uses of **DateTime.Now** in our code, and consistently use **Timepiece.Now** instead. By default, **Timepiece.Now** uses **DateTime.Now** to yield the current time, but you're free to replace it. You can pass in your own time provider to the **Replacement** method, and that we be used instead - until someone calls **Dispose** on the **TempTimepiece** instance returned from **Replacement**, that is. In the code above, we're causing time to go backwards for the three **Tick**s inside the **using** block. The output looks like this:
 
 ![Output showing the time.](/images/timepiece-backwards.png)
 
@@ -202,7 +202,7 @@ public override void Write()
 
 Hee hee.
 
-Yup, it's an embedded DSL for writing HTML, based on the using statement. Whatever your other reactions might be – it's fairly readable, don't you think?
+Yup, it's an embedded DSL for writing HTML, based on the using statement. Whatever your other reactions might be - it's fairly readable, don't you think?
 
 When you run it, it produces the following output (nicely formatted and everything):
 
@@ -328,7 +328,7 @@ abstract class BaseHtmlWriter
 }
 ```
 
-So you can see, it's almost like you're using an **IDisposable** in a fluent interface. You just keep using the same **DisposableWriter** over and over again! Internally, it maintains a stack of tags. Whenever you add a new tag to the writer (which happens on each new **using**), it writes the start tag to the stream and pushes it onto the stack. When the **using** block ends, **Dispose** is called on the **DisposableWriter** – causing it to pop the correct tag off the stack and write the corresponding end tag to the stream. The indentation is determined by the depth of the stack, of course.
+So you can see, it's almost like you're using an **IDisposable** in a fluent interface. You just keep using the same **DisposableWriter** over and over again! Internally, it maintains a stack of tags. Whenever you add a new tag to the writer (which happens on each new **using**), it writes the start tag to the stream and pushes it onto the stack. When the **using** block ends, **Dispose** is called on the **DisposableWriter** - causing it to pop the correct tag off the stack and write the corresponding end tag to the stream. The indentation is determined by the depth of the stack, of course.
 
 Wasn't that fun? There are other things you could do, too. For instance, I bet you could implement an interpreter for a stack-based language (such as IL) pretty easily. Let each instruction implement **IDisposable**, pop values off the stack upon instantiation, execute the instruction, optionally push a value back on upon **Dispose**. Shouldn't be hard at all.
 

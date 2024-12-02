@@ -12,7 +12,7 @@ Here's a familiar scenario for a programmer: You have some useful function that 
 
 Simple, right? But there's a twist! The values you'd like to apply your function to are all trapped in la-la land! And once you have values in la-la land, it's not obvious how you'd go about getting them out of there. It really depends on the kind of la-la land your values are in. It's sort of like being trapped in the afterlife. You might be able to return to the land of the living, but it's not trivial. Certainly not something you'd want your pure, innocent function to have to deal with!
 
-You might wonder how the values ended up in la-la land in the first place. In many cases, they were born there. They are la-la land natives – it's the only existence they've ever known. It sounds weird, but it's surprisingly common. Indeed, many programs contain not one but several distinct la-la lands, each with their own peculiar laws and customs! Some familiar la-la lands in the .NET world include `Task`, `Nullable` and `List`.
+You might wonder how the values ended up in la-la land in the first place. In many cases, they were born there. They are la-la land natives - it's the only existence they've ever known. It sounds weird, but it's surprisingly common. Indeed, many programs contain not one but several distinct la-la lands, each with their own peculiar laws and customs! Some familiar la-la lands in the .NET world include `Task`, `Nullable` and `List`.
 
 Since la-la lands are so pervasive in our programs, clearly we need to be able to apply functions to the values that dwell there. Previously we've seen that if your la-la land is a `Functor`, there is a `Map` function that lets us do that. But there is a problem: `Map` cannot work with any of the functions I mentioned above. The reason is that they all take more than one argument. `Map` can transform a single value of type `T1` inside la-la land to a single value of type `T2` inside la-la land. What `Map` does is teleport the `T1` value out of la-la land, apply your function to obtain a `T2` value, and teleport that back into la-la land. You can of course map multiple times, but you'll still involving just one la-la land value at a time. So that's not going to work.
 
@@ -120,7 +120,7 @@ public static class MayhapsApplicative
 }
 ```
 
-The semantics of `Mayhaps` is to propagate `Sorry` – you can only get a new `Indeed` if you have both a function and a value.
+The semantics of `Mayhaps` is to propagate `Sorry` - you can only get a new `Indeed` if you have both a function and a value.
 
 And of course the nice thing now is that we can separate our logic from the idiosyncracies of each la-la land! Which is pretty great.
 

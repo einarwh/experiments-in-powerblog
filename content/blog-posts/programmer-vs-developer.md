@@ -24,7 +24,7 @@ How can I explain these two switches, first from programmer to developer, then b
 
 The switches correspond to exactly two realizations.
 
-The first realization, maybe twenty years ago, was that _programming isn't everything_. To be effective in my work, I soon figured that I had to do more – much more! – than just write code. And so I called myself a software developer in reflection of that.
+The first realization, maybe twenty years ago, was that _programming isn't everything_. To be effective in my work, I soon figured that I had to do more - much more! - than just write code. And so I called myself a software developer in reflection of that.
 
 I realized that there were many things I needed to master that were just as important as programming. For one thing, I needed to learn to collaborate effectively with other people (how to negotiate, explain opinions, share ideas, handle being challenged, compromise, how to speak up and how to shut up). I also needed to learn that figuring out what the problem should be is just as important as chasing a solution as quickly as possible, that there are many problems for which there are no technical solutions, and a slew of other things. I even realized that code quality is largely determined by contextual forces, not coding chops. I realized that agility is primarily a property of organizations. To deal with all of this, I started looking into domain-driven design, thinking about language, categorization, abstraction, systems thinking. I grew aware of socio-technical factors.
 

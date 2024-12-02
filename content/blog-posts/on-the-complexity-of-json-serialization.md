@@ -30,7 +30,7 @@ This is _actual_ JSON serialization:
 
 ![Actual JSON serialization](/images/json-serialization.png)
 
-This problem has some very nice properties! It is well-defined. It is closed. It has bounded complexity. There are no sources of new complexity unless the JSON specification itself is changed. It is an eminent candidate for a black box magical solution – some highly tuned, fast, low footprint enterprise-ready library or other. Great.
+This problem has some very nice properties! It is well-defined. It is closed. It has bounded complexity. There are no sources of new complexity unless the JSON specification itself is changed. It is an eminent candidate for a black box magical solution - some highly tuned, fast, low footprint enterprise-ready library or other. Great.
 
 This, however, is "JSON serialization" as we practice it:
 

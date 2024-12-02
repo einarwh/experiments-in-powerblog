@@ -10,13 +10,13 @@ Posted: July 22, 2017
 
 On February 9th 2017, I was sitting in an auditorium in Krakow, listening to Mary Sheeran and John Hughes give the opening keynote at the [Lambda Days](http://www.lambdadays.org/) conference. It was an inspired and inspiring keynote, that discussed some of the most influential ideas in some of the most interesting papers written on functional programming. You should absolutely [check it out](https://www.youtube.com/watch?v=1qBHf8DrWR8).
 
-One of the papers that was mentioned was _Functional Geometry_ by Peter Henderson, written in 1982. In it, Henderson shows a deconstruction of an Escher woodcut called Square Limit, and how he can elegantly reconstruct a replica of the woodcut by using functions as data. He defines a small set of picture combinators – simple functions that operate on picture functions – to form complex pictures out of simple ones.
+One of the papers that was mentioned was _Functional Geometry_ by Peter Henderson, written in 1982. In it, Henderson shows a deconstruction of an Escher woodcut called Square Limit, and how he can elegantly reconstruct a replica of the woodcut by using functions as data. He defines a small set of picture combinators - simple functions that operate on picture functions - to form complex pictures out of simple ones.
 
 Escher's original woodcut looks like this:
 
 ![Escher's "Square Limit" woodcutting"](/images/escher-square-limit.png)
 
-Which is pretty much a recursive dream. No wonder Henderson found it so fascinating – any functional programmer would.
+Which is pretty much a recursive dream. No wonder Henderson found it so fascinating - any functional programmer would.
 
 As I was listening the keynote, I recalled that I had heard about the paper before, in the legendary SICP lectures by Abelson and Sussman (in lecture 3A, in case you're interested). I figured it was about time I read the paper first hand. And so I did. Or rather, I read the revised version from 2002, because that's what I found online.
 
@@ -438,7 +438,7 @@ Here's what I came up with.
 
 TODO: escher-fish-all.png
 
-To support different hues of the same fish requires a bit of thinking – we can't just follow Henderson's instructions any more. But we can use exactly the same approach! In addition to transforming the shape of the picture, we need to be able to transform the _coloring_ of the picture. For this, we introduce a new abstraction, that we will call a **Lens**.
+To support different hues of the same fish requires a bit of thinking - we can't just follow Henderson's instructions any more. But we can use exactly the same approach! In addition to transforming the shape of the picture, we need to be able to transform the _coloring_ of the picture. For this, we introduce a new abstraction, that we will call a **Lens**.
 
 ```fsharp
 type Hue = Blackish | Greyish | Whiteish

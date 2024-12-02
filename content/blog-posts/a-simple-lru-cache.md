@@ -73,7 +73,7 @@ Let's look at something a bit more interesting: the pruning. (Of course, I don't
 ```csharp
 private void Prune()
 {
-  DateTime expirationTime = DateTime.Now – _lifetime;
+  DateTime expirationTime = DateTime.Now - _lifetime;
   while (true)
   {
     var node = _list.Last;
@@ -114,7 +114,7 @@ public void Add(TKey key, TValue value)
 }
 ```
 
-After the mandatory pruning step is done, we can do what we're here for. Let's assume we're adding a new element first. It's trivial, even though we need to nest a few type envelopes: we're wrapping our element in a **TimeStamped** inside a **KeyValuePair** inside a **LinkedListNode**. Then we just put that in front of the list (because it's our newest one), and add it to the dictionary. Replacing an existing element is not much harder; we just remove it before adding it. We can't mutate it, since we need a new timestamp and – more importantly – a new position in the linked list. We can't afford to shuffle things around, since we'd lose O(1) in a heartbeat.
+After the mandatory pruning step is done, we can do what we're here for. Let's assume we're adding a new element first. It's trivial, even though we need to nest a few type envelopes: we're wrapping our element in a **TimeStamped** inside a **KeyValuePair** inside a **LinkedListNode**. Then we just put that in front of the list (because it's our newest one), and add it to the dictionary. Replacing an existing element is not much harder; we just remove it before adding it. We can't mutate it, since we need a new timestamp and - more importantly - a new position in the linked list. We can't afford to shuffle things around, since we'd lose O(1) in a heartbeat.
 
 ## Look up
 

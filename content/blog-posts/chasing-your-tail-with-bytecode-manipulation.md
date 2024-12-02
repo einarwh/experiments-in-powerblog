@@ -38,7 +38,7 @@ This is what is known as a _tail recursive call_. In general, a _tail call_ is a
 
 It should come as no surprise, therefore, that clever people have figured out that in principle, we don't need a brand new stack frame for each tail call. Instead, we can reuse the old one, slightly modified, and simply jump to the appropriate method. This is known as tail call optimization or tail call elimination. You can find all the details in a [classic paper](http://repository.readscheme.org/ftp/papers/ai-lab-pubs/AIM-443.pdf) by the eminent Guy L Steele Jr. The paper has the impressive title _DEBUNKING THE "EXPENSIVE PROCEDURE CALL" MYTH or PROCEDURE CALL IMPLEMENTATIONS CONSIDERED HARMFUL or LAMBDA: THE ULTIMATE GOTO_, but is affectionately known as simply _Lambda: The Ultimate GOTO_ (presumably because overly long and complex titles are considered harmful).
 
-In this blog post, we'll implement a poor man's tail call elimination by transforming recursive tail calls into loops. Instead of actually making a recursive method call, we'll just jump to the start of the method – with the arguments to the method set to the appropriate values. That's actually remarkably easy to accomplish using bytecode rewriting with the ever-amazing [Mono.Cecil](http://www.mono-project.com/Cecil) library. Let's see how we can do it.
+In this blog post, we'll implement a poor man's tail call elimination by transforming recursive tail calls into loops. Instead of actually making a recursive method call, we'll just jump to the start of the method - with the arguments to the method set to the appropriate values. That's actually remarkably easy to accomplish using bytecode rewriting with the ever-amazing [Mono.Cecil](http://www.mono-project.com/Cecil) library. Let's see how we can do it.
 
 First, we'll take a look at the original bytecode, the one that does the recursive tail call.
 
@@ -102,7 +102,7 @@ private static int Add(int x, int y)
 {
   while (x != 0)
   {
-    int arg_0F_0 = x – 1;
+    int arg_0F_0 = x - 1;
     y++;
     x = arg_0F_0;
   }
@@ -112,7 +112,7 @@ private static int Add(int x, int y)
 
 You may wonder where the **arg_0F_0** variable comes from; I do too. ILSpy made it up for whatever reason. There's nothing in the bytecode that mandates a local variable, but perhaps it makes for simpler reverse engineering.
 
-Apart from that, we note that the elegant recursive algorithm is gone, replaced by a completely pedestrian and mundane one that uses mutable state. The benefit is that we no longer run the risk of running out of stack frames – the reverse engineered code never allocates more than a single stack frame. So that's nice. Now if we could do this thing automatically, we could have the best of both worlds: we could _write_ our algorithms in the recursive style, yet have them _executed_ as loops. That's where TailCop comes in.
+Apart from that, we note that the elegant recursive algorithm is gone, replaced by a completely pedestrian and mundane one that uses mutable state. The benefit is that we no longer run the risk of running out of stack frames - the reverse engineered code never allocates more than a single stack frame. So that's nice. Now if we could do this thing automatically, we could have the best of both worlds: we could _write_ our algorithms in the recursive style, yet have them _executed_ as loops. That's where TailCop comes in.
 
 [TailCop](https://github.com/einarwh/tailcop) is a simple command line utility I wrote that rewrites some tail calls into loops, as in the example we've just seen. Why some and not all? Well, first of all, rewriting to loops doesn't help much for mutually recursive methods, say. So we're restricted to strictly self-recursive tail calls. Furthermore, we have to be careful with dynamic dispatch of method calls. To keep TailCop as simple as possible, I evade that problem altogether and don't target instance methods at all. Instead, TailCop will only rewrite tail calls for static methods. (Obviously, you should feel free, even encouraged, to extend TailCop to handle benign cases of self-recursive instance methods, i.e. cases where the method is always invoked on the same object. _Update: [I've done it myself](/blog-posts/another-wild-tail-chase/)_.)
 
@@ -185,7 +185,7 @@ private static int Sum(List<int> numbers, int result = 0)
   {
     return result;
   }
-  int last = size – 1;
+  int last = size - 1;
   int n = numbers[last];
   numbers.RemoveAt(last);
   return Sum(numbers, n + result);
@@ -209,7 +209,7 @@ private static int Sum(List<int> numbers, int result = 0)
     {
       break;
     }
-    int index = num – 1;
+    int index = num - 1;
     int num2 = numbers[index];
     numbers.RemoveAt(index);
     List<int> arg_27_0 = numbers;

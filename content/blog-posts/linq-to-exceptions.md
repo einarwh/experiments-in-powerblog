@@ -10,9 +10,9 @@ Posted: June 28, 2014
 
 Lately I've been thinking about the mundane task of _exception handling_. Remarkably unsexy, and yet completely mandatory. There's no escape from handling the exceptions that may (and therefore will) occur in your application, unless you want it to crash or misbehave regularly.
 
-Proper exception handling can be a chore anywhere in your application, but in particular at integration points. Whenever your application needs to communicate with some external service, any number of things can go wrong, at various levels in the stack – from application level errors to network problems. We need to be able to cope with all these different kinds of errors, and hence we surround each service call with a veritable flood of exception handlers. That sort of works, but there are problems – first, the actual service is drowning amidst all the exception handling, and second, we get a lot of code duplication, since we tend to handle many kinds of exceptions in the same way for all service calls.
+Proper exception handling can be a chore anywhere in your application, but in particular at integration points. Whenever your application needs to communicate with some external service, any number of things can go wrong, at various levels in the stack - from application level errors to network problems. We need to be able to cope with all these different kinds of errors, and hence we surround each service call with a veritable flood of exception handlers. That sort of works, but there are problems - first, the actual service is drowning amidst all the exception handling, and second, we get a lot of code duplication, since we tend to handle many kinds of exceptions in the same way for all service calls.
 
-I've been discussing how to best solve this problem in a completely general and flexible way in several impromptu popsicle- and coffee-driven sessions with some of my compatriots at work (in particular Johan and Jonas – thanks guys!). Some of the code examples in this blog post, especially those who exhibit some trace of intelligence, can legitimately be considered rip-offs, evolutions, misunderstandings or various other degenerations of similar code snippets they have come up with.
+I've been discussing how to best solve this problem in a completely general and flexible way in several impromptu popsicle- and coffee-driven sessions with some of my compatriots at work (in particular Johan and Jonas - thanks guys!). Some of the code examples in this blog post, especially those who exhibit some trace of intelligence, can legitimately be considered rip-offs, evolutions, misunderstandings or various other degenerations of similar code snippets they have come up with.
 
 But I'm getting ahead of myself. Let's return to the root of the problem: how exception handling code has a tendency to overshadow the so-called business logic in our applications and to cause severe cases of duplication.
 
@@ -172,7 +172,7 @@ Quux SafeMethod3() {
 }
 ```
 
-Well yes, slightly better, but still pretty horrible, and much worse than just suffering the duplication in the first place. But maybe we've learned something. What we need is composition – our current solution doesn't compose at all. we need to be able to put together exactly the exception handlers we need for each method, while at the same time avoiding repetition. The problem is in some sense the coupling between the exception handlers. What if we tried a different approach, handling a single exception at a time?
+Well yes, slightly better, but still pretty horrible, and much worse than just suffering the duplication in the first place. But maybe we've learned something. What we need is composition - our current solution doesn't compose at all. we need to be able to put together exactly the exception handlers we need for each method, while at the same time avoiding repetition. The problem is in some sense the coupling between the exception handlers. What if we tried a different approach, handling a single exception at a time?
 
 We could have a less ambitious **Call**-method, that would handle just a single type of exception for a method. Like this:
 
@@ -253,9 +253,9 @@ Frob TraditionalSafeMethod4() {
 }
 ```
 
-So there's nothing very complicated going on here. In fact, I bet you can see how similar the two methods really are – the structure is identical! All we've done is replace the familiar _try-catch_ construct with our own **Call**-construct.
+So there's nothing very complicated going on here. In fact, I bet you can see how similar the two methods really are - the structure is identical! All we've done is replace the familiar _try-catch_ construct with our own **Call**-construct.
 
-As an aside, we should note that the composed try-catch approach has slightly different semantics than the sequential, coupled try-catch approach. The difference in semantics is due to decoupling provided by the composed try-catch approach – each catch-block is completely independent. Therefore, there is nothing stopping us from having multiple catch-handlers for the same type of exception should we so desire.
+As an aside, we should note that the composed try-catch approach has slightly different semantics than the sequential, coupled try-catch approach. The difference in semantics is due to decoupling provided by the composed try-catch approach - each catch-block is completely independent. Therefore, there is nothing stopping us from having multiple catch-handlers for the same type of exception should we so desire.
 
 Now, to work on the readability a bit. What we really would like is some way to attach catch-handlers for various exception types to our function call. So assuming that we wrap up our original function call in a closure using a delegate of type **Func&lt;TR&gt;**, we would like to be able to attach a catch-handler for some exception type **TE**, and end up with a new closure that still has the type **Func&lt;TR&gt;**. Then we would have encapsulated the exception handling completely. Our unambitious **Call**-method from above is almost what we need, but not quite. Instead, let's define an extension method on the type that we would like to extend! **Func&lt;TR&gt;**, that is:
 
@@ -307,7 +307,7 @@ Func<TR> Protect<TR>(Func<TR> it) {
 }
 ```
 
-So we have essentially created a fluent interface for attaching catch-handlers to a method call. The cool thing is that it is trivial to attach additional exception handlers as needed – and since we do so programmatically, we can even have logic to control the attachment of handlers. Say we discovered that we needed to catch **WerewolfException**s when the moon is full? No problem:
+So we have essentially created a fluent interface for attaching catch-handlers to a method call. The cool thing is that it is trivial to attach additional exception handlers as needed - and since we do so programmatically, we can even have logic to control the attachment of handlers. Say we discovered that we needed to catch **WerewolfException**s when the moon is full? No problem:
 
 ```csharp
 Func<Frob> WolfProof() {
@@ -321,7 +321,7 @@ Func<Frob> WolfProof() {
 
 In my eyes, this is pretty cool. You might be running away screaming, thinking I'm crazy and that with this approach, you'll never know which exceptions you're actually catching anymore. You could be right. Opinions differ.
 
-But that's OK. All I'm doing is providing an alternative approach to the handling of multiple exception – one that I think offers increased power and flexibility. I'm not saying you should take advantage of it. With greater power comes greater responsibility and all that.
+But that's OK. All I'm doing is providing an alternative approach to the handling of multiple exception - one that I think offers increased power and flexibility. I'm not saying you should take advantage of it. With greater power comes greater responsibility and all that.
 
 And besides, we still haven't talked about Linq. An alternative (and attractive) solution to our current fluent interface is to attach a sequence of catch-handlers at once. Something like this:
 
@@ -336,7 +336,7 @@ Func<TR> Protect<TR>(Func<TR> it) {
 }
 ```
 
-However, it's surprisingly difficult to provide a suitable type for that sequence of catch-handlers – in fact, the C# compiler fails to do so! The problem is that delegates are contravariant in their parameters, which means that a delegate **D1** is considered a subtype of delegate **D2** if the parameters of **D1** are supertypes of the parameters of **D2**. That's all a bit abstract, so perhaps an example will help:
+However, it's surprisingly difficult to provide a suitable type for that sequence of catch-handlers - in fact, the C# compiler fails to do so! The problem is that delegates are contravariant in their parameters, which means that a delegate **D1** is considered a subtype of delegate **D2** if the parameters of **D1** are supertypes of the parameters of **D2**. That's all a bit abstract, so perhaps an example will help:
 
 ```csharp
 Action<object> d1 = (object o) => {}; 
@@ -346,9 +346,9 @@ d1 = d2; // This won't compile.
 d2 = d1; // This is OK.
 ```
 
-To make sense of the abstract description above, assume that **D1** is Action&lt;object&gt; and D2 is Action&lt;string>. Since the **D1** parameter (object) is a supertype of the **D2** parameter (string), it follows that **D1** is a subtype of **D2** – and not the other way around, as we might have guessed. This is why the C# compiler won't let us assign a **D2** instance to a **D1** reference.
+To make sense of the abstract description above, assume that **D1** is Action&lt;object&gt; and D2 is Action&lt;string>. Since the **D1** parameter (object) is a supertype of the **D2** parameter (string), it follows that **D1** is a subtype of **D2** - and not the other way around, as we might have guessed. This is why the C# compiler won't let us assign a **D2** instance to a **D1** reference.
 
-The implication is that the C# compiler will fail to find a type that will reconcile the catch handlers above. In particular, due to the contravariance of delegate parameters, we cannot type the sequence as **Func&lt;Exception, TR&gt;**, since neither **Func&lt;NullReferenceException, TR&gt;**, nor **Func&lt;InvalidOperationException, TR&gt;**, nor **Func&lt;FormatException, TR&gt;** are assignable to **Func&lt;Exception, TR&gt;**. It would go the other way around: we could assign a **Func&lt;Exception, TR&gt;** to all three of the other types, but which one should the compiler pick? If it (arbitrarily) picked **Func<&lt;NullReferenceException, TR&gt;**, clearly it wouldn't work for the two other delegates – and all other choices have the same problem.
+The implication is that the C# compiler will fail to find a type that will reconcile the catch handlers above. In particular, due to the contravariance of delegate parameters, we cannot type the sequence as **Func&lt;Exception, TR&gt;**, since neither **Func&lt;NullReferenceException, TR&gt;**, nor **Func&lt;InvalidOperationException, TR&gt;**, nor **Func&lt;FormatException, TR&gt;** are assignable to **Func&lt;Exception, TR&gt;**. It would go the other way around: we could assign a **Func&lt;Exception, TR&gt;** to all three of the other types, but which one should the compiler pick? If it (arbitrarily) picked **Func<&lt;NullReferenceException, TR&gt;**, clearly it wouldn't work for the two other delegates - and all other choices have the same problem.
 
 So we're stuck. Sort of. The only solution we have is to _hide_ the exception type somehow, so that we don't have to include the exception type in the type of the sequence. Now how do we do that? Well, in some sense, we've already seen an example of how to do that: we hide the exception handling (and the type) inside a closure. So all we need is some way to convert an exception handler to a simple transformation function that doesn't care about the type of the exception itself. Like this:
 
@@ -398,7 +398,7 @@ var f = protect(() => FetchStringSomewhere());
 var s = f();
 ```
 
-The cool part is obviously the **Aggregate** call, where **acc** is the "accumulated" composed closure, **nxt** is the next encapsulated exception handler and **thing** is the thing we're trying to protect with our exception handlers – so in other words, the closure that contains the call to **FetchStringSomewhere**.
+The cool part is obviously the **Aggregate** call, where **acc** is the "accumulated" composed closure, **nxt** is the next encapsulated exception handler and **thing** is the thing we're trying to protect with our exception handlers - so in other words, the closure that contains the call to **FetchStringSomewhere**.
 
 And of course we can now implement **CatchAll** if we want to:
 
@@ -415,4 +415,4 @@ static class CatchExtensions
 }
 ```
 
-Now please, if you are Eric Lippert and can come up with code that proves that I'm wrong with respect to the typing of sequences of exception handler delegates – please let me know! I would very much like to be corrected if that is the case.
+Now please, if you are Eric Lippert and can come up with code that proves that I'm wrong with respect to the typing of sequences of exception handler delegates - please let me know! I would very much like to be corrected if that is the case.
