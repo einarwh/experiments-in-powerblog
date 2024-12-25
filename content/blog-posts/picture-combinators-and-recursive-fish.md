@@ -368,11 +368,11 @@ What should we use to fill our quartets? Well, first off, we need a base case to
 
 We'll discuss **side** first since it is the simplest of the two (and also because **corner** uses **side**). The base case should look like this:
 
-TODO: side 1 fish
+![Recursive side, depth 1. A single quartet with two blank squares.](/svg/fish-side-1.svg)
 
 For the recursive case, we'll want self-similar copies of the side-tile in the top row instead of blank pictures. So the case one step removed from the base case should look like this:
 
-TODO: side 2 fish
+![Recursive side, depth 2. The blank squares are filled with side, depth 1.](/svg/fish-side-2.svg)
 
 The following code helps us construct sides of arbitrary depth:
 
@@ -387,11 +387,11 @@ This gives us the side tile that should be used as the "north" tile in the nonet
 
 Creating a corner is quite similar to creating a side. The base case should be a **quartet** consisting of three **blank** pictures, and a **u** tile for the final, bottom right picture. It should look like this:
 
-TODO: corner 1 fish
+![Recursive corner, depth 1. A single u-tile with three blank squares.](/svg/fish-corner-1.svg)
 
 The recursive case should use self-similar copies of both the corner tile (for the top left or "north-west" picture) and the side tile (for the top right and bottom left pictures), while keeping the u tile for the bottom right tile.
 
-TODO: corner 2 fish
+![Recursive corner, depth 2. The blank squares are filled with sides and corner of depth 1.](/svg/fish-corner-2.svg)
 
 Here's how we can write it in code:
 
@@ -425,7 +425,7 @@ let squareLimit n picture =
 
 Calling `squareLimit 3 fish` produces the following image:
 
-TODO: sqlimit-3.png
+![Reproduction of Henderson's Square Limit, depth 3.](/svg/fish-square-limit-3.svg)
 
 Which is a pretty good replica of Henderson's replica of Escher's Square Limit, to a depth of 3. Sweet!
 
