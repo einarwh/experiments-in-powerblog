@@ -43,11 +43,11 @@ The vector **a** denotes the offset from the origin to the bottom left corner of
 
 For example, assume we have a picture **F** that will produce the letter F when given a bounding box. A rendering might look like this:
 
-TODO: basic-f
+![The letter F rendered within a bounding box.](/svg/letter-f-basic.svg)
 
 But if we give F a different box, the rendering will look different too:
 
-TODO: skewed-f-image
+![The letter F rendered within a skewed bounding box.](/svg/letter-f-skewed.svg)
 
 So, how do we create and render such a magical, self-fitting picture?
 
@@ -149,7 +149,7 @@ The first transformation is **turn**, which rotates a picture 90 degrees counter
 
 The effect of **turn** looks like this:
 
-TODO: turn-f
+![The letter F turned 90 degrees counter-clockwise.](/svg/letter-f-turned.svg)
 
 Note that turning four times produces the original picture. We can formulate this as a property:
 
@@ -182,7 +182,7 @@ The next transformation is **flip**, which flips a picture about the center vert
 
 Which might sound a bit involved, but it's just this:
 
-TODO: flip-f
+![The letter F about the vertical axis of the bounding box.](/svg/letter-f-flipped.svg)
 
 Flipping twice always produces the same picture, so the following property should hold:
 
@@ -207,7 +207,7 @@ let flip p = flipBox >> p
 
 The third transformation is a bit peculiar, and quite particular to the task of mimicking Escher's Square Limit, which is what we're building up to. Henderson called the transformation **rot45**, but I'll refer to it as **toss**, since I think it resembles light-heartedly tossing the picture up in the air:
 
-TODO: toss-f
+![The letter F tossed up into the air.](/svg/letter-f-tossed.svg)
 
 What's going on here? Its a 45 degree counter-clockwise rotation around top left corner, which also shrinks the bounding box by a factor of √2.
 
@@ -239,11 +239,12 @@ That's all the transformations we'll use. We can of course combine transformatio
 
 Which produces this:
 
-TODO: turn-turn-flip-toss
+![The letter F tossed up into the air.](/svg/letter-f-turned-turned-flipped-tossed.svg)
 
 We proceed to compose simple pictures into more complex ones. We define two basic functions for composing pictures, **above** and **beside**. The two are quite similar. Both functions take two pictures as arguments; **above** places the first picture above the second, whereas **beside** places the first picture to the left of the second.
 
-TODO: above-beside.png
+| ----------- | ----------- |
+| ![An F above a turned F.](/svg/letter-f-above.svg)      | ![An F beside a turned F.](/svg/letter-f-beside.svg)       |
 
 Here we see the F placed above the turned F, and the F placed beside the turned F. Notice that each composed picture forms a square, whereas each original picture is placed within a half of that square. What happens is that the bounding box given to the composite picture is split in two, with each original picture receiving one of the split boxes as _their_ bounding box. The example shows an even split, but in general we can assign a fraction of the bounding box to the first argument picture, and the remainder to the second.
 
@@ -280,7 +281,7 @@ let moveVertically offset { a = a; b = b; c = c } =
 
 Now we can create more interesting images, such as this one:
 
-TODO: composite-f
+![A composite picture of four F's.](/svg/letter-f-composite.svg)
 
 Which is made like this:
 
@@ -295,23 +296,23 @@ We start with a basic picture that is somewhat more interesting than the F we ha
 
 According to the paper, Henderson created his fish from 30 bezier curves. Here is my attempt at recreating it:
 
-TODO: Henderson's fish
+![A recreation of Henderson's fish.](/svg/henderson-fish.svg)
 
 You'll notice that the fish violates the boundaries of the unit square. That is, some points on the shape has coordinates that are below zero or above one. This is fine, the picture isn't really _bound_ by its box, it's just scaled and positioned relative to it.
 
 We can of course **turn**, **flip** and **toss** the fish as we like.
 
-TODO: Henderson's fish (turned, flipped and tossed)
+![Henderson's fish turned, flipped and tossed.](/svg/henderson-fish-turn-flip-toss.svg)
 
 But there's more to the fish than might be immediately obvious. After all, it's not just any fish, it's an Escher fish. An interesting property of the fish is shown if we overlay it with itself turned twice.
 
 We define a combinator **over** that takes two pictures and places _both_ pictures with respect to the _same_ bounding box. And voila:
 
-TODO: overlay-fish
+![Henderson's fish overlayed with a turned copy of itself.](/svg/henderson-fish-over.svg)
 
 As we can see, the fish is designed so that it fits together neatly with itself. And it doesn't stop there.
 
-TODO: The t tile
+![The t-tile.](/svg/henderson-fish-ttile.svg)
 
 This shows the tile **t**, which is one of the building blocks we'll use to construct Square Limit. The function **ttile** creates a t-tile when given a picture:
 
@@ -326,7 +327,7 @@ Here we see why we needed the **toss** transformation defined earlier, and begin
 
 The second building block we'll need is called tile **u**. It looks like this:
 
-TODO: The u tile
+![The u-tile.](/svg/henderson-fish-utile.svg)
 
 And we construct it like this:
 
@@ -342,7 +343,7 @@ let utile (f : Picture) =
 
 To compose the Square Limit itself, we observe that we can construct it from nine tiles organized in a 3×3 grid. We define a helper function **nonet** that takes nine pictures as arguments and lays them out top to bottom, left to right. Calling **nonet** with pictures of the letters H, E, N, D, E, R, S, O, N produces this result:
 
-TODO: H-E-N-D-E-R-S-O-N
+![Nonet of the letters H-E-N-D-E-R-S-O-N.](/svg/henderson-name-nonet.svg)
 
 The code for **nonet** looks like this:
 
