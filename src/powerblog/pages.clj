@@ -47,7 +47,7 @@
 (defn render-article [context page]
   (layout {}
           header
-          [:script "hljs.highlightAll();"]
+          ;; [:script "hljs.highlightAll();"]
           (md/render-html (:page/body page))))
 
 (defn render-blog-post [context page]

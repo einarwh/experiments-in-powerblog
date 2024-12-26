@@ -8,7 +8,7 @@
 
 <p class="blog-post-date">December 19, 2013</p>
 
-It appears I've been waiting in vain! It's been more than a month since my last [blog post](/blog-posts/chasing-your-tail-with-bytecode-manipulation/), and still no pull requests for TailCop! In particular, no pulls requests that implement rewriting of recursive calls to loops for instance methods. I don't know why.
+It appears I've been waiting in vain! It's been more than a month since my last [blog post](/blog/2013/11/05/chasing-your-tail-with-bytecode-manipulation/), and still no pull requests for TailCop! In particular, no pulls requests that implement rewriting of recursive calls to loops for instance methods. I don't know why.
 
 I guess it's up to me, then.
 
