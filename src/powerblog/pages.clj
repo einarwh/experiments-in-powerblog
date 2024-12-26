@@ -31,7 +31,7 @@
     content]])
 
 (def header
-  [:header [:a {:href "/"} "@einarwh"] [:hr]])
+  [:header [:a {:href "/"} "einarwh"] [:hr]])
 
 (defn render-frontpage [context page]
   (layout {}

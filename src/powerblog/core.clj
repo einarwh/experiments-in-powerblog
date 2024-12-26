@@ -8,7 +8,7 @@
             [powerpack.highlight :as highlight]))
 
 (def config
-  (-> {:site/title "@einarwh"
+  (-> {:site/title "einarwh"
        :powerpack/render-page #'pages/render-page
        :powerpack/create-ingest-tx #'ingest/create-tx
 
