@@ -23,7 +23,7 @@
     content]])
 
 (def header
-  [:header [:a {:href "/"} "@einarwh"]])
+  [:header [:a {:href "/"} "@einarwh"] [:hr]])
 
 (defn render-frontpage [context page]
   (layout {:title "Einar W. Høst"}

@@ -6,7 +6,7 @@
 
 # The AI puppet dance
 
-<span style="color:#AFAFAF">Posted: January 12, 2024</span>
+<p class="blog-post-date">January 12, 2024</p>
 
 I worry about the wasted effort, the distraction and the opportunity cost brought on by the massive AI hype wave sweeping over society. Instead of solving real problems with known solutions, we dance around to the tune of the trend goblins like so many string puppets. It's like we're all participating in a massively distributed presales party arranged by the tech giants.
 

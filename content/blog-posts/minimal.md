@@ -10,21 +10,6 @@ Text
 
 ![Lizard?](/images/single-lizard.svg)
 
-![Lizard?](/svg/basic-f.svg)
+![The letter F rendered within a bounding box?](/svg/letter-f-basic.svg)
 
-![The letter F rendered within a bounding box?](/svg/basic-f.svg)
-
-![The letter F rendered within a bounding box?](/images/basic-f.svg)
-
-![Lizard?](/images/basic-f.svg)
-
-
-<!-- <svg width="400px" height="400px" viewBox="0 0 400 400" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <title></title>
-    <description></description>
-    <defs>
-    </defs>
-    <path stroke="none" fill="#000000" d="M100,300 C104,290 106,276 105,263 C120,276 140,283 162,282 C162,300 162,320 162,362.6 C190,334 200,320 225,286 C240,292 256,298 270,300 C240,314 212.6,336 212.6,362.6 C236,362 256,382 262.6,375 C258.4,366.6 254.2,358.4 250,350 C260,340 280,320 300,300 C280,280 260,260 250,250 C280,170 310,150 350,130 C340,112 320,104 300,100 C296,120 288,140 270,150 C250,110 230,80 150,50 C140,60 120,80 100,100 C110,110 130,130 150,150 C175,137.4 175,137.4 175,137.4 C182,144 162,164 162.6,187.4 C136,187.4 114,160 100,130 C98,144 92,160 86,175 C120,200 134,210 162.6,238 C120,238 100,238 82,238 C83,260 76,280 63,295 C76,294 90,296 100,300 Z " />
-    <path stroke-width="2.5" stroke="#FFFFFF" fill="none" d="M170,340 C210,260 290,80 115,100 " />
-</svg> -->
 
