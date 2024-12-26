@@ -17,7 +17,7 @@
                           :paths ["/css/styles.css"]}}
 
        :optimus/assets [{:public-dir "public"
-                         :paths [#".*\.svg" #".*\.jpg" #".*\.png" #".*\.gif"]}]
+                         :paths [#".*\.svg" #".*\.jpg" #".*\.png" #".*\.gif" #".*\.mp4"]}]
 
        :imagine/config {:prefix "image-assets"
                         :resource-path "public"

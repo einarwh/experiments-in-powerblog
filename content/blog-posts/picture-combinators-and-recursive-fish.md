@@ -216,7 +216,7 @@ It's not so easy to define simple properties that should hold for **toss**. For 
 The vector arithmetic is still pretty simple:
 
 ```fsharp
-(a', b', c') = (a + (b + c) / 2, (b + c) / 2, (c − b) / 2)
+(a', b', c') = (a + (b + c) / 2, (b + c) / 2, (c - b) / 2)
 ```
 
 And it still translates very directly into code:

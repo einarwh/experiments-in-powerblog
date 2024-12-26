@@ -53,7 +53,7 @@ Well, what kind of behaviour should we expect from this code? Obviously, the fir
 
 That's theory. Here's practice:
 
-TODO: Video
+<video src="/videos/aspects-caching.mp4" width="516" height="374" controls></video>
 
 So that seems to work according to plan. What else can we do? We've seen exception handling in the previous posts and caching in this one - both examples of so-called "cross-cutting concerns" in our applications. Cross-cutting concerns was hot terminology ten years ago, when the enterprise world discovered the power of the meta-object protocol (without realizing it, of course). It did so in the guise of _aspect-oriented programming_, which carried with it a whole vocabulary besides the term "cross-cutting concerns" itself, including "advice" (additional behaviour to handle), "join points" (places in your code where the additional behaviour may be applied) and "pointcuts" (a way of specifying declaratively which join points the advice applies to). And indeed, we can use these transformations that we've been doing to implement a sort of poor man's aspects.
 
