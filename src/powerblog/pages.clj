@@ -1,6 +1,8 @@
 (ns powerblog.pages
   (:require [powerpack.markdown :as md]
-            [datomic.api :as d]))
+            [datomic.api :as d])
+  (:import (java.time LocalDateTime)
+           (java.time.format DateTimeFormatter)))
 
 (defn get-blog-posts [db]
   (->> (d/q '[:find [?e ...]
@@ -11,9 +13,15 @@
        (sort-by :blog-post/published)
        reverse))
 
-;; <link rel= "stylesheet" href= "/path/to/styles/default.min.css" >
-;; <script src= "/path/to/highlight.min.js" ></script>
-;; <script>hljs.highlightAll ();</script>
+(defn ->ldt [inst]
+  (when inst
+    (LocalDateTime/ofInstant (.toInstant inst) (java.time.ZoneId/of "Europe/Oslo"))))
+
+(defn ymd [^LocalDateTime ldt]
+  (.format ldt (DateTimeFormatter/ofPattern "MMMM d yyy")))
+
+(defn md [^LocalDateTime ldt]
+  (.format ldt (DateTimeFormatter/ofPattern "MMMM d")))
 
 (defn layout [{:keys [title]} & content]
   [:html
