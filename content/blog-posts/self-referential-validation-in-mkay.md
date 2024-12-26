@@ -8,7 +8,7 @@
 
 Posted: February 22, 2013
 
-...so I implemented **eval** for [Mkay](/blog-posts/mkay-one-validation-attribute-to-rule-them-al/). That sentence doesn't have a first half, because I couldn't think of any good reasons for doing so. I happen to think that's a perfectly valid reason in and by itself, but I fear that's a minority stance. But it doesn't really matter. The second half of the sentence is true in any case. I implemented **eval** for Mkay.
+...so I implemented **eval** for [Mkay](/blog-posts/mkay-one-validation-attribute-to-rule-them-all/). That sentence doesn't have a first half, because I couldn't think of any good reasons for doing so. I happen to think that's a perfectly valid reason in and by itself, but I fear that's a minority stance. But it doesn't really matter. The second half of the sentence is true in any case. I implemented **eval** for Mkay.
 
 It might be unclear to you exactly what I mean by that, though. What I mean is that Mkay now has a function (called **eval**) that you can call inside an Mkay expression. That function will take another Mkay expression as a string parameter and produce a boolean result when called. That result will then be used within the original Mkay expression. Still opaque? A concrete example should make it entirely transparent.
 
@@ -24,7 +24,8 @@ public class Guardian
 
 So here we have a model that uses **eval** inside an Mkay expression. How does it work in practice? Have a look:
 
-TODO: Video
+<!-- 636 × 198 -->
+<video src="/videos/mkay-guardian.mp4" width="636" height="198" controls></video>
 
 So what happens in the video is that the rule "(eval Rule)" that annotates the Value property says that you should take the content of the **Rule** property and interpret that as the rule that the **Value** property must adher to. It's sort of like SQL injection, only for Mkay. Isn't that nice?
 
@@ -42,7 +43,8 @@ public class Composed
 }
 ```
 
-TODO: Video
+<!-- 636 × 198 -->
+<video src="/videos/mkay-compound.mp4" width="636" height="198" controls></video>
 
 It's even more amusing if you go all self-referential and [Douglas Hofstadter](http://en.wikipedia.org/wiki/Douglas_Hofstadter)-like, and have the value and the rule be one and the same thing. To accomplish that, all you have to do is annotate your property with "(eval .)".
 
@@ -59,6 +61,7 @@ public class Self
 
 And then we can do stuff like this:
 
-TODO: Video.
+<!-- 636 × 198 -->
+<video src="/videos/mkay-self.mp4" width="636" height="198" controls></video>
 
 Can you do anything useful with this? Probably not. But you've got to admit it's pretty cute.
