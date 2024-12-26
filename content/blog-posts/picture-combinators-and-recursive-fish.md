@@ -225,7 +225,7 @@ And it still translates very directly into code:
 let tossBox { a = a; b = b; c = c } =
   let a' = a + (b + c) / 2
   let b' = (b + c) / 2
-  let c' = (c − b) / 2
+  let c' = (c - b) / 2
   { a = a'; b = b'; c = c' }
 
 let toss p = tossBox >> p
@@ -437,7 +437,7 @@ However, if you take a look directly at Escher's woodcut (or, more likely, the p
 
 Here's what I came up with.
 
-TODO: escher-fish-all.png
+![A more faithful reproduction of Escher's fish, in three colors.](/svg/fish-three-colors.svg)
 
 To support different hues of the same fish requires a bit of thinking - we can't just follow Henderson's instructions any more. But we can use exactly the same approach! In addition to transforming the _shape_ of the picture, we need to be able to transform the _coloring_ of the picture. For this, we introduce a new abstraction, that we will call a **Lens**.
 
@@ -456,7 +456,7 @@ let rehue p =
   | Greyish -> Whiteish
   | Whiteish -> Blackish
   fun (box, hue) -> p (box, change hue)
-```fsharp
+```
 
 Changing hue three times takes us back to the original hue:
 
@@ -466,7 +466,7 @@ Changing hue three times takes us back to the original hue:
 
 We need to revise the tiles we used to construct the Square Limit to incorporate the **rehue** combinator. It turns out we need to create two variants of the **t** tile.
 
-TODO: ttile-shades
+![Two variants of the t-tile.](/svg/fish-ttiles-with-colors.svg)
 
 But of course it's just the same old **t** tile with appropriate calls to **rehue** for each fish:
 
@@ -484,7 +484,7 @@ let ttile2 = ttile (rehue >> rehue) rehue
 
 For the **u** tile, we need three variants:
 
-TODO: utiles.png
+![Three variants of the u-tile.](/svg/fish-utiles-with-colors.svg)
 
 Again, we just call **rehue** to varying degrees for each fish.
 
@@ -563,7 +563,7 @@ let squareLimit n picture =
 
 And now calling `squareLimit 5 fish` produces the following image:
 
-TODO: square-limit-shades-level-5.png
+![Reproduction of Escher's Square Limit, depth 5.](/svg/square-limit-colors-5.svg)
 
 Which is a pretty good replica of Escher's Square Limit, to a depth of 5.
 
