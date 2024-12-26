@@ -26,12 +26,15 @@
   [:header [:a {:href "/"} "@einarwh"] [:hr]])
 
 (defn render-frontpage [context page]
-  (layout {:title "Einar W. Høst"}
+  (layout {}
           (md/render-html (:page/body page))
-  ;;  [:h2 "Blog posts"]
+          header
+          [:h2 "Blog posts"]
           [:ul
            (for [blog-post (get-blog-posts (:app/db context))]
-             [:li [:a {:href (:page/uri blog-post)} (:page/title blog-post)]])]))
+             [:li
+              [:p {:class "blog-post-list-date"} (:blog-post/published blog-post)]
+              [:a {:href (:page/uri blog-post)} (:page/title blog-post)]])]))
 
 (defn render-article [context page]
   (layout {}
