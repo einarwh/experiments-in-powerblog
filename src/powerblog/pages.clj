@@ -7,11 +7,13 @@
 (defn get-blog-posts [db]
   (->> (d/q '[:find [?e ...]
               :where
-              [?e :blog-post/author]]
+              [?e :blog-post/author]
+              [?e :blog-post/published]]
             db)
        (map #(d/entity db %))
        (sort-by :blog-post/published)
        reverse))
+
 
 (defn ->ldt [inst]
   (when inst
