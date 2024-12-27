@@ -64,9 +64,12 @@
 (defn render-blog-post [context page]
   (render-article context page))
 
+(defn render-draft [context page]
+  (render-article context page))
+
 (defn render-page [context page]
   (case (:page/kind page)
     :page.kind/frontpage (render-frontpage context page)
     :page.kind/blog-list (render-blog-list context page)
     :page.kind/blog-post (render-blog-post context page)
-    :page.kind/article (render-article context page)))
+    :page.kind/draft (render-draft context page)))

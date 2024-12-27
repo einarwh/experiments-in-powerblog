@@ -3,7 +3,7 @@
 
 (defn get-page-kind [file-name]
   (cond
-    (re-find #"^blog/index\.md" file-name)
+    (re-find #"^blog/index\.md$" file-name)
     :page.kind/blog-list
 
     (re-find #"^blog/" file-name)
@@ -12,8 +12,8 @@
     (re-find #"^index\.md" file-name)
     :page.kind/frontpage
 
-    (re-find #"\.md$" file-name)
-    :page.kind/article))
+    (re-find #"^draft/" file-name)
+    :page.kind/draft))
 
 (defn create-tx [file-name txes]
   (let [kind (get-page-kind file-name)]
