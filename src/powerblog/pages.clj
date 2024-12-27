@@ -1,6 +1,6 @@
 (ns powerblog.pages
-  (:require [powerpack.markdown :as md]
-            [datomic.api :as d])
+  (:require [datomic-type-extensions.api :as d]
+            [powerpack.markdown :as md])
   (:import (java.time LocalDateTime)
            (java.time.format DateTimeFormatter)))
 
@@ -18,10 +18,10 @@
     (LocalDateTime/ofInstant (.toInstant inst) (java.time.ZoneId/of "Europe/Oslo"))))
 
 (defn ymd [^LocalDateTime ldt]
-  (.format ldt (DateTimeFormatter/ofPattern "MMMM d yyy")))
+  (.format ldt (DateTimeFormatter/ofPattern "yyy-MM-dd")))
 
 (defn md [^LocalDateTime ldt]
-  (.format ldt (DateTimeFormatter/ofPattern "MMMM d")))
+  (.format ldt (DateTimeFormatter/ofPattern "MMMM dd")))
 
 (defn layout [{:keys [title]} & content]
   [:html
@@ -34,6 +34,17 @@
   [:header [:a {:href "/"} "einarwh"] [:hr]])
 
 (defn render-frontpage [context page]
+  (layout {}
+          (md/render-html (:page/body page))
+          header
+          [:h2 "Blog posts"]
+          [:ul
+           (for [blog-post (get-blog-posts (:app/db context))]
+             [:li
+              [:p {:class "blog-post-list-date"} (ymd (:blog-post/published blog-post))]
+              [:a {:href (:page/uri blog-post)} (:page/title blog-post)]])]))
+
+(defn render-blog-list [context page]
   (layout {}
           (md/render-html (:page/body page))
           header
@@ -56,5 +67,6 @@
 (defn render-page [context page]
   (case (:page/kind page)
     :page.kind/frontpage (render-frontpage context page)
+    :page.kind/blog-list (render-blog-list context page)
     :page.kind/blog-post (render-blog-post context page)
     :page.kind/article (render-article context page)))

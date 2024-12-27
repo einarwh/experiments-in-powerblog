@@ -3,7 +3,10 @@
 
 (defn get-page-kind [file-name]
   (cond
-    (re-find #"^blog-posts/" file-name)
+    (re-find #"^blog/index\.md" file-name)
+    :page.kind/blog-list
+
+    (re-find #"^blog/" file-name)
     :page.kind/blog-post
 
     (re-find #"^index\.md" file-name)
