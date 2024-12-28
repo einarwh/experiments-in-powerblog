@@ -14,7 +14,7 @@ But what does it mean? What does it mean for me to improve 1%? What is it that I
 
 Where did the 1% number come from? How much does 1% improvement entail? Is it realistic? I guess it's supposed to sound like a minuscule improvement, something easily achievable, but is it really? How can we tell? In fact, if 1% is so easily within our reach, why stop there? Why not put in some extra effort and go for 2% improvement? That would yield a truly mind-blowing 1377-fold improvement!
 
-![An AI-generated image of a crow in front of complicated calculations at a blackboard.](/images/crow-at-a-blackboard.png)
+![An AI-generated image of a crow in front of complicated calculations at a blackboard.](/images/crow-at-a-blackboard-500x500.jpg)
 
 But that's obviously ridiculous. We can't just arbitrarily decide to improve by 2% every day! That's absurd! But how is 1% any different? In fact, how can we be sure that the improvement - whatever it is, and whatever it even means - is not something like 0.1% instead? It makes for less impressive math of course - 1.001<sup>365</sup> is approximately 1.44. It is still a significant improvement though! To get 44% better at something in a year (even if I'm not entirely sure what that means unless I have a very clear metric, like time spent on something, or weights lifted or whatever) is truly remarkable in many cases. But of course it could be even bleaker. Maybe daily improvement is unrealistic, and we have to settle for weekly? We're down to 5%. I'm not sure about you, but I'm getting less inspired. But which calculation is most realistic? How can we tell?
 

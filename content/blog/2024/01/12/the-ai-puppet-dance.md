@@ -10,7 +10,7 @@
 
 I worry about the wasted effort, the distraction and the opportunity cost brought on by the massive AI hype wave sweeping over society. Instead of solving real problems with known solutions, we dance around to the tune of the trend goblins like so many string puppets. It's like we're all participating in a massively distributed presales party arranged by the tech giants.
 
-![An AI-generated image of a robot puppet](/images/robot-puppet.png)
+![An AI-generated image of a robot puppet](/images/robot-puppet-500x500.jpg)
 
 These days, every little agency in every little county is spending their time and money scrambling to come up with an AI strategy instead of addressing the problems on their doorstep, because they're told that otherwise they'll be "left behind". Every little business in every little domain is struggling to find some way to shoehorn something that qualifies as "AI" into their offering, because otherwise they "can't compete". They have little choice in this matter. If doing the AI dance is a prerequisite for funding, for attention, for hiring, everyone will do the AI dance. It's rational given the conditions, but the outcome for society at large remains to be seen.
 

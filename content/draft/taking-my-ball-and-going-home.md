@@ -8,4 +8,15 @@
 
 <p class="blog-post-date">December 27, 2024</p>
 
-...
+The Internet used to be a nice place. 
+
+Hobbyist 
+
+Social media 
+
+Enshittification
+
+User exploitation / User qua hostage.
+
+What do we do with this broken web? 
+
