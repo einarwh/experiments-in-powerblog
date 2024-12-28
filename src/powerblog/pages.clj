@@ -28,7 +28,8 @@
 (defn layout [{:keys [title]} & content]
   [:html
    [:head
-    (when title [:title title])]
+    (when title [:title title])
+    [:link {:rel "icon" :sizes "any" :type "image/svg+xml" :href "/images/favfish.svg"}]]
    [:body
     content]])
 
