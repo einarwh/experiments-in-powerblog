@@ -2,73 +2,88 @@
 @import url("pygments.css");
 @import url("syntax-highlight.css");
 
-h1, h2, h3 { margin: 0 0 0 0; padding: 0; line-height:1.1; }
-h1 { font-size: 2.2rem; } h2 { font-size: 1.4rem; }  h3 { font-size: 1.1rem; }
+h1,
+h2,
+h3 {
+  margin: 0 0 0 0;
+  padding: 0;
+  line-height: 1.1;
+}
+h1 {
+  font-size: 2.2rem;
+}
+h2 {
+  font-size: 1.4rem;
+}
+h3 {
+  font-size: 1.1rem;
+}
 
 p.blog-post-date {
-  margin: 8px 0 0 0; 
+  margin: 8px 0 0 0;
   padding: 0;
-  color: #A9A9A9;
-  font-size: smaller
+  color: #a9a9a9;
+  font-size: smaller;
 }
 
 p.blog-post-list-date {
-  margin: 0 0 0 0; 
+  margin: 0 0 0 0;
   padding: 0;
-  color: #A9A9A9;
-  font-size: 12px
+  color: #a9a9a9;
+  font-size: 12px;
 }
 
-ul {
+ul.blog-post-list {
   list-style: none;
   margin: 10px 0px 10px 0px;
   padding: 0px;
 }
 
-li {
+li.blog-post-list-item {
   margin: 15px 0px 15px 0px;
 }
 
 html {
-    font-size: 20px;
-    font-family: Helvetica, arial, sans-serif;
-  }
-  
-  body {
-    background: #fff;
-    color: #000;
-    max-width: 800px;
-    margin: 20px auto;
-    line-height: 1.5;
-  }
-  
-  a:link, a:visited {
-    color: var(--active-link-red);
-    /* font-weight: bold; */
-    text-decoration: underline dotted;
-  }
-  
-  a:hover {
-    color: var(--active-link-red);
-    text-decoration: underline;
-  }
+  font-size: 20px;
+  font-family: Helvetica, arial, sans-serif;
+}
 
-  img,
-  video {
-    max-width: 95%;
-    height: auto;
-    margin-left: auto;
-    margin-right: auto;
-    border-radius: var(--standard-border-radius);
-  }
+body {
+  background: #fff;
+  color: #000;
+  max-width: 800px;
+  margin: 20px auto;
+  line-height: 1.5;
+}
 
-  blockquote {
-    max-width: 90%;
-    /* margin-inline-start: 2rem; */
-    margin-inline-end: 0;
-    margin-block: 2rem;
-    /* padding: 0.4rem 0.8rem; */
-    border-inline-start: 0.35rem solid var(--accent);
-    color: var(--text-light);
-    font-style: italic;
-  }
+a:link,
+a:visited {
+  color: var(--active-link-red);
+  /* font-weight: bold; */
+  text-decoration: underline dotted;
+}
+
+a:hover {
+  color: var(--active-link-red);
+  text-decoration: underline;
+}
+
+img,
+video {
+  max-width: 95%;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: var(--standard-border-radius);
+}
+
+blockquote {
+  max-width: 90%;
+  /* margin-inline-start: 2rem; */
+  margin-inline-end: 0;
+  margin-block: 2rem;
+  /* padding: 0.4rem 0.8rem; */
+  border-inline-start: 0.35rem solid var(--accent);
+  color: var(--text-light);
+  font-style: italic;
+}

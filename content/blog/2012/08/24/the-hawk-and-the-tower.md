@@ -12,7 +12,7 @@ Behold the tower of good intentions!
 
 ![A tower of books about computer programming](/images/book-tower.jpg)
 
-The stack of books shown in the picture is my accumulated backlog of unread books. (Of course, in terms of data structures, it's not really a [stack](https://en.wikipedia.org/wiki/Stack_(abstract_data_type)), it's more like a [priority queue](http://en.wikipedia.org/wiki/Priority_queue). Although the priority tends to be skewed somewhat towards the most recently purchased books.)
+The stack of books shown in the picture is my accumulated backlog of unread books. (Of course, in terms of data structures, it's not really a [stack](<https://en.wikipedia.org/wiki/Stack_(abstract_data_type)>), it's more like a [priority queue](http://en.wikipedia.org/wiki/Priority_queue). Although the priority tends to be skewed somewhat towards the most recently purchased books.)
 
 As you can see, the tower is made up of _completely awesome, jaw-drop-inducing_ books. (You can browse them [here](http://www.amazon.com/gp/registry/wishlist/3G42M2O57XW0) if you're interested.) I'm quite convinced that there are no better books out there — except perhaps [Knuth](http://www.amazon.com/Computer-Programming-Volumes-1-4A-Boxed/dp/0321751043/ref=sr_1_1?ie=UTF8&qid=1344625434&sr=8-1&keywords=knuth), but we already [discussed that](/blog/2012/07/08/to-knuth-or-not-to-knuth/). (Also, I wasn't able to locate my copy of Jon Bentley's [Programming Pearls](http://www.amazon.com/Programming-Pearls-2nd-Jon-Bentley/dp/0201657880/ref=sr_1_1?s=books&ie=UTF8&qid=1344625471&sr=1-1&keywords=programming+pearls) for the picture, otherwise it would be in there somewhere.) And yet I haven't read any of them! That is, I may have read the introduction, maybe the first chapter, in some cases a bit more. But I don't think that I've read more than 10% of either one.
 
@@ -48,9 +48,9 @@ This brings me to the scary part, which I call topic skipping. The problem is th
 
 Now according to Wikipedia, that trustworthy workhorse of information that may or may not be trustworthy, a user can do the following to alleviate disk thrashing:
 
-* Increase the amount of RAM in the computer.
-* Adjust the size of the swap file.
-* Decrease the amount of programs being run on the computer.
+- Increase the amount of RAM in the computer.
+- Adjust the size of the swap file.
+- Decrease the amount of programs being run on the computer.
 
 In terms of reading, this translates roughly to increasing the size of your brain (a good idea, but requires significant advances in medicine), increasing the amount of time available for reading (I'd like to, but cannot conjure up any more hours in the day) and decreasing the number of books you're trying to read at once (excellent advice!).
 

@@ -41,9 +41,9 @@
           (md/render-html (:page/body page))
           header
           [:h2 "Blog posts"]
-          [:ul
+          [:ul {:class "blog-post-list"}
            (for [blog-post (get-blog-posts (:app/db context))]
-             [:li
+             [:li {class "blog-post-list-item"}
               [:p {:class "blog-post-list-date"} (ymd (:blog-post/published blog-post))]
               [:a {:href (:page/uri blog-post)} (:page/title blog-post)]])]))
 
