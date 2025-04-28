@@ -1,14 +1,12 @@
 :page/title Socio-technical API patterns
 :blog-post/tags [:tech ]
 :blog-post/author {:person/id :einarwh}
-
-<!-- :blog-post/published #time/ldt "2014-12-27T00:00:00" -->
-
+:blog-post/published #time/ldt "2025-04-28T16:17:00"
 :page/body
 
 # Socio-technical API patterns
 
-<p class="blog-post-date">April 22, 2025</p>
+<p class="blog-post-date">April 28, 2025</p>
 
 ![A pattern of stick people.](/svg/byteman-pattern-long.svg)
 
@@ -26,7 +24,7 @@ But first, let's take a look at the socio-technical landscape and the forces tha
 
 ### Consumer-provider relationship
 
-On the two sides of the API divide we find the provider and the consumer(s) of the API. How important is the API to them?
+On the two sides of the API divide we find the provider and the consumer(s) of the API. To investigate the dynamics between the two parties, let's start with a basic question. How important is the API to them?
 
 For the API provider, the answer can range from main focus (the team exists primarily to provide the API) to nuisance (the team has been instructed to provide an API to another team), with the middle ground being something like a side hustle. This is typically mirrored by the amount of resources available both for the initial development of the API and for its subsequent upkeep and evolution. For the API consumer, it can range from essential to optional.
 
@@ -34,7 +32,7 @@ The consumer and the provider are not necessarily aligned with respect to how im
 
 The degree to which the consumer and the provider need to collaborate and communicate in order to connect their systems vary greatly. In the case where the API is a product offered by the provider and the consumer is just another customer, direct communication may be entirely absent. The consumer can handle onboarding by themselves, with no other guidance than the documentation offered by the provider. At the other end of the spectrum, there is no existing API, and the prospective provider and consumer need to work out what the API should be.
 
-Correspondingly, the communication between consumer and provider ranges from practically none-existent (except perhaps the ability to report bugs in a fire-and-forget manner) to being able to walk over to someone's desk and have a face-to-face conversation. (Of course being _able to_ have a face-to-face conversation is not the same as _using_ that ability, since people are subject to social awkwardness, inhibitions and self-defense mechanisms, leading us to prefer lower-bandwidth but less-exposed asynchronous communication channels). This is unfortunate, since poor communication or communication avoidance often leads to workarounds and dependencies on assumptions, perceived invariants, and undocumented features. (An example is consumers scavenging string values for data items like IDs.) This in turn makes it harder to change the API since the implementation becomes the interface. As long as the consumer-provider relationship is sufficiently dysfunctional, a single consumer is enough to fulfil Hyrum's Law, i.e.
+Correspondingly, the communication between consumer and provider ranges from practically non-existent (except perhaps the ability to report bugs in a fire-and-forget manner) to being able to walk over to someone's desk and have a face-to-face conversation. (Of course being _able to_ have a face-to-face conversation is not the same as _using_ that ability, since people are subject to social awkwardness, inhibitions and self-defense mechanisms, leading us to prefer lower-bandwidth but less-exposed asynchronous communication channels). This is unfortunate, since poor communication or communication avoidance often leads to workarounds and dependencies on assumptions, perceived invariants, and undocumented features. (An example is consumers scavenging string values for data items like IDs.) This in turn makes it harder to change the API since the implementation becomes the interface. As long as the consumer-provider relationship is sufficiently dysfunctional, a single consumer is enough to fulfil [Hyrum's Law](https://www.hyrumslaw.com/), i.e.
 
 > With a sufficient number of users of an API,
 > it does not matter what you promise in the contract:
@@ -91,7 +89,7 @@ Exposing data is by definition a matter of turning internal data into public dat
 
 The problems with the Millstone pattern are much more pronounced for the provider than for the consumers. However the situation isn’t necessarily great for consumers either. The API tends to be poorly specified. There is no stable contract, just reverse engineered documentation. The API may be subject to inadvertent changes, in particular since the API provider is using the same data model for their primary focus as well. There is no SLA, just the "best effort" of a team that would rather spend their time on something else. Best may fall quite a bit short of good. An upside is that the consumer team at least tends to have easy access to the provider team.
 
-How do you avoid falling into the Millstone pattern? The forces pulling toward the pattern are strong, and so must be tackled head-on. It poses a number of challenges. First, the organization needs to be aware of the dangers of the Millstone pattern. Decision makers need to be mature enough to realize that providing an API is not a one-time cost, it is a long-time commitment.Initial investments in API quality pay off, whereas sloppy initial work can exact a cost for the lifetime of the API.
+How do you avoid falling into the Millstone pattern? The forces pulling toward the pattern are strong, and so must be tackled head-on. It poses a number of challenges. First, the organization needs to be aware of the dangers of the Millstone pattern. Decision makers need to be mature enough to realize that providing an API is not a one-time cost, it is a long-time commitment. Initial investments in API quality pay off, whereas sloppy initial work can exact a cost for the lifetime of the API.
 
 The API must be treated as a proper product. The API enters the portfolio of products that the team needs to support, whether the team wants it to or not, and whether the organization recognizes it or not. The only variables are the quality of the API and how much unacknowledged ghost work the provider team will need to do. It is important that the team's environment and stakeholders understand this as well. The team will need to allocate some of its time and focus on the API, which means less time and focus on other products.
 
@@ -119,7 +117,7 @@ Moving away from the Rapids pattern is a "[inverse Conway](https://www.thoughtwo
 
 <h3 id="sock-puppet">The Sock Puppet</h3>
 
-In the Sock Puppet pattern, a team is talking to itself through an API. That is, a single team is both producer and consumer of the API. The Sock Puppet is not necessarily an anti-pattern. If you're making a Single Page Application (SPA), you basically have the choice between The Rapids and The Sock Puppet. In that case, The Sock Puppet is preferable for the reasons described above. In other cases, it may be worth revisiting the reason for having an API. What benefits do you get? Do they outweigh the costs? Is it worth it? This is particularly the case for APIs that change often.
+In the Sock Puppet pattern, a team is talking to itself through an API. That is, a single team is both the provider and the sole consumer of the API. The Sock Puppet is not necessarily an anti-pattern. At least it's not as obviously a bad idea as it might seem at first glance. If you're making a Single Page Application (SPA), you basically have the choice between The Rapids and The Sock Puppet. In that case, The Sock Puppet is preferable for the reasons described above. In other cases, it may be worth revisiting the reason for having an API. What benefits do you get? Do they outweigh the costs? Is it worth it? This is particularly the case for APIs that change often.
 
 You should also beware if you start getting a large number of socks. Exactly what constitutes a large number may vary, but it may be worth recalling that a human has only two hands, and so can only manipulate two puppets with anything resembling ease and elegance. The number may be similarly low for teams.
 
