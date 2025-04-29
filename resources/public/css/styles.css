@@ -5,19 +5,25 @@
 h1,
 h2,
 h3 {
-  margin: 0 0 0 0;
-  padding: 0;
   line-height: 1.1;
+  /* border-style: dotted; */
 }
 h1 {
+  margin: 20px 0 0 0;
   font-size: 2.2rem;
 }
 h2 {
+  margin: 36px 0 0 0;
   font-size: 1.4rem;
 }
 h3 {
+  margin: 36px 0 0 0;
   font-size: 1.1rem;
 }
+
+/* p {
+  border-style: dotted;
+} */
 
 p.blog-post-date {
   margin: 8px 0 0 0;
@@ -34,13 +40,14 @@ p.blog-post-list-date {
 }
 
 ul.blog-post-list {
+  /* border-style: dotted; */
   list-style: none;
   margin: 10px 0px 10px 0px;
-  padding: 0px;
+  padding: 2px;
 }
 
 li.blog-post-list-item {
-  margin: 15px 0px 15px 0px;
+  margin: 15px 0px 15px 30px;
 }
 
 html {
@@ -52,7 +59,7 @@ body {
   background: #fff;
   color: #000;
   max-width: 800px;
-  margin: 20px auto;
+  margin: auto;
   line-height: 1.5;
 }
 

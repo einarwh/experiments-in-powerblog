@@ -40,7 +40,7 @@
   (layout {}
           (md/render-html (:page/body page))
           header
-          [:h2 "Blog posts"]
+          [:h1 "Blog posts"]
           [:ul {:class "blog-post-list"}
            (for [blog-post (get-blog-posts (:app/db context))]
              [:li {class "blog-post-list-item"}
@@ -51,7 +51,7 @@
   (layout {}
           (md/render-html (:page/body page))
           header
-          [:h2 "Blog posts"]
+          [:h1 "Blog posts"]
           [:ul
            (for [blog-post (get-blog-posts (:app/db context))]
              [:li
