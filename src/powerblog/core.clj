@@ -14,7 +14,7 @@
 
        :optimus/bundles {"app.css"
                          {:public-dir "public"
-                          :paths ["/css/styles.css" "/css/themes/ascetic.min.css"]}}
+                          :paths ["/css/jonas.css" "/css/themes/ascetic.min.css"]}}
                         ;;  "app.js"
                         ;;  {:public-dir "public"
                         ;;   :paths ["/js/highlight.min.js"]}}
