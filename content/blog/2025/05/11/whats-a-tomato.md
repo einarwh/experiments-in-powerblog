@@ -10,7 +10,7 @@
 
 <p class="blog-post-date">May 11, 2025</p>
 
-I read a post on LinkedIn that said something like "knowledge is knowing that tomato is a fruit and wisdom is knowing not to put it in a fruit salad". Which is mostly remarkable as an expression of what counts as a _bon mot_ over at LinkedIn, but since I've often used the tomato as an example in [my talk](https://www.youtube.com/watch?v=SAWVPCO575k) about categorization, I paid a little more attention than I usually would.
+I read a post on LinkedIn that said something like "knowledge is knowing that tomato is a fruit and wisdom is knowing not to put it in a fruit salad". Which is mostly remarkable as an expression of what counts as a _bon mot_ over at LinkedIn, but since I've often used the tomato as an example in [my talk](https://www.youtube.com/watch?v=SAWVPCO575k) about categorization, I paid a little more attention than I otherwise would.
 
 I noticed that some commenters remarked that what's missing is context. That is, in the botanic context, a tomato is considered to be a fruit, whereas in the culinary context, the tomato is more like a vegetable. This is roughly the same point that I have been making in my talk. It is perhaps best expressed by my friend Romeu, who did one better to include the third context of theatre.
 
@@ -28,7 +28,7 @@ In my talk, I argue that a tomato by itself, without a concrete context in which
 
 To avoid falling into my own trap, let me qualify that a bit. Of course, tomato is a fuzzy category in its own right, with specimens ranging from prototypical tomatoes to edge cases to non-tomatoes. But in order to make any point at all, let's assume we have in our hand a prototypical tomato, the familiar red, round, edible, squishy thing that finds good usage when you are making pizza sauce, the kind which pretty much everyone you ask would agree is a typical tomato. We are not questioning its membership in the tomato category.
 
-What is it? What is this thing that we have in our hand? Is it a fruit? Is it a vegetable? Is it feedback? Something else? It seems to me that we are running a fool's errand, getting caught in the web we have spun from our thoughts. In all contexts, it is first and foremost a tomato. Everything else is either irrelevant or secondary.
+What is it? What is this thing that we have in our hand? Is it a fruit? Is it a vegetable? Is it feedback? Something else? It seems to me that we are running a fool's errand, getting caught in the web we have spun from our thoughts. In all contexts, it is first and foremost a tomato. Everything else is either irrelevant or secondary. We are interested in tomatoes as tomatoes.
 
 In the culinary context, this is obvious. No chef treats the tomato the way they do because they consider it to be a vegetable. They do it because they consider it to be a tomato! The only thing the chef will worry about is whether or not it is a high quality tomato, if it has seen plenty of sun and is full of flavor. The story ends there. Talking about higher levels of categorization is quite ridiculous and of little relevance to the chef.
 
