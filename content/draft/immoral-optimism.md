@@ -23,6 +23,7 @@ It is not enough to be optimistic that outcomes will turn out positive for socie
 - Optimism is ignorance.
 - Optimism is trivialization.
 - Optimism is immoral.
+- Optimism is fucking useless.
 
 Human tendency to frame things in binary oppositions. It is a very simple model.
 
