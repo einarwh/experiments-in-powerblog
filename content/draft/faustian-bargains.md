@@ -10,7 +10,7 @@
 
 <p class="blog-post-date">February 8, 2025</p>
 
-I think it’s time to revisit some doc the Faustian bargains we’ve made with technology.
+I think it’s time to revisit some of the Faustian bargains we’ve made with technology.
 
 What’s offered is always convenience, and we find it hard to resist. Convenience for attention, convenience for data, convenience for time. (Authenticity, humanity)
 
