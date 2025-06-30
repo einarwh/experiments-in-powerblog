@@ -76,7 +76,7 @@ But there are other reasons as well, primary among them being that _you are not 
 
 Of course, some of the tools and techniques and the pixie dust used in Silicon Valley _may_ in fact be useful in other contexts as well. But it's hard to take success in Silicon Valley as a guarantee for that.
 
-When might you consider biting the bullet and read a Silicon Valley self-help book? It _could_ of course be that you believe that the self-help book will be genuinely helpful. In that's the case, by all means, go ahead. But beware that it's a rather weak reason and that chances are you'll be wrong. A better reason is the principle of _know your enemy_. That is, if a particularly stupid fad is getting an unreasonable amount of attention in your environment, you may find it useful to go to the sources and know and understand the fad better than those who promote it in your vicinity.
+When should you bite the bullet and read a Silicon Valley self-help book? It _could_ of course be that you believe that the self-help book will be genuinely helpful. In that's the case, by all means, go ahead. But beware that it's a rather weak reason and that chances are you'll be wrong. A better reason is the principle of _know your enemy_. That is, if a particularly stupid fad is getting an unreasonable amount of attention in your environment, you may find it useful to go to the sources and know and understand the fad better than those who promote it in your vicinity.
 
 ### Why avoid books written by people in tech
 
