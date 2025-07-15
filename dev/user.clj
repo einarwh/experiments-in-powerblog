@@ -1,2 +1,2 @@
 (ns user
-  (:require powerblog.dev))
+  (:require einarwh.dev))

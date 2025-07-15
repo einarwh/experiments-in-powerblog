@@ -1,7 +1,8 @@
 {:paths ["src" "resources"]
- :deps {org.clojure/clojure {:mvn/version "1.12.0"}
+ :deps {org.clojure/clojure {:mvn/version "1.12.1"}
+        org.clojure/data.xml {:mvn/version "0.0.8"}
         no.cjohansen/powerpack {:mvn/version "2024.12.29"}
         clygments/clygments {:mvn/version "2.0.2"}}
  :aliases
  {:dev {:extra-paths ["dev"]}
-  :build {:exec-fn powerblog.export/export!}}}
+  :build {:exec-fn einarwh.export/export!}}}

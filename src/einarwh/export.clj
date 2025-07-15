@@ -1,5 +1,5 @@
-(ns powerblog.export
-  (:require [powerblog.core :as blog]
+(ns einarwh.export
+  (:require [einarwh.core :as blog]
             [powerpack.export :as export]))
 
 (defn ^:export export! [& args]

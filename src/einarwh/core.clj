@@ -1,10 +1,6 @@
-(ns powerblog.core
-  (:require [powerblog.ingest :as ingest]
-            [powerblog.pages :as pages]))
-
-(ns powerblog.core
-  (:require [powerblog.ingest :as ingest]
-            [powerblog.pages :as pages]
+(ns einarwh.core
+  (:require [einarwh.ingest :as ingest]
+            [einarwh.pages :as pages]
             [powerpack.highlight :as highlight]))
 
 (def config
@@ -15,9 +11,6 @@
        :optimus/bundles {"app.css"
                          {:public-dir "public"
                           :paths ["/css/jonas.css" "/css/themes/ascetic.min.css"]}}
-                        ;;  "app.js"
-                        ;;  {:public-dir "public"
-                        ;;   :paths ["/js/highlight.min.js"]}}
 
        :optimus/assets [{:public-dir "public"
                          :paths [#".*\.svg" #".*\.jpg" #".*\.png" #".*\.gif" #".*\.mp4"]}]

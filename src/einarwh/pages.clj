@@ -1,6 +1,7 @@
-(ns powerblog.pages
+(ns einarwh.pages
   (:require [datomic-type-extensions.api :as d]
-            [powerpack.markdown :as md])
+            [powerpack.markdown :as md]
+            [einarwh.rss :as rss])
   (:import (java.time LocalDateTime)
            (java.time.format DateTimeFormatter)))
 
@@ -14,7 +15,6 @@
        (sort-by :blog-post/published)
        reverse))
 
-
 (defn ->ldt [inst]
   (when inst
     (LocalDateTime/ofInstant (.toInstant inst) (java.time.ZoneId/of "Europe/Oslo"))))
@@ -24,9 +24,6 @@
 
 (defn md [^LocalDateTime ldt]
   (.format ldt (DateTimeFormatter/ofPattern "MMMM dd")))
-
-;; <script data-goatcounter="https://einarwh.goatcounter.com/count"
-;;         async src="//gc.zgo.at/count.js"></script>
 
 (defn layout [{:keys [title]} & content]
   [:html
@@ -62,10 +59,13 @@
               [:p {:class "blog-post-list-date"} (:blog-post/published blog-post)]
               [:a {:href (:page/uri blog-post)} (:page/title blog-post)]])]))
 
+(defn render-atom-feed [context page]
+  (let [posts (get-blog-posts (:app/db context))]
+    (rss/atom-xml posts)))
+
 (defn render-article [context page]
   (layout {}
           header
-          ;; [:script "hljs.highlightAll();"]
           (md/render-html (:page/body page))))
 
 (defn render-blog-post [context page]
@@ -77,6 +77,7 @@
 (defn render-page [context page]
   (case (:page/kind page)
     :page.kind/frontpage (render-frontpage context page)
+    :page.kind/atom-feed (render-atom-feed context page)
     :page.kind/blog-list (render-blog-list context page)
     :page.kind/blog-post (render-blog-post context page)
     :page.kind/draft (render-draft context page)))

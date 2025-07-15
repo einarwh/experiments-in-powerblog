@@ -1,5 +1,5 @@
-(ns powerblog.dev
-  (:require [powerblog.core :as blog]
+(ns einarwh.dev
+  (:require [einarwh.core :as blog]
             [powerpack.dev :as dev]))
 
 (defmethod dev/configure! :default []
@@ -22,8 +22,4 @@
   (->> (d/entity db [:page/uri "/blog-posts/first-post/"])
        :blog-post/author
        (into {}))
-
-  ;;=> {:person/id :christian
-  ;;    :person/full-name "Christian Johansen"}
-
   )
