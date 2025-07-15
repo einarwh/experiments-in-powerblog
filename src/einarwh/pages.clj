@@ -59,9 +59,11 @@
               [:p {:class "blog-post-list-date"} (:blog-post/published blog-post)]
               [:a {:href (:page/uri blog-post)} (:page/title blog-post)]])]))
 
-(defn render-atom-feed [context page]
-  (let [posts (get-blog-posts (:app/db context))]
-    (rss/atom-xml posts)))
+(defn render-atom-feed [context _]
+  (let [posts (get-blog-posts (:app/db context))] 
+    {:status 200
+   :headers {"Content-Type" "application/atom+xml"}
+   :body (rss/atom-xml posts)}))
 
 (defn render-article [context page]
   (layout {}
