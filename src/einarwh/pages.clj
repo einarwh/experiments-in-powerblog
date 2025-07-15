@@ -37,7 +37,7 @@
 (def header
   [:header [:a {:href "/"} "einarwh"] [:hr]])
 
-(defn render-frontpage [context page]
+(defn render-blog-list [context page]
   (layout {}
           (md/render-html (:page/body page))
           header
@@ -46,17 +46,6 @@
            (for [blog-post (get-blog-posts (:app/db context))]
              [:li {class "blog-post-list-item"}
               [:p {:class "blog-post-list-date"} (ymd (:blog-post/published blog-post))]
-              [:a {:href (:page/uri blog-post)} (:page/title blog-post)]])]))
-
-(defn render-blog-list [context page]
-  (layout {}
-          (md/render-html (:page/body page))
-          header
-          [:h1 "Blog posts"]
-          [:ul
-           (for [blog-post (get-blog-posts (:app/db context))]
-             [:li
-              [:p {:class "blog-post-list-date"} (:blog-post/published blog-post)]
               [:a {:href (:page/uri blog-post)} (:page/title blog-post)]])]))
 
 (defn render-atom-feed [context _]
@@ -78,7 +67,7 @@
 
 (defn render-page [context page]
   (case (:page/kind page)
-    :page.kind/frontpage (render-frontpage context page)
+    :page.kind/frontpage (render-blog-list context page)
     :page.kind/atom-feed (render-atom-feed context page)
     :page.kind/blog-list (render-blog-list context page)
     :page.kind/blog-post (render-blog-post context page)
