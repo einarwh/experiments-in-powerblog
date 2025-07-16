@@ -2,6 +2,11 @@
 :blog-post/tags [:tech :programming :functional-programming :csharp]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2017-10-05T23:01:00"
+
+:blog-post/description
+
+What does adding or multiplying integers, concatenating strings, appending lists and composing functions have in common?
+
 :page/body
 
 # How to reduce bunches of things
@@ -15,12 +20,12 @@ One of the (admittedly many) things you might want to do is reduce a bunch of th
 Now how should the actual reduction take place? An obvious idea is to do it stepwise. It's both a good problem solving strategy in general, and kind of necessary when dealing with an `IEnumerable`. For that to work, though, you need some way of taking two values and combining them to produce a single value. So `Reduce` needs to be a higher-order function. The caller should pass in a `combine` function, as well as some initial value to combine with the first element. And then the completed function might look something like this:
 
 ```csharp
-public static T Reduce(this IEnumerable<T> things, 
-  Func<T, T, T> combine, 
-  T initialValue) 
+public static T Reduce(this IEnumerable<T> things,
+  Func<T, T, T> combine,
+  T initialValue)
 {
   T result = initialValue;
-  foreach (var t in things) 
+  foreach (var t in things)
   {
     result = combine(result, t);
   }
@@ -42,7 +47,7 @@ var lists = new [] {
   new List { 1 },
   new List { 2, 3 }
 };
-var sum = lists.Reduce((a, b) => 
+var sum = lists.Reduce((a, b) =>
   {
     var list = new List();
     list.AddRange(a);
@@ -78,8 +83,8 @@ public interface ISemigroup<T>
 And we can modify our `Reduce` function to work with semigroups, which _by definition_ guarantees that the `Combine` function is associative.
 
 ```csharp
-public static T Reduce<T>(this IEnumerable<T> things, 
-  ISemigroup<T> semigroup, 
+public static T Reduce<T>(this IEnumerable<T> things,
+  ISemigroup<T> semigroup,
   T initialValue)
 {
   T result = initialValue;
@@ -112,15 +117,15 @@ class IntegerUnderMultiplicationSemigroup : ISemigroup<int>
 
 class StringSemigroup : ISemigroup<string>
 {
-  public string Combine(string a, string b) 
+  public string Combine(string a, string b)
   {
     return a + b;
   }
 }
 
-class ListSemigroup<T> : ISemigroup<List<T>> 
+class ListSemigroup<T> : ISemigroup<List<T>>
 {
-  public List Combine(List a, List b) 
+  public List Combine(List a, List b)
   {
     var result = new List();
     result.AddRange(a);
@@ -131,7 +136,7 @@ class ListSemigroup<T> : ISemigroup<List<T>>
 
 class FuncSemigroup<T> : ISemigroup<Func<T, T>>
 {
-  public Func<T, T> Combine(Func<T, T> f, Func<T, T> g) 
+  public Func<T, T> Combine(Func<T, T> f, Func<T, T> g)
   {
     return it => g(f(it));
   }
@@ -145,7 +150,7 @@ There is still a small problem when working with semigroups for reduction though
 One approach, I guess, would be to just pick the first value and then perform reduce on the rest.
 
 ```csharp
-public static T Reduce(this IEnumerable<T> things, 
+public static T Reduce(this IEnumerable<T> things,
   ISemigroup<T> semigroup)
 {
   return things.Skip(1).Reduce(semigroup, things.First();
@@ -161,7 +166,7 @@ Luckily, it turns out that there are such magical values for all the semigroups 
 We can represent monoids in our programs by introducing another interface:
 
 ```csharp
-public interface IMonoid<T> : ISemigroup<T> 
+public interface IMonoid<T> : ISemigroup<T>
 {
   T Unit { get; }
 }
@@ -178,7 +183,7 @@ This just says that the unit value is magical in the sense we outlined. We can c
 Now we can write a new `Reduce` function that works on monoids:
 
 ```csharp
-public static T Reduce(this IEnumerable<T> things, 
+public static T Reduce(this IEnumerable<T> things,
   IMonoid<T> monoid)
 {
   return things.Reduce(monoid, monoid.Unit);
@@ -188,7 +193,7 @@ public static T Reduce(this IEnumerable<T> things,
 This is quite nice, because we don't have to worry any more about whether or not the bunch of things is empty. We can proceed to implement concrete monoids that we might want to use.
 
 ```csharp
-class IntegerUnderAdditionMonoid 
+class IntegerUnderAdditionMonoid
   : IntegerUnderAdditionSemigroup, IMonoid<int>
 {
   public int Unit
@@ -197,7 +202,7 @@ class IntegerUnderAdditionMonoid
   }
 }
 
-class IntegerUnderMultiplicationMonoid 
+class IntegerUnderMultiplicationMonoid
   : IntegerUnderMultiplicationSemigroup, IMonoid<int>
 {
   public int Unit
@@ -214,7 +219,7 @@ class StringMonoid : StringSemigroup, IMonoid<string>
   }
 }
 
-class ListMonoid<T> 
+class ListMonoid<T>
   : ListSemigroup<T>, IMonoid<List<T>>
 {
   public List<T> Unit
@@ -225,7 +230,7 @@ class ListMonoid<T>
 
 class FuncMonoid<T> : FuncSemigroup<T>, IMonoid<Func<T, T>>
 {
-  public Func<T, T> Unit 
+  public Func<T, T> Unit
   {
     get { return it => it; }
   }

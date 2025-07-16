@@ -2,6 +2,11 @@
 :blog-post/tags [:tech :programming :functional-programming :csharp :dotnet]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2017-09-27T22:38:00"
+
+:blog-post/description
+
+What does it take to enable LINQ syntax for Nullable? I consult the C# specification and write some unusual code.
+
 :page/body
 
 # LINQ to Nullable
@@ -21,7 +26,7 @@ To illustrate, I explained that `Nullable<T>` is a functor - or at least it shou
 ```csharp
 public static class NullableExtensions {
   public static TTarget? Select<TSource, TTarget>(
-      this TSource? t, 
+      this TSource? t,
       Func<TSource, TTarget> selector)
     where TSource : struct
     where TTarget : struct
@@ -64,7 +69,7 @@ And it worked, which I thought was pretty cool. I consulted the C# specification
 
 ```csharp
 public static TSource? Where<TSource>(
-    this TSource? t, 
+    this TSource? t,
     Func<TSource, bool> predicate)
   where TSource : struct
   {
@@ -90,7 +95,7 @@ It should have stopped there, but the C# specification is full of examples of ex
 
 ```csharp
 public static TTarget? SelectMany<TSource, TTarget>(
-    this TSource? t, 
+    this TSource? t,
     Func<TSource, TTarget?> selector)
   where TSource : struct
   where TTarget : struct
@@ -99,8 +104,8 @@ public static TTarget? SelectMany<TSource, TTarget>(
 }
 
 public static TResult? SelectMany<TSource, TIntermediate, TResult>(
-    this TSource? t, 
-    Func<TSource, TIntermediate?> selector, 
+    this TSource? t,
+    Func<TSource, TIntermediate?> selector,
     Func<TSource, TIntermediate, TResult> resultSelector)
   where TSource : struct
   where TIntermediate : struct

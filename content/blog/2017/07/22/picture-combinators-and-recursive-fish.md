@@ -2,6 +2,11 @@
 :blog-post/tags [:tech :functional-programming :escher :fsharp]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2017-07-22T07:24:00"
+
+:blog-post/description
+
+An implementation of Peter Henderson's Functional Geometry in F#, with a step-by-step guide to make an SVG reproduction of Escher's Square Limit.
+
 :page/body
 
 # Picture combinators and recursive fish
@@ -56,9 +61,9 @@ We can decompose the problem into three parts: defining the basic shape, transfo
 We start by defining a basic shape relative to the unit square. The unit square has sides of length 1, and we position it such that the bottom left corner is at (0, 0) and top right corner is at (1, 1). Here's a definition that puts a polygon outlining the F picture inside the unit square:
 
 ```fsharp
-let fShape = 
-  let pts = [ 
-    { x = 0.30; y = 0.20 } 
+let fShape =
+  let pts = [
+    { x = 0.30; y = 0.20 }
     { x = 0.40; y = 0.20 }
     { x = 0.40; y = 0.45 }
     { x = 0.60; y = 0.45 }
@@ -108,26 +113,26 @@ type PolygonShape = { points : Vector list }
 
 type Shape = Polygon of PolygonShape
 
-let mapShape m = function 
+let mapShape m = function
   | Polygon { points = pts } ->
     Polygon { points = pts |> List.map m }
 
-let createPicture shapes = 
+let createPicture shapes =
    fun box ->
      shapes |> List.map (mapShape (mapper box))
 
-let renderSvg width height filename shapes = 
+let renderSvg width height filename shapes =
   let size = Size(width, height)
   let canvas = GraphicCanvas(size)
-  let p x y = Point(x, height - y) 
-  let drawShape = function 
+  let p x y = Point(x, height - y)
+  let drawShape = function
   | Polygon { points = pts } ->
-    match pts |> List.map (fun { x = x; y = y } -> p x y) with 
+    match pts |> List.map (fun { x = x; y = y } -> p x y) with
     | startPoint :: t ->
       let move = MoveTo(startPoint) :> PathOp
-      let lines = t |> List.map (fun pt -> LineTo(pt) :> PathOp) 
+      let lines = t |> List.map (fun pt -> LineTo(pt) :> PathOp)
       let close = ClosePath() :> PathOp
-      let ops = (move :: lines) @ [ close ] 
+      let ops = (move :: lines) @ [ close ]
       canvas.DrawPath(ops, Pens.Black)
     | _ -> ()
   shapes |> List.iter drawShape
@@ -244,7 +249,7 @@ Which produces this:
 We proceed to compose simple pictures into more complex ones. We define two basic functions for composing pictures, **above** and **beside**. The two are quite similar. Both functions take two pictures as arguments; **above** places the first picture above the second, whereas **beside** places the first picture to the left of the second.
 
 | ----------- | ----------- |
-| ![An F above a turned F.](/svg/letter-f-above.svg)      | ![An F beside a turned F.](/svg/letter-f-beside.svg)       |
+| ![An F above a turned F.](/svg/letter-f-above.svg) | ![An F beside a turned F.](/svg/letter-f-beside.svg) |
 
 Here we see the F placed above the turned F, and the F placed beside the turned F. Notice that each composed picture forms a square, whereas each original picture is placed within a half of that square. What happens is that the bounding box given to the composite picture is split in two, with each original picture receiving one of the split boxes as _their_ bounding box. The example shows an even split, but in general we can assign a fraction of the bounding box to the first argument picture, and the remainder to the second.
 
@@ -252,7 +257,7 @@ For implementation details, we'll just look at **above**:
 
 ```fsharp
 let splitHorizontally f box =
-  let top = box |> moveVertically (1. - f) |> scaleVertically f  
+  let top = box |> moveVertically (1. - f) |> scaleVertically f
   let bottom = box |> scaleVertically (1. - f)
   (top, bottom)
 
@@ -268,12 +273,12 @@ let above = aboveRatio 1 1
 There are three things we need to do: work out the fraction of the bounding box assigned to the first picture, split the bounding box in two according to that fraction, and pass the appropriate bounding box to each picture. We "split" the bounding box by creating two new bounding boxes, scaled and moved as appropriate. The mechanics of scaling and moving is implemented as follows:
 
 ```fsharp
-let scaleVertically s { a = a; b = b; c = c } = 
+let scaleVertically s { a = a; b = b; c = c } =
   { a = a
-    b = b 
+    b = b
     c = c * s }
 
-let moveVertically offset { a = a; b = b; c = c } = 
+let moveVertically offset { a = a; b = b; c = c } =
   { a = a + c * offset
     b = b
     c = c }
@@ -317,9 +322,9 @@ As we can see, the fish is designed so that it fits together neatly with itself.
 This shows the tile **t**, which is one of the building blocks we'll use to construct Square Limit. The function **ttile** creates a t-tile when given a picture:
 
 ```fsharp
-let ttile f = 
+let ttile f =
    let fishN = f |> toss |> flip
-   let fishE = fishN |> turn |> turn |> turn 
+   let fishE = fishN |> turn |> turn |> turn
    over f (over fishN fishE)
 ```
 
@@ -332,7 +337,7 @@ The second building block we'll need is called tile **u**. It looks like this:
 And we construct it like this:
 
 ```fsharp
-let utile (f : Picture) = 
+let utile (f : Picture) =
   let fishN = f |> toss |> flip
   let fishW = fishN |> turn
   let fishS = fishW |> turn
@@ -377,7 +382,7 @@ For the recursive case, we'll want self-similar copies of the side-tile in the t
 The following code helps us construct sides of arbitrary depth:
 
 ```fsharp
-let rec side n p = 
+let rec side n p =
   let s = if n = 1 then blank else side (n - 1) p
   let t = ttile p
   quartet s s (t |> turn) t
@@ -396,8 +401,8 @@ The recursive case should use self-similar copies of both the corner tile (for t
 Here's how we can write it in code:
 
 ```fsharp
-let rec corner n p = 
-  let c, s = if n = 1 then blank, blank 
+let rec corner n p =
+  let c, s = if n = 1 then blank, blank
              else corner (n - 1) p, side (n - 1) p
   let u = utile p
   quartet c s (s |> turn) u
@@ -418,7 +423,7 @@ let squareLimit n picture =
   let sideS = turn sideW
   let sideE = turn sideS
   let center = utile picture
-  nonet cornerNW sideN cornerNE  
+  nonet cornerNW sideN cornerNE
         sideW center sideE
         cornerSW sideS cornerSE
 ```
@@ -471,9 +476,9 @@ We need to revise the tiles we used to construct the Square Limit to incorporate
 But of course it's just the same old **t** tile with appropriate calls to **rehue** for each fish:
 
 ```fsharp
-let ttile hueN hueE f = 
+let ttile hueN hueE f =
    let fishN = f |> toss |> flip
-   let fishE = fishN |> turn |> turn |> turn 
+   let fishE = fishN |> turn |> turn |> turn
    over f (over (fishN |> hueN)
                 (fishE |> hueE))
 
@@ -489,7 +494,7 @@ For the **u** tile, we need three variants:
 Again, we just call **rehue** to varying degrees for each fish.
 
 ```fsharp
-let utile hueN hueW hueS hueE f = 
+let utile hueN hueW hueS hueE f =
   let fishN = f |> toss |> flip
   let fishW = fishN |> turn
   let fishS = fishW |> turn
@@ -497,20 +502,20 @@ let utile hueN hueW hueS hueE f =
   over (over (fishN |> hueN) (fishW |> hueW))
        (over (fishE |> hueE) (fishS |> hueS))
 
-let utile1 = 
+let utile1 =
   utile (rehue >> rehue) id (rehue >> rehue) id
 
-let utile2 = 
+let utile2 =
   utile id (rehue >> rehue) rehue (rehue >> rehue)
 
-let utile3 = 
-  utile (rehue >> rehue) id rehue id 
+let utile3 =
+  utile (rehue >> rehue) id rehue id
 ```
 
 We use the two variants of the **t** tile in two side functions, one for the "north" and "south" side, another for the "west" and "east" side.
 
 ```fsharp
-let side tt hueSW hueSE n p = 
+let side tt hueSW hueSE n p =
   let rec aux n p =
     let t = tt p
     let r = if n = 1 then blank else aux (n - 1) p
@@ -518,7 +523,7 @@ let side tt hueSW hueSE n p =
   aux n p
 
 let side1 =
-  side ttile1 id rehue 
+  side ttile1 id rehue
 
 let side2 =
   side ttile2 (rehue >> rehue) rehue
@@ -527,19 +532,19 @@ let side2 =
 We define two corner functions as well, one for the "north-west" and "south-east" corner, another for the "north-east" and the "south-west" corner.
 
 ```fsharp
-let corner ut sideNE sideSW n p = 
-  let rec aux n p = 
-    let c, ne, sw = 
-      if n = 1 then blank, blank, blank 
+let corner ut sideNE sideSW n p =
+  let rec aux n p =
+    let c, ne, sw =
+      if n = 1 then blank, blank, blank
                else aux (n - 1) p, sideNE (n - 1) p, sideSW (n - 1) p
     let u = ut p
     quartet c ne (sw |> turn) u
-  aux n p 
+  aux n p
 
-let corner1 = 
+let corner1 =
   corner utile3 side1 side2
 
-let corner2 = 
+let corner2 =
   corner utile2 side2 side1
 ```
 
@@ -556,7 +561,7 @@ let squareLimit n picture =
   let sideS = sideN |> turn |> turn
   let sideE = sideW |> turn |> turn
   let center = utile1 picture
-  nonet cornerNW sideN cornerNE  
+  nonet cornerNW sideN cornerNE
         sideW center sideE
         cornerSW sideS cornerSE
 ```
@@ -570,4 +575,3 @@ Which is a pretty good replica of Escher's Square Limit, to a depth of 5.
 The complete code is [here](https://github.com/einarwh/funfish).
 
 Update: I have also written a version using Fable and SAFE that I use for presentations. You can find it [here](https://github.com/einarwh/safe-fish).
-

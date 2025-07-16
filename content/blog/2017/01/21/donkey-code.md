@@ -2,6 +2,11 @@
 :blog-post/tags [:software-design :modelling :domain-driven-design]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2017-01-21T11:12:00"
+
+:blog-post/description
+
+A fable about how code quickly can deteriorate under new requirements if we don't have a conceptual model with the right abstractions to express both new and old requirements.
+
 :page/body
 
 # Donkey code
@@ -18,7 +23,7 @@ eQuest is a tremendous success for whatever reason, perhaps there's very little 
 
 ![Donkey](/images/donkey-only.png)
 
-It's a new kind of horse! It's mostly like the other horses and so lots of functionality can easily be reused. However, it has some special characteristics, and must be treated a little differently in some respects. Physically it is quite short, but very strong. Behaviour-wise, it is known to be stubborn, intelligent and not easily startled. It's an interesting kind of horse.  It also likes carrots a lot (but then don't all horses?). Needless to say, there will be some adjustments to some of the modules.
+It's a new kind of horse! It's mostly like the other horses and so lots of functionality can easily be reused. However, it has some special characteristics, and must be treated a little differently in some respects. Physically it is quite short, but very strong. Behaviour-wise, it is known to be stubborn, intelligent and not easily startled. It's an interesting kind of horse. It also likes carrots a lot (but then don't all horses?). Needless to say, there will be some adjustments to some of the modules.
 
 Design meetings ensue, to flesh out the new functionality and figure out the correct adjustments to be made to eQuest. Discussions go pretty well. Everyone has heard of these "horses that are small and stubborn" as they're called. (Some rumors indicate that genetically they're not actually horses at all - apparently there are differences at the DNA level, but the real world is always riddled with such technicalities. From a pragmatic viewpoint, they're certainly horses. Albeit short and stubborn, of course. And strong, too.) So it's not that hard to discuss features that apply to the new kind of horse.
 
@@ -67,14 +72,14 @@ What is it? Well, it's the offspring from a horse and a horse that's short and s
 You now have code that looks like this:
 
 ```csharp
-if (horse.IsShort && 
-    horse.IsStubborn && 
-    horse.Sound == Sound.HeeHaw) || 
-   (horse.Sire.IsShort && 
-    horse.Sire.IsStubborn && 
+if (horse.IsShort &&
+    horse.IsStubborn &&
+    horse.Sound == Sound.HeeHaw) ||
+   (horse.Sire.IsShort &&
+    horse.Sire.IsStubborn &&
     horse.Sire.Sound == Sound.HeeHaw) ||
-   (horse.Dam.IsShort && 
-    horse.Dam.IsStubborn && 
+   (horse.Dam.IsShort &&
+    horse.Dam.IsStubborn &&
     horse.Dam.Sound == Sound.HeeHaw)) {
   // Logic for both the new horse and the new-new horse!
 }

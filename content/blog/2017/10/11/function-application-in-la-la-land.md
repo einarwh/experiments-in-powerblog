@@ -2,6 +2,11 @@
 :blog-post/tags [:tech :functional-programming]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2017-10-11T21:06:00"
+
+:blog-post/description
+
+The world of programming contains realms of strange values for things that may happen or may have happened, collections of things, things that may or may not be things, and so forth. How do you work with such values in a uniform way?
+
 :page/body
 
 # Function application in la-la land
@@ -49,13 +54,13 @@ In other words, `Pure` is a one-way portal to la-la land.
 Let's see how this would work for our curried `add` function:
 
 ```csharp
-static Lala<int> AddLalaIntegers(Lala<int> a, Lala<int> b) 
+static Lala<int> AddLalaIntegers(Lala<int> a, Lala<int> b)
 {
     Func<int, Func<int, int>> add = a => b => a + b;
     Lala<Func<int, Func<int, int>>> lalaAdd = Lala.Pure(add);
     Lala<Func<int, int>> lalaPartial = Lala.Apply(lalaAdd, a);
     Lala<int> lalaResult = Lala.Apply(lalaPartial, b);
-    return lalaResult;    
+    return lalaResult;
 }
 ```
 
@@ -68,15 +73,15 @@ But there are still questions worth asking, such as: How do we implement these f
 First, consider the la-la land known as `Task<T>`.
 
 ```csharp
-public static class TaskApplicative 
+public static class TaskApplicative
 {
-    public static Task<T> Pure(T val) 
+    public static Task<T> Pure(T val)
     {
         return Task.FromResult(val);
     }
 
     public static async Task<TR> Apply<T, TR>(
-        this Task<Func<T, TR> funTask, 
+        this Task<Func<T, TR> funTask,
         Task<T> valTask)
     {
         var fun = await funTask;
@@ -139,9 +144,9 @@ public static Func<T1, Func<T2, Func<T3, Func<T4, TR>>>> Curry<T1, T2, T3, T4, T
 We can use it like this:
 
 ```csharp
-Func<int, int, int, int, int> sirplusalot = 
-    (a, b, c, d) => a + b + c + d; 
-Func<int, Func<int, Func<int, Func<int, int>>>> = 
+Func<int, int, int, int, int> sirplusalot =
+    (a, b, c, d) => a + b + c + d;
+Func<int, Func<int, Func<int, Func<int, int>>>> =
     sirplusalot.Curry();
 ```
 
@@ -165,23 +170,23 @@ And now we can implement functions that look like this:
 
 ```csharp
 private async static Task<int> Plus(
-    Task<int> ta, 
-    Task<int> tb, 
-    Task<int> tc, 
-    Task<int> td) 
-{ 
-    Func<int, int, int, int, int> sirplusalot = 
+    Task<int> ta,
+    Task<int> tb,
+    Task<int> tc,
+    Task<int> td)
+{
+    Func<int, int, int, int, int> sirplusalot =
         (a, b, c, d) => a + b + c + d;
     return await sirplusalot.Lift(ta, tb, tc, td);
 }
 
 private static Mayhaps<int> Plus(
-    Mayhaps<int> ma, 
-    Mayhaps<int> mb, 
-    Mayhaps<int> mc, 
+    Mayhaps<int> ma,
+    Mayhaps<int> mb,
+    Mayhaps<int> mc,
     Mayhaps<int> md)
 {
-    Func<int, int, int, int, int> sirplusalot = 
+    Func<int, int, int, int, int> sirplusalot =
         (a, b, c, d) => a + b + c + d;
     return sirplusalot.Lift(ma, mb, mc, md);
 }

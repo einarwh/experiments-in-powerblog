@@ -2,6 +2,11 @@
 :blog-post/tags [:tech]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2017-01-17T21:35:00"
+
+:blog-post/description
+
+The problem with null.
+
 :page/body
 
 # Something for nothing
@@ -73,17 +78,17 @@ The code you write to handle absence and presence follows certain patterns, whic
 Here's how you might write it out, assuming F#-style syntax and pattern matching:
 
 ```fsharp
-match dunnoCouldBe with 
-| Indeed str -> Indeed (thingify str) 
+match dunnoCouldBe with
+| Indeed str -> Indeed (thingify str)
 | Nothing -> Nothing
 ```
 
 This pattern is going to pop up again and again when you're working with **Mayhaps** values, where the only thing that varies is the function you'd like to apply. So you can write a general function to handle this:
 
 ```fsharp
-let quux (f : 'T -> 'U) (v : Mayhaps<'T>) : Mayhaps<'U> = 
-  match v with 
-  | Indeed t -> Indeed (f t) 
+let quux (f : 'T -> 'U) (v : Mayhaps<'T>) : Mayhaps<'U> =
+  match v with
+  | Indeed t -> Indeed (f t)
   | Nothing -> Nothing
 ```
 
@@ -101,7 +106,7 @@ Here's a naive implementation written down very quickly, without a whole lot of 
 public abstract class Mayhaps<T>
 {
   private Mayhaps() {}
-  
+
   public abstract bool HasValue { get; }
 
   public abstract T Value { get; }
@@ -111,16 +116,16 @@ public abstract class Mayhaps<T>
   private class MayhapsValue : Mayhaps<T>
   {
     private readonly T _value;
-    
+
     public MayhapsValue(T value)
     {
-      if (value == null) { 
-        throw new ArgumentNullException("Begone, null!"); 
+      if (value == null) {
+        throw new ArgumentNullException("Begone, null!");
       }
-      
+
       _value = value;
     }
-    
+
     public override bool HasValue
     {
       get { return true; }
@@ -132,7 +137,7 @@ public abstract class Mayhaps<T>
     }
 
     public override Mayhaps<TR> Map<TR>(Func<T, TR> f)
-    {  
+    {
       return Mayhaps<TR>.Indeed(f(_value));
     }
   }
@@ -196,7 +201,7 @@ public sealed class Indeed<T> {
     _value = value;
   }
 
-  public T Value { 
+  public T Value {
     get { return _value; }
   }
 }

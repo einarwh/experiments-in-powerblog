@@ -2,6 +2,11 @@
 :blog-post/tags [:tech :software-development :craft]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2020-04-05T11:24:00"
+
+:blog-post/description
+
+A description of my identity crisis as a programmer, why I've rejected craftsmanship and crafting, and what I think we should do instead.
+
 :page/body
 
 # Death of a craftsman

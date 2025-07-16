@@ -2,6 +2,11 @@
 :blog-post/tags [:tech :programming :json]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2020-05-13T17:50:00"
+
+:blog-post/description
+
+JSON data can be represented in many different ways in a .NET application (e.g. explicit JSON model, JSON-friendly DTOs and plain old dictionaries). Each representation has their own characteristics in terms of flexibility, readability and verbosity. In this blog post I look at the trade-offs involved and make some recommendations.
+
 :page/body
 
 # Proper JSON and property bags
@@ -54,12 +59,12 @@ Second, an active shopping cart with two items in it, a gizmo and a widget. You'
 {
   "_state": "active",
   "unpaidItems": [
-    { 
+    {
       "id": "1bcd",
-      "title": "gizmo" 
+      "title": "gizmo"
     },
-    { 
-      "id" : "3cdf",
+    {
+      "id": "3cdf",
       "title": "widget",
       "description": "A very useful item"
     }
@@ -73,12 +78,12 @@ And finally, a paid shopping cart with two items in it, the amount and currency 
 {
   "_state": "paid",
   "paidItems": [
-    { 
+    {
       "id": "1bcd",
-      "title": "gizmo" 
+      "title": "gizmo"
     },
-    { 
-      "id" : "3cdf",
+    {
+      "id": "3cdf",
       "title": "widget",
       "description": "A very useful item"
     }
@@ -97,10 +102,10 @@ So what are our options for explicit representations of these JSON documents in 
 
 We'll take a look at the following:
 
-* Explicit JSON model (Newtonsoft)
-* Explicit DTO model
-* Anonymous DTO model
-* Dictionary
+- Explicit JSON model (Newtonsoft)
+- Explicit DTO model
+- Anonymous DTO model
+- Dictionary
 
 ## Explicit JSON model
 
@@ -111,14 +116,14 @@ We'll look at serialization first. Here's how we might create a paid cart as a `
 ```csharp
 var paidCartObject = new JObject(
   new JProperty("_state", new JValue("paid")),
-  new JProperty("paidItems", 
+  new JProperty("paidItems",
     new JArray(
       new JObject(
         new JProperty("id", new JValue("1bcd")),
         new JProperty("title", new JValue("gizmo"))),
       new JObject(
         new JProperty("id", new JValue("3cdf")),
-        new JProperty("title", new JValue("widget")), 
+        new JProperty("title", new JValue("widget")),
         new JProperty("description", new JValue("A very useful item"))))),
   new JProperty("payment",
     new JObject(
@@ -135,11 +140,11 @@ What about deserialization?
 var paidCartJsonString = @"{
   ""_state"": ""paid"",
   ""paidItems"": [
-    { 
+    {
       ""id"": ""1bcd"",
-      ""title"": ""gizmo"" 
+      ""title"": ""gizmo""
     },
-    { 
+    {
       ""id"" : ""3cdf"",
       ""title"": ""widget"",
       ""description"": ""A very useful item""
@@ -189,9 +194,9 @@ First we're going to have to make some decisions about property names. In C#, th
 One option is to combine an assumption with an admission. That is, we can 1) make the assumption that our JSON documents only will contain "benign" property names that don't contain whitespace or control characters and 2) accept that our DTOs will have property names that violate the sensitivies of a C# style checker. That will yield the following set of DTOs:
 
 ```csharp
-public abstract class ShoppingCart 
+public abstract class ShoppingCart
 {
-  public ShoppingCart(string state) 
+  public ShoppingCart(string state)
   {
     _state = state;
   }
@@ -218,14 +223,14 @@ public class PaidCart : ShoppingCart
   public string timestamp { get; set; }
 }
 
-public class Item 
+public class Item
 {
   public string id { get; set; }
   public string title { get; set; }
   public string description { get; set; }
 }
 
-public class Money 
+public class Money
 {
   public float amount { get; set; }
   public string currency { get; set; }
@@ -237,13 +242,13 @@ Depending on your sensitivies, you may have run away screaming at this point. A 
 Another option is to add _custom attributes_ to the properties of our DTOs. Custom attributes are a mechanism that some JSON serializers employ to let us create an explicit mapping between property names in our data model and property names in the JSON document. This clearly is a violation of the no-configuration rule, though. Do it at your own peril.
 
 ```csharp
-abstract class ShoppingCart 
+abstract class ShoppingCart
 {
-  public ShoppingCart(string state) 
+  public ShoppingCart(string state)
   {
     State = state;
   }
-  
+
   [JsonProperty("_state")]
   public string State { get; }
 }
@@ -264,7 +269,7 @@ class ActiveCart : ShoppingCart
 class PaidCart : ShoppingCart
 {
   public PaidCart() : base("paid") {}
-    
+
   [JsonProperty("paidItems")]
   public Item[] PaidItems { get; set; }
 
@@ -287,7 +292,7 @@ class Item
   public string Description { get; set; }
 }
 
-class Money 
+class Money
 {
   [JsonProperty("amount")]
   public double Amount { get; set; }
@@ -367,11 +372,11 @@ What about deserialization? Here's how it looks for a paid cart using DTO v2:
 var paidCartJsonString = @"{
   ""_state"": ""paid"",
   ""paidItems"": [
-    { 
+    {
       ""id"": ""1bcd"",
-      ""title"": ""gizmo"" 
+      ""title"": ""gizmo""
     },
-    { 
+    {
       ""id"" : ""3cdf"",
       ""title"": ""widget"",
       ""description"": ""A very useful item""
@@ -406,7 +411,7 @@ But the poor JSON serializer can't do that, not without help! The problem is tha
 We have three choices at this point. First, we can create a third variation of our DTO, one that doesn't have this problem. We could just the collapse our fancy class hierarchy and use something like this:
 
 ```csharp
-class ShoppingCart 
+class ShoppingCart
 {
   [JsonProperty("_state")]
   public string State { get; set; }
@@ -478,11 +483,11 @@ What about deserialization? Surely it doesn't make sense to use an anonymous typ
 var paidCartJsonString = @"{
   ""_state"": ""paid"",
   ""paidItems"": [
-    { 
+    {
       ""id"": ""1bcd"",
-      ""title"": ""gizmo"" 
+      ""title"": ""gizmo""
     },
-    { 
+    {
       ""id"" : ""3cdf"",
       ""title"": ""widget"",
       ""description"": ""A very useful item""
@@ -501,9 +506,9 @@ var anonymousPaidCartObject = JsonConvert
     {
       _state = default(string),
       paidItems = new [] {
-      new { 
-        id = default(string), 
-        title = default(string), 
+      new {
+        id = default(string),
+        title = default(string),
         description = default(string)
       }
     },
@@ -571,11 +576,11 @@ What about the deserialization target scenario, which caused so much trouble for
 var paidCartJsonString = @"{
   ""_state"": ""paid"",
   ""paidItems"": [
-    { 
+    {
       ""id"": ""1bcd"",
-      ""title"": ""gizmo"" 
+      ""title"": ""gizmo""
     },
-    { 
+    {
       ""id"" : ""3cdf"",
       ""title"": ""widget"",
       ""description"": ""A very useful item""
@@ -612,16 +617,16 @@ public class PropertyBagDeserializer : JsonConverter
   {
     return true;
   }
-  
-  public override object ReadJson(JsonReader reader, 
-    Type objectType, 
-    object existingValue, 
+
+  public override object ReadJson(JsonReader reader,
+    Type objectType,
+    object existingValue,
     JsonSerializer serializer)
   {
     return ReadValue(reader, serializer);
   }
-  
-  private static object ReadValue(JsonReader reader, 
+
+  private static object ReadValue(JsonReader reader,
     JsonSerializer serializer)
   {
     if (reader.TokenType == JsonToken.StartObject)
@@ -637,8 +642,8 @@ public class PropertyBagDeserializer : JsonConverter
       return ReadSimpleValue(reader, serializer);
     }
   }
-  
-  private static object ReadObjectValue(JsonReader reader, 
+
+  private static object ReadObjectValue(JsonReader reader,
     JsonSerializer serializer)
   {
     reader.Read();
@@ -656,7 +661,7 @@ public class PropertyBagDeserializer : JsonConverter
     return dictionary;
   }
 
-  private static object ReadArrayValue(JsonReader reader, 
+  private static object ReadArrayValue(JsonReader reader,
     JsonSerializer serializer)
   {
     reader.Read();
@@ -669,16 +674,16 @@ public class PropertyBagDeserializer : JsonConverter
     return list;
   }
 
-  private static object ReadSimpleValue(JsonReader reader, 
+  private static object ReadSimpleValue(JsonReader reader,
     JsonSerializer serializer)
   {
     var val = serializer.Deserialize(reader);
     reader.Read();
     return val;
   }
-  
-  public override void WriteJson(JsonWriter writer, 
-    object value, 
+
+  public override void WriteJson(JsonWriter writer,
+    object value,
     JsonSerializer serializer)
   {
     throw new NotImplementedException();
@@ -694,11 +699,11 @@ With the custom deserializer, deserializing to a dictionary looks like this:
 var paidCartJsonString = @"{
   ""_state"": ""paid"",
   ""paidItems"": [
-    { 
+    {
       ""id"": ""1bcd"",
-      ""title"": ""gizmo"" 
+      ""title"": ""gizmo""
     },
-    { 
+    {
       ""id"" : ""3cdf"",
       ""title"": ""widget"",
       ""description"": ""A very useful item""

@@ -2,6 +2,11 @@
 :blog-post/tags [:climbing :nature]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2020-05-08T16:04:00"
+
+:blog-post/description
+
+We've messed up JSON serialization in .NET. In an effort to make it easy and magical, we have turned something simple into something complicated and error-prone. To fix it, we must get rid of accidental complexity and let the serialization process be as simple and stupid as possible.
+
 :page/body
 
 # On the complexity of JSON serialization
