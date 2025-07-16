@@ -5,7 +5,7 @@
 
 :blog-post/description
 
-How and why intra-team mobs can help fight the rigidity of many software organizations.
+How and why intra-team mobs can help fight the rigidity of many software organizations and their code.
 
 :page/body
 

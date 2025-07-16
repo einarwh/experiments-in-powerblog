@@ -35,7 +35,13 @@
     content]])
 
 (def header
-  [:header [:a {:href "/"} "einarwh"] [:hr]])
+  [:header
+   [:div {:id "blog-header"} 
+    [:span {:style "display:inline-block"}
+     [:a {:href "/"} "einarwh"]]
+    [:span {:style "float: right;"}
+     [:a {:href "/feed/atom.xml"} "feed"]]]
+   [:hr]])
 
 (defn render-blog-list [context page]
   (layout {}
@@ -48,7 +54,7 @@
               [:p {:class "blog-post-list-date"} (ymd (:blog-post/published blog-post))]
               [:a {:href (:page/uri blog-post)} (:page/title blog-post)]])]))
 
-(defn render-rss [context _]
+(defn render-feed [context _]
   (let [posts (get-blog-posts (:app/db context))] 
     {:status 200
    :headers {"Content-Type" "application/atom+xml"}
@@ -68,7 +74,7 @@
 (defn render-page [context page]
   (case (:page/kind page)
     :page.kind/frontpage (render-blog-list context page)
-    :page.kind/rss (render-rss context page)
+    :page.kind/rss (render-feed context page)
     :page.kind/blog-list (render-blog-list context page)
     :page.kind/blog-post (render-blog-post context page)
     :page.kind/draft (render-draft context page)))
