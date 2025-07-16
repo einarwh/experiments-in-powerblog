@@ -7,7 +7,7 @@
     :page.kind/blog-list
     
     (re-find #"^feed/" file-name)
-    :page.kind/rss
+    :page.kind/feed
 
     (re-find #"^blog/" file-name)
     :page.kind/blog-post

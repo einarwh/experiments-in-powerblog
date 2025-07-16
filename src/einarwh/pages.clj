@@ -1,7 +1,7 @@
 (ns einarwh.pages
   (:require [datomic-type-extensions.api :as d]
             [powerpack.markdown :as md]
-            [einarwh.rss :as rss])
+            [einarwh.feed :as feed])
   (:import (java.time LocalDateTime)
            (java.time.format DateTimeFormatter)))
 
@@ -58,7 +58,7 @@
   (let [posts (get-blog-posts (:app/db context))] 
     {:status 200
    :headers {"Content-Type" "application/atom+xml"}
-   :body (rss/atom-xml posts)}))
+   :body (feed/atom-xml posts)}))
 
 (defn render-article [context page]
   (layout {}
@@ -74,7 +74,7 @@
 (defn render-page [context page]
   (case (:page/kind page)
     :page.kind/frontpage (render-blog-list context page)
-    :page.kind/rss (render-feed context page)
+    :page.kind/feed (render-feed context page)
     :page.kind/blog-list (render-blog-list context page)
     :page.kind/blog-post (render-blog-post context page)
     :page.kind/draft (render-draft context page)))

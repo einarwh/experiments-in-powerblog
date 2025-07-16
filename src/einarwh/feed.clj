@@ -1,4 +1,4 @@
-(ns einarwh.rss
+(ns einarwh.feed
   (:require
    [clojure.data.xml :as xml]
    [xmlns.http%3a%2f%2fwww.w3.org%2f2005%2fAtom :as-alias atom]
