@@ -2,6 +2,11 @@
 :blog-post/tags [:software-development]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2023-02-05T10:39:00"
+
+:blog-post/description
+
+Code, alas, is dead. It falls upon the poor programmers to make it appear to be alive.
+
 :page/body
 
 # Dragging a dead priest: programs and programmers in time

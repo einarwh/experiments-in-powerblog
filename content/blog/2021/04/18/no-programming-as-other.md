@@ -2,6 +2,11 @@
 :blog-post/tags [:programming :software-development]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2021-04-18T19:45:00"
+
+:blog-post/description
+
+Let's never discuss if programming is art or science again.
+
 :page/body
 
 # NO! Programming as other

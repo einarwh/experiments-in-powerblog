@@ -4,6 +4,10 @@
 
 :blog-post/published #time/ldt "2025-06-16T21:00:00"
 
+:blog-post/description
+
+We are mostly just peacocks when we use the word socio-technical. Otherwise we would use the identification of software systems as socio-technical as the starting point for discussing interconnectedness, adaptivity, non-linearity and emergence in those systems.
+
 :page/body
 
 # Socio-technical is a big word

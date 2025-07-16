@@ -2,6 +2,11 @@
 :blog-post/tags [:self-help]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2023-05-20T11:09:00"
+
+:blog-post/description
+
+A few words about self-help math.
+
 :page/body
 
 # Inspirational math

@@ -2,6 +2,11 @@
 :blog-post/tags [:tech software-development :mob-programming]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2020-09-05T16:57:00"
+
+:blog-post/description
+
+How and why intra-team mobs can help fight the rigidity of many software organizations.
+
 :page/body
 
 # Conway's mob

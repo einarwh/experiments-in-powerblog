@@ -2,6 +2,11 @@
 :blog-post/tags [:tech ]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2025-04-28T16:17:00"
+
+:blog-post/description
+
+When we connect software systems through APIs, we also connect the people who work on those systems. Socio-technical forces tend to favor certain patterns of relationships between provider and consumer. This blog post describes four patterns that I have observed many times in my career: The Millstone, The Mountain (or the Volcano), The Rapids (with or without Beaver Dams) and The Sock Puppet.
+
 :page/body
 
 # Socio-technical API patterns

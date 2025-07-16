@@ -1,8 +1,11 @@
 :page/title Book heuristics
 :blog-post/tags [:reading :books]
 :blog-post/author {:person/id :einarwh}
-
 :blog-post/published #time/ldt "2025-06-20T21:00:00"
+
+:blog-post/description
+
+You can't read every book. Which ones can you safely ignore? This blog post contains a handful of heuristics for dodging boring books and finding something interesting to read.
 
 :page/body
 

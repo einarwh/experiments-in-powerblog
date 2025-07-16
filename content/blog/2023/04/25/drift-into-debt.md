@@ -2,6 +2,11 @@
 :blog-post/tags [:technical-debt :software-development]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2023-04-25T17:01:00"
+
+:blog-post/description
+
+The passing of time is the greatest unsolved problem in software. Technical debt is not an option, it is the inevitable by-product of change and inertia. Over time, we will drift into debt.
+
 :page/body
 
 # Drift into debt

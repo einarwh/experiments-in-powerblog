@@ -4,6 +4,10 @@
 
 :blog-post/published #time/ldt "2025-05-11T21:00:00"
 
+:blog-post/description
+
+Sometimes a tomato is just a tomato. Most times even. When is a tomato not just a tomato? Almost never.
+
 :page/body
 
 # What's a tomato?

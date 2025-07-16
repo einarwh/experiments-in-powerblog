@@ -2,6 +2,11 @@
 :blog-post/tags [:ai]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2024-10-03T12:33:00"
+
+:blog-post/description
+
+The banana test is a simple heuristic to distinguish gimmicks from lasting value.
+
 :page/body
 
 # The banana test for AI-generated artifacts

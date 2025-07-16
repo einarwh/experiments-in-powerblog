@@ -2,6 +2,11 @@
 :blog-post/tags [:ai]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2024-01-12T17:08:00"
+
+:blog-post/description
+
+What's the opportunity cost of being swept up in hype?
+
 :page/body
 
 # The AI puppet dance

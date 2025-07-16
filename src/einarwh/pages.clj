@@ -48,7 +48,7 @@
               [:p {:class "blog-post-list-date"} (ymd (:blog-post/published blog-post))]
               [:a {:href (:page/uri blog-post)} (:page/title blog-post)]])]))
 
-(defn render-atom-feed [context _]
+(defn render-rss [context _]
   (let [posts (get-blog-posts (:app/db context))] 
     {:status 200
    :headers {"Content-Type" "application/atom+xml"}
@@ -68,7 +68,7 @@
 (defn render-page [context page]
   (case (:page/kind page)
     :page.kind/frontpage (render-blog-list context page)
-    :page.kind/atom-feed (render-atom-feed context page)
+    :page.kind/rss (render-rss context page)
     :page.kind/blog-list (render-blog-list context page)
     :page.kind/blog-post (render-blog-post context page)
     :page.kind/draft (render-draft context page)))

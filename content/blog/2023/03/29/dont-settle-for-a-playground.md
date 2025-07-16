@@ -2,6 +2,11 @@
 :blog-post/tags [:software-development :agile :methodology]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2023-03-29T18:39:00"
+
+:blog-post/description
+
+What is autonomy for a software team? What do we want it for? Do we really want it?
+
 :page/body
 
 # Don't settle for a playground
@@ -28,10 +33,10 @@ Obviously, it has something to do with brushing up against some kind of boundary
 
 When we say "we're gonna need a grown-up for that", what does it really mean? It's code for something, right? What could it be? What are we really saying? Here are a few candidates:
 
-* We don't have the autonomy to make that decision.
-* It's not our responsibility.
-* We don't have enough information.
-* It's not just up to us, it's going to affect someone else too.
+- We don't have the autonomy to make that decision.
+- It's not our responsibility.
+- We don't have enough information.
+- It's not just up to us, it's going to affect someone else too.
 
 If I'm right, and these are the kinds of things we're trying to say, why don't we say them outright? It seems like a shame, because they all sound like really interesting topics to me. We could have meaningful conversations about our environment, our boundaries, the constraints we operate under, our dependencies on others, our degree of ownership over the problem we're solving, etc etc. And not just as generic, abstract topics from the realm of philosophy either, but concretely: we could build our understanding of what these big words actually mean to us, in our context. But if we just laugh it off as something awkward, we won't be having those conversations. And so those things are going to remain unexamined and unclear.
 
