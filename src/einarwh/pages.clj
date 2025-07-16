@@ -57,7 +57,7 @@
 (defn render-feed [context _]
   (let [posts (get-blog-posts (:app/db context))] 
     {:status 200
-   :headers {"Content-Type" "application/atom+xml"}
+   :headers {"Content-Type" "application/atom+xml; charset=utf-8"}
    :body (feed/atom-xml posts)}))
 
 (defn render-article [context page]
