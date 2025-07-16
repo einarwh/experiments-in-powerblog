@@ -2,6 +2,11 @@
 :blog-post/tags [:tech]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2016-01-29T23:23:00"
+
+:blog-post/description
+
+A string in a program is never just a string. There are always assumptions about what kind of string it's going to be.
+
 :page/body
 
 # Strings with assumptions
@@ -13,7 +18,7 @@ _TL;DR Strings always come with strings attached._
 I had a little rant about strings on Twitter the other day. It started like this:
 
 > I hate string.
-> 
+>
 > — Einar W. Høst (@einarwh) January 28, 2016
 
 This blog post is essentially the same rant, with a bit of extra cheese.
@@ -49,7 +54,7 @@ author: &id001
 <?php $s='fiddlesticks'; ?>
 <html>
   <body>
-    <script type="text/javascript">  
+    <script type="text/javascript">
       alert("<?php echo $s; ?>");
     </script>
   </body>
@@ -73,7 +78,7 @@ public sealed class PhoneNumber
 {
   private readonly string _;
 
-  public PhoneNumber(string s) 
+  public PhoneNumber(string s)
   {
     if (!ValidPhoneNumber(s))
     {
@@ -85,7 +90,7 @@ public sealed class PhoneNumber
 
   public override bool Equals(object that)
   {
-    return 
+    return
       that != null &&
       this.GetType() == that.GetType() &&
       this.ToString().Equals(that.ToString());

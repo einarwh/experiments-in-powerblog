@@ -2,6 +2,11 @@
 :blog-post/tags [:tech :technical-debt :software-development]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2015-12-05T22:29:00"
+
+:blog-post/description
+
+Technical debt is a symptom.
+
 :page/body
 
 # Technical debt isn't technical
@@ -22,17 +27,17 @@ That's not what I want to write about however. What I want to say is that techni
 
 The usual story is that technical debt stems from project deadlines. If the code is inadequate, sloppy or otherwise "bad", it has probably been written in a hurry because the project leader said so. This indicates that _time_ is the cause of our problems, and also conveniently places the responsibility of the mess on someone else than the developers.
 
-This is certainly true in some cases; we have all written code like that, and for those exact reasons. I just don't think it's the whole story, or even a major part of it. It seems to me entirely inadequate to explain the majority of technical debt that I've seen on software projects. The so-called technical problems go much deeper than mere sloppiness of implementation, and reveal fundamental problems in the process of understanding of the business domain and how that understanding is captured and represented in software. In particular, it is very common to see weak abstractions that fail to represent the richness of the domain. The code tends to be overgrown with conditional and flags, which indicates a weak model that has handled evolution and change very poorly - by ad hoc spouting of extra branches and the booleans needed to navigate them as appropriate for different use cases.  Complexity grows like ever new epicycles on the inadequate model - easily recognizable as things in your code that cannot be given meaningful names because they have no meaningful counterpart in the problem domain. The end result is a horrific steampunk contraption of accidental complexity.
+This is certainly true in some cases; we have all written code like that, and for those exact reasons. I just don't think it's the whole story, or even a major part of it. It seems to me entirely inadequate to explain the majority of technical debt that I've seen on software projects. The so-called technical problems go much deeper than mere sloppiness of implementation, and reveal fundamental problems in the process of understanding of the business domain and how that understanding is captured and represented in software. In particular, it is very common to see weak abstractions that fail to represent the richness of the domain. The code tends to be overgrown with conditional and flags, which indicates a weak model that has handled evolution and change very poorly - by ad hoc spouting of extra branches and the booleans needed to navigate them as appropriate for different use cases. Complexity grows like ever new epicycles on the inadequate model - easily recognizable as things in your code that cannot be given meaningful names because they have no meaningful counterpart in the problem domain. The end result is a horrific steampunk contraption of accidental complexity.
 
 This makes the code extraordinarily difficult to reason about. Hence, it would seem that the so-called _technical debt_ really stems from _modelling debt_; the code lacks the higher-level concepts of a rich domain model that would make it possible to express the use cases more directly.
 
-> The currency of technical debt is knowledge. 
+> The currency of technical debt is knowledge.
 >
->— @sarahmei
+> — @sarahmei
 
 In DDD terms, _modelling debt_ indicates that insufficient [knowledge crunching](http://www.informit.com/articles/article.aspx?p=102604&seqNum=2) has taken place. Knowledge crunching involves learning about the problem domain and capturing that knowledge in a suitable domain model. This is a communication-driven process that involves identifying and resolving ambiguity in the problem domain, and expressing the domain as clearly as possible. Most of all, it is a chaotic and messy process that involves _people_ and _discussions_. Insufficient knowledge crunching in turn points towards the ultimate cause of _technical debt_: poor communication.
 
-> Communication is the principal portion of the "technical debt." Messy code is just the ever-increasing interest. 
+> Communication is the principal portion of the "technical debt." Messy code is just the ever-increasing interest.
 >
 > — @nycplayer
 
@@ -52,7 +57,7 @@ And yet it is _indirectly_ true: a developer who doesn't know the importance of 
 
 This has deep ramifications, in particular in how we address technical debt. _Refactoring_ is another successful meme in software development, and we often use it to describe the process of paying off technical debt. But if technical debt isn't just clumsy code, if instead it is clumsy code caused by unresolved ambiguity in the problem domain, then it is poorly addressed by rearranging code. We need to start in the other end, with a better understanding of the problem we are trying to solve, and with modelling concepts permeating the code instead of branches and booleans. This is what Eric Evans calls "refactoring towards deeper insight". Unless we have a model to drive our efforts, there is no reason to believe that we will be able to do much better than before. Refactoring without an improved domain model is just hubris.
 
-> A rewrite will end up with the same problems as the original unless you close the understanding gap. 
+> A rewrite will end up with the same problems as the original unless you close the understanding gap.
 >
 > — @sarahmei
 

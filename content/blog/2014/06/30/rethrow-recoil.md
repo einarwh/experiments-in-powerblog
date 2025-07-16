@@ -2,6 +2,11 @@
 :blog-post/tags [:tech :programming :csharp]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2014-06-30T15:48:00"
+
+:blog-post/description
+
+Fixing an issue with rethrows in the approach described in the previous blog post.
+
 :page/body
 
 # Rethrow recoil

@@ -2,6 +2,11 @@
 :blog-post/tags [:tech]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2016-03-16T07:14:00"
+
+:blog-post/description
+
+Appeal to pragmatism is a logical fallacy. We should make better arguments.
+
 :page/body
 
 # Pragmatism is poison
@@ -56,7 +61,7 @@ What we should do instead is accept the complexity we're faced with and resist t
 
 Another problem with pragmatism is that it can be - and is - used as an excuse for sloppy thinking, or no thinking at all. Pragmatism encourages partial "solutions" that work not by reflecting a conceptual solution to a problem, but rather by mimicking correct behavior for various inputs. That way, we can short-circuit the need for design and collaboration. Instead we start with a trivial "happy path" solution and add flags and epicycles to flesh it out into richer behavior as needed. This approach yields software that more or less works for the inputs we've tried, and maybe for other inputs as well. (Behavior in the latter case is not as well understood, for obvious reasons.) If we come across inputs that cause problems, we apply patches in the form of additional flags and epicycles.
 
-Because the approach sounds rather dubious when written out like that, we use the magic word "pragmatic" to make it sound better. It's _pragmatic_ problem-solving. We call the solutions themselves "good enough" solutions - wasting any more time thinking would be gold-plating!  Sometimes we use quotes like "perfect is the enemy of good" as further evidence that we're doing a good thing - as if the problem we're facing is too much perfect software in the world!
+Because the approach sounds rather dubious when written out like that, we use the magic word "pragmatic" to make it sound better. It's _pragmatic_ problem-solving. We call the solutions themselves "good enough" solutions - wasting any more time thinking would be gold-plating! Sometimes we use quotes like "perfect is the enemy of good" as further evidence that we're doing a good thing - as if the problem we're facing is too much perfect software in the world!
 
 Here's an obviously made-up example of this approach:
 
@@ -82,7 +87,7 @@ function square(x) = {
 }
 ```
 
-Which solves the general case of calculating the square of integers - sort of! Unfortunately, integers themselves are deeply pragmatic. (What happens when x * x is greater than the maximum value for integers?)
+Which solves the general case of calculating the square of integers - sort of! Unfortunately, integers themselves are deeply pragmatic. (What happens when x \* x is greater than the maximum value for integers?)
 
 But these are all silly examples - theoretical considerations!
 

@@ -2,6 +2,11 @@
 :blog-post/tags [:tech :programming :linq :csharp]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2014-06-28T20:04:00"
+
+:blog-post/description
+
+A way to attach and compose exception handling blocks to Funcs using extension methods.
+
 :page/body
 
 # LINQ to Exceptions
@@ -55,7 +60,7 @@ A solution would be to use a closure to inject the interesting code into a gener
 TR Call<TR>(Func<TR> f) {
   try {
     return f();
-  } 
+  }
   catch (SomeException ex) {
     // Dull code.
   }
@@ -101,15 +106,15 @@ As an answer to the two first problems, you could pass in each exception handler
 
 ```csharp
 TR Call<TR>(
-  Func<TR> f, 
-  Func<SomeException, TR> h1, 
-  Func<SomeOtherException, TR> h2, 
-  Func<YetAnotherException, TR> h3, 
-  Func<Exception, TR> h4) 
+  Func<TR> f,
+  Func<SomeException, TR> h1,
+  Func<SomeOtherException, TR> h2,
+  Func<YetAnotherException, TR> h3,
+  Func<Exception, TR> h4)
 {
   try {
     return f();
-  } 
+  }
   catch (SomeException ex) {
     return h1(ex);
   }
@@ -133,7 +138,7 @@ Foo SafeMethod1(int x, string s) {
     ex => // Handle SomeException,
     ex => // Handle SomeOtherException,
     ex => // Handle YetAnotherException,
-    ex => // Handle Exception 
+    ex => // Handle Exception
   );
 }
 ```
@@ -148,7 +153,7 @@ Quux SafeMethod3() {
        ex => // Handle SomeOtherException,
        ex => // Handle YetAnotherException,
        ex => // Handle Exception
-    );    
+    );
   }
   catch (IdiosyncraticException ex) {
     // Do something.
@@ -160,15 +165,15 @@ Which just might be the worst code ever, and also has the idiosyncracy that the 
 
 ```csharp
 Quux SafeMethod3() {
-  return Call(() => 
-    { 
-      try { return Method3(); } catch (IdiosyncraticException ex) { throw ex; } 
+  return Call(() =>
+    {
+      try { return Method3(); } catch (IdiosyncraticException ex) { throw ex; }
     },
     ex => // Handle SomeException,
     ex => // Handle SomeOtherException,
     ex => // Handle YetAnotherException,
     ex => // Handle Exception
-  );    
+  );
 }
 ```
 
@@ -178,13 +183,13 @@ We could have a less ambitious **Call**-method, that would handle just a single 
 
 ```csharp
 TR Call<TR, TE>(
-  Func<TR> f, 
-  Func<TE, TR> h) 
+  Func<TR> f,
+  Func<TE, TR> h)
   where TE : Exception
 {
   try {
     return f();
-  } 
+  }
   catch (TE ex) {
     return h(ex);
   }
@@ -196,7 +201,7 @@ Now we have a single generic exception handler **h**. Note that when we constrai
 ```csharp
 Frob SafeMethod4a() {
   return Call(
-    () => new Frob(), 
+    () => new Frob(),
     (NullReferenceException ex) => ... );
 }
 ```
@@ -225,12 +230,12 @@ You get the picture. Of course, we can collapse all three to a single method if 
 
 ```csharp
 Frob SafeMethod4() {
-  return 
-    Call(() => 
-      Call(() => 
-        Call(() => 
-          FrobFactory.Create(), 
-          (NullReferenceException ex) => ... ), 
+  return
+    Call(() =>
+      Call(() =>
+        Call(() =>
+          FrobFactory.Create(),
+          (NullReferenceException ex) => ... ),
         (InvalidOperationException ex) => ... ),
       (FormatException ex) => ... );
 }
@@ -264,7 +269,7 @@ static class CatchExtensions
 {
   static Func<TR> Catch<TR, TE>(
     this Func<TR> f,
-    Func<TE, TR> h) 
+    Func<TE, TR> h)
   where TE : Exception
   {
     return () => {
@@ -283,7 +288,7 @@ So the trick is to return a new closure that encapsulates calling the original c
 ```csharp
 Frob ExtSafeMethod4() {
   Func<Frob> it = () => FrobFactory.Create();
-  var safe = 
+  var safe =
     it.Catch((NullReferenceException ex) => ... )
       .Catch((InvalidOperationException ex) => ... )
       .Catch((FormatException ex) => ... );
@@ -300,7 +305,7 @@ Frob ExtSafeMethod4b() {
 }
 
 Func<TR> Protect<TR>(Func<TR> it) {
-  return 
+  return
     it.Catch((NullReferenceException ex) => ... )
       .Catch((InvalidOperationException ex) => ... )
       .Catch((FormatException ex) => ... );
@@ -328,7 +333,7 @@ And besides, we still haven't talked about Linq. An alternative (and attractive)
 ```csharp
 // Unfortunately, this won't compile.
 Func<TR> Protect<TR>(Func<TR> it) {
-  return 
+  return
     it.CatchAll(
       (NullReferenceException ex) => ... ,
       (InvalidOperationException ex) => ... ,
@@ -339,8 +344,8 @@ Func<TR> Protect<TR>(Func<TR> it) {
 However, it's surprisingly difficult to provide a suitable type for that sequence of catch-handlers - in fact, the C# compiler fails to do so! The problem is that delegates are contravariant in their parameters, which means that a delegate **D1** is considered a _subtype_ of delegate **D2** if the parameters of **D1** are _supertypes_ of the parameters of **D2**. That's all a bit abstract, so perhaps an example will help:
 
 ```csharp
-Action<object> d1 = (object o) => {}; 
-Action<string> d2 = (string s) => {}; 
+Action<object> d1 = (object o) => {};
+Action<string> d2 = (string s) => {};
 
 d1 = d2; // This won't compile.
 d2 = d1; // This is OK.
@@ -353,14 +358,14 @@ The implication is that the C# compiler will fail to find a type that will recon
 So we're stuck. Sort of. The only solution we have is to _hide_ the exception type somehow, so that we don't have to include the exception type in the type of the sequence. Now how do we do that? Well, in some sense, we've already seen an example of how to do that: we hide the exception handling (and the type) inside a closure. So all we need is some way to convert an exception handler to a simple transformation function that doesn't care about the type of the exception itself. Like this:
 
 ```csharp
-Func<Func<TR>, Func<TR>> Encapsulate<TR, TE>(Func<TE, TR> h) 
+Func<Func<TR>, Func<TR>> Encapsulate<TR, TE>(Func<TE, TR> h)
   where TE : Exception
 {
-  return f => () =>  
+  return f => () =>
   {
     try {
       return f();
-    } 
+    }
     catch (TE ex) {
       return h(ex);
     };
@@ -374,7 +379,7 @@ So now we can sort of accomplish what we wanted, even though it's less than perf
 
 ```csharp
 Func<TR> Protect<TR>(Func<TR> it) {
-  return 
+  return
     it.CatchAll(
       Encapsulate((NullReferenceException ex) => ...),
       Encapsulate((InvalidOperationException ex) => ...),
@@ -405,9 +410,9 @@ And of course we can now implement **CatchAll** if we want to:
 ```csharp
 static class CatchExtensions
 {
-  Func<TR> CatchAll<TR>(	
-    this Func<TR> f, 
-    params Func<Func<TR>, Func<TR>>[] catchers) 
+  Func<TR> CatchAll<TR>(
+    this Func<TR> f,
+    params Func<Func<TR>, Func<TR>>[] catchers)
   {
     var protect = catchers.Aggregate((acc, nxt) => thing => nxt(acc(thing)));
     return protect(f);

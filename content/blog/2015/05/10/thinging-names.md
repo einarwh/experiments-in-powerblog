@@ -2,6 +2,11 @@
 :blog-post/tags [:tech :software-development :modelling]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2015-05-10T21:09:00"
+
+:blog-post/description
+
+We've got it backwards when we say that "naming things is hard". The problem isn't naming, the problem is in coming up with the right things to name.
+
 :page/body
 
 # Thinging names

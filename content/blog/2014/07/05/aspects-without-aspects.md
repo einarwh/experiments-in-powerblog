@@ -2,6 +2,11 @@
 :blog-post/tags [:tech :programming :aop]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2014-07-05T09:51:00"
+
+:blog-post/description
+
+Using extension methods in C# to implement a poor man's version of aspect-oriented programming.
+
 :page/body
 
 # Aspects without aspects
@@ -15,7 +20,7 @@ This capability is so cool that I took a break from writing this blog post to sh
 So that was a close call. But yes, you can totally use this for caching. All we need is a suitable transformation thing.
 
 ```csharp
-public static Func<T> Caching<T>(this Func<T> f) 
+public static Func<T> Caching<T>(this Func<T> f)
 {
   bool cached = false;
   T t = default(T);
@@ -79,36 +84,36 @@ public static class AspectExtensions {
 
   public static Func<T> Before<T>(this Func<T> f, Action a) {
     return () => { a(); return f(); };
-  } 		
+  }
 
   public static Func<T> Success<T>(this Func<T> f, Action a) {
-    return () => { 
+    return () => {
       var result = f();
       a();
       return result;
     };
-  } 
+  }
 
   public static Func<T> Success<T>(this Func<T> f, Action<T> a) {
-    return () => { 
+    return () => {
       var result = f();
       a(result);
       return result;
     };
-  } 
+  }
 
   public static Func<T> After<T>(this Func<T> f, Action a) {
-    return () => { 
+    return () => {
       try {
         return f();
       } finally {
         a();
       }
     };
-  } 
-  
+  }
+
   public static Func<T> After<T>(this Func<T> f, Action<T> a) {
-    return () => { 
+    return () => {
       T result = default(T);
       try {
         result = f();
@@ -117,7 +122,7 @@ public static class AspectExtensions {
         a(result);
       }
     };
-  } 
+  }
 }
 ```
 
@@ -134,18 +139,18 @@ static void Main (string[] args)
     .Before(() => Console.WriteLine("When do I occur???"))
     .After(r => Console.WriteLine("What did I get? " + r));
 
-  var m1 = wrap(() => { 
-    Console.WriteLine("Executing m1..."); 
+  var m1 = wrap(() => {
+    Console.WriteLine("Executing m1...");
     return "Hello Kiczales!";
   });
 
-  var m2 = wrap(() => { 
-    Console.WriteLine("Executing m2..."); 
-    throw new Exception("Boom"); 
+  var m2 = wrap(() => {
+    Console.WriteLine("Executing m2...");
+    throw new Exception("Boom");
   });
 
-  Call("m1", m1); 
-  Call("m2", m2); 
+  Call("m1", m1);
+  Call("m2", m2);
 }
 
 static void Call(string name, Func<string> m) {
@@ -155,7 +160,7 @@ static void Call(string name, Func<string> m) {
   }
   catch (Exception ex) {
     Console.WriteLine("Exception in {0}: {1}", name, ex.Message);
-  }			
+  }
   Console.WriteLine();
 }
 ```
@@ -178,4 +183,4 @@ And of course, we can transform other things besides closures as well - we can u
 delegate T Decorate<T>(T t);
 ```
 
-Why **Decorate**? Well, nothing is ever new on this blog. I'm just rediscovering old ideas and reinventing flat tires as [Alan Kay](https://en.wikipedia.org/wiki/Alan_Kay) put it. In this case, it turns out that all we've been doing is looking at the good old [Decorator pattern](https://www.google.com/search?client=firefox-b-d&q=decorator+pattern) from the [GoF book](https://en.wikipedia.org/wiki/Design_Patterns) in a new or unfamiliar guise. 
+Why **Decorate**? Well, nothing is ever new on this blog. I'm just rediscovering old ideas and reinventing flat tires as [Alan Kay](https://en.wikipedia.org/wiki/Alan_Kay) put it. In this case, it turns out that all we've been doing is looking at the good old [Decorator pattern](https://www.google.com/search?client=firefox-b-d&q=decorator+pattern) from the [GoF book](https://en.wikipedia.org/wiki/Design_Patterns) in a new or unfamiliar guise.

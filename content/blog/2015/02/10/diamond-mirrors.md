@@ -2,6 +2,11 @@
 :blog-post/tags [:tech :programming :kata :fsharp]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2015-02-10T22:13:00"
+
+:blog-post/description
+
+An implementation of the Diamond code kata in F#.
+
 :page/body
 
 # Diamond mirrors
@@ -55,19 +60,19 @@ So far so good. But we need the first quarter. How could we go about producing t
 Assume we start with a list ['A' .. 'E']. We would like to use that to produce this list:
 
 ```fsharp
-[ 
-  ['A'; '.'; '.'; '.'; '.']; 
-  ['.'; 'B'; '.'; '.'; '.']; 
-  ['.'; '.'; 'C'; '.'; '.']; 
-  ['.'; '.'; '.'; 'D'; '.']; 
-  ['.'; '.'; '.'; '.'; 'E']; 
+[
+  ['A'; '.'; '.'; '.'; '.'];
+  ['.'; 'B'; '.'; '.'; '.'];
+  ['.'; '.'; 'C'; '.'; '.'];
+  ['.'; '.'; '.'; 'D'; '.'];
+  ['.'; '.'; '.'; '.'; 'E'];
 ]
 ```
 
 But that's rather easy. Each inner list is just the original list ['A' .. 'E'] with all letters except one replaced by ‘.'. That's a job for **map**. Say I want to keep only the ‘B':
 
 ```fsharp
-List.map (fun x -> if x = 'B' then x else '.') ['A' .. 'E'] 
+List.map (fun x -> if x = 'B' then x else '.') ['A' .. 'E']
 ```
 
 And so on and so forth for each letter in the original list. We can use a list comprehension to generate all of them for us. For convenience, we'll create a function **genLists**:
@@ -80,8 +85,8 @@ let genLists lst =
 This gives us the first quarter. Now for the mirroring. That's easy too:
 
 ```fsharp
-let mirror lst = 
-  match lst with 
+let mirror lst =
+  match lst with
     | [] -> []
     | h::t -> List.rev t @ lst
 ```
@@ -91,12 +96,12 @@ let mirror lst =
 So now we can **map** the **mirror** function over the quarter diamond to produce a half diamond:
 
 ```fsharp
-[ 
-  ['.'; '.'; '.'; '.'; 'A'; '.'; '.'; '.'; '.']; 
-  ['.'; '.'; '.'; 'B'; '.'; 'B'; '.'; '.'; '.']; 
-  ['.'; '.'; 'C'; '.'; '.'; '.'; 'C'; '.'; '.']; 
-  ['.'; 'D'; '.'; '.'; '.'; '.'; '.'; 'D'; '.']; 
-  ['E'; '.'; '.'; '.'; '.'; '.'; '.'; '.'; 'E']; 
+[
+  ['.'; '.'; '.'; '.'; 'A'; '.'; '.'; '.'; '.'];
+  ['.'; '.'; '.'; 'B'; '.'; 'B'; '.'; '.'; '.'];
+  ['.'; '.'; 'C'; '.'; '.'; '.'; 'C'; '.'; '.'];
+  ['.'; 'D'; '.'; '.'; '.'; '.'; '.'; 'D'; '.'];
+  ['E'; '.'; '.'; '.'; '.'; '.'; '.'; '.'; 'E'];
 ]
 ```
 
@@ -106,10 +111,10 @@ That's trivial to fix though. We'll just reverse the list first, and then do the
 
 ```fsharp
 let diamond letters =
-  letters |> genLists 
-          |> List.map (fun a -> mirror a) 
-          |> List.rev 
-          |> mirror 
+  letters |> genLists
+          |> List.map (fun a -> mirror a)
+          |> List.rev
+          |> mirror
 ```
 
 Could I speed up things by reversing my lists before the first mapping instead of after? No, because the (outer) list has the same number of elements before and after the first mirroring. Plus it's easier to explain this way. And really, perf optimization for a code kata? Come on!
@@ -118,7 +123,7 @@ Now for rendering:
 
 ```fsharp
 let toStr d =
-  d |> List.map (fun a -> new string(Array.ofList(a))) 
+  d |> List.map (fun a -> new string(Array.ofList(a)))
     |> String.concat "\n"
 ```
 
@@ -142,13 +147,13 @@ let mirror lst =
    | h::t -> List.rev t @ lst
 
 let diamond letters =
-  letters |> genLists 
-          |> List.map (fun a -> mirror a) 
-          |> List.rev 
-          |> mirror 
+  letters |> genLists
+          |> List.map (fun a -> mirror a)
+          |> List.rev
+          |> mirror
 
 let toStr d =
-  d |> List.map (fun a -> new string(Array.ofList(a))) 
+  d |> List.map (fun a -> new string(Array.ofList(a)))
     |> String.concat "\n"
 
 ['A' .. 'Z'] |> diamond |> toStr |> printfn "%s"

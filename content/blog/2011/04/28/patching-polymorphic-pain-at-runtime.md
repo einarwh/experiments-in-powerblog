@@ -1,7 +1,7 @@
 :page/title Patching polymorphic pain at runtime
 :blog-post/tags [:tech :programming :dotnet :aspnet :csharp :reflection]
 :blog-post/author {:person/id :einarwh}
-:blog-post/published #time/ldt "2014-04-28T17:40:00"
+:blog-post/published #time/ldt "2011-04-28T17:40:00"
 :page/body
 
 # Patching polymorphic pain at runtime
@@ -53,12 +53,12 @@ What we want to do in our web application is display a grid that shows the canin
 The **DataGrid** is declared in the .aspx page:
 
 ```xml
-<asp:DataGrid 
-  ID="_grid" 
-  runat="server" 
-  Auto-generateColumns="true" 
-  Font-Size="X-Large" 
-  Font-Names="Consolas" 
+<asp:DataGrid
+  ID="_grid"
+  runat="server"
+  Auto-generateColumns="true"
+  Font-Size="X-Large"
+  Font-Names="Consolas"
   HeaderStyle-BackColor="LightBlue" />
 ```
 
@@ -78,19 +78,19 @@ private static List<DataGridColumn> GetGridColumns()
 {
   return new List<DataGridColumn>
   {
-    new TemplateColumn 
+    new TemplateColumn
     {
-      HeaderText = "Biscuits?", 
+      HeaderText = "Biscuits?",
       ItemTemplate = new FoodColumnTemplate(Food.Biscuit)
     },
-    new TemplateColumn 
+    new TemplateColumn
     {
-      HeaderText = "Meatballs?", 
+      HeaderText = "Meatballs?",
       ItemTemplate = new FoodColumnTemplate(Food.Meatballs)
     },
-    new TemplateColumn 
+    new TemplateColumn
     {
-      HeaderText = "You?", 
+      HeaderText = "You?",
       ItemTemplate = new FoodColumnTemplate(Food.You)
     }
   };
@@ -251,7 +251,7 @@ abstract class Box<T>
 
   public T Unwrap() { return _; }
 
-  public Box<T> Create(T t) 
+  public Box<T> Create(T t)
   {
     var box = MemberwiseClone();
     box._ = t;
@@ -295,28 +295,28 @@ Looking at the bytecode for **BoxedICanine** in ILDASM, ILSpy or Reflector, you 
   .method public hidebysig specialname rtspecialname instance void .ctor() cil managed
   {
     .maxstack 8
-    L_0000: ldarg.0 
+    L_0000: ldarg.0
     L_0001: call instance void PolyFix.Lib.Box`1<class PolyFix.Lib.ICanine>::.ctor()
-    L_0006: ret 
+    L_0006: ret
   }
 
   .method public hidebysig newslot virtual final instance bool Eats(valuetype PolyFix.Lib.Food f) cil managed
   {
     .maxstack 8
-    L_0000: ldarg.0 
+    L_0000: ldarg.0
     L_0001: ldfld !0 PolyFix.Lib.Box`1<class PolyFix.Lib.ICanine>::_
-    L_0006: ldarg.1 
+    L_0006: ldarg.1
     L_0007: callvirt instance bool PolyFix.Lib.ICanine::Eats(valuetype PolyFix.Lib.Food)
-    L_000c: ret 
+    L_000c: ret
   }
 
   .method public hidebysig specialname newslot virtual final instance string get_Bark() cil managed
   {
     .maxstack 8
-    L_0000: ldarg.0 
+    L_0000: ldarg.0
     L_0001: ldfld !0 PolyFix.Lib.Box`1<class PolyFix.Lib.ICanine>::_
     L_0006: callvirt instance string PolyFix.Lib.ICanine::get_Bark()
-    L_000b: ret 
+    L_000b: ret
   }
 
   .property instance string Bark
@@ -332,9 +332,9 @@ This, then, is what we're aiming for. If we can generate this type at runtime, u
 
 If you're new to IL, here's a simple walk-through of the **get_Bark** method. IL is a stack-based language, meaning it uses a stack to transfer state between operations. In addition, state can be written to and read from local variables.
 
-The **.maxstack 8** instruction tells the runtime that a stack containing a eight elements will be sufficient for this method (in reality, the stack will never be more than a single element deep, so eight is strictly overkill). That's sort of a preamble to the actual instructions, which come next. The **ldarg.0** instruction loads argument 0 onto the stack, that is, the first parameter of the method. Now that's confusing, since **get_Bark** seems to have no parameters, right? However, all instance methods receive a reference to **this** as an implicit 0th argument. So **ldarg.0** loads the **this** reference onto the stack. This is necessary to read the **\_** instance field, which happens in the **ldfld !0** instruction that follows. The **ldfld !0** pops the **this** reference from the stack, and pushes the reference held by the 0th field (**_**) back on. So now we got an reference to an **ICanine** on there. The following **callvirt** instruction pops the **ICanine** reference from the stack and invokes **get_Bark** on it (passing the reference as the implicit 0th argument, of course). When the method returns, it will have pushed its return value onto the stack. So there will be a reference to a string there. Finally, ret returns from the method, leaving the string reference on the stack as the return value from the method.
+The **.maxstack 8** instruction tells the runtime that a stack containing a eight elements will be sufficient for this method (in reality, the stack will never be more than a single element deep, so eight is strictly overkill). That's sort of a preamble to the actual instructions, which come next. The **ldarg.0** instruction loads argument 0 onto the stack, that is, the first parameter of the method. Now that's confusing, since **get_Bark** seems to have no parameters, right? However, all instance methods receive a reference to **this** as an implicit 0th argument. So **ldarg.0** loads the **this** reference onto the stack. This is necessary to read the **\_** instance field, which happens in the **ldfld !0** instruction that follows. The **ldfld !0** pops the **this** reference from the stack, and pushes the reference held by the 0th field (**\_**) back on. So now we got an reference to an **ICanine** on there. The following **callvirt** instruction pops the **ICanine** reference from the stack and invokes **get_Bark** on it (passing the reference as the implicit 0th argument, of course). When the method returns, it will have pushed its return value onto the stack. So there will be a reference to a string there. Finally, ret returns from the method, leaving the string reference on the stack as the return value from the method.
 
-If you take a look at the **Eats** method next, you'll notice it's practically identical to **get_Bark**. That's because we're essentially doing the same thing: delegating directly to the underlying **T** instance referenced by the **_** field.
+If you take a look at the **Eats** method next, you'll notice it's practically identical to **get_Bark**. That's because we're essentially doing the same thing: delegating directly to the underlying **T** instance referenced by the **\_** field.
 
 Now, how can we generate stuff like this on the fly?
 
@@ -402,7 +402,7 @@ public Type CreateBoxType(Type t, Type boxType, string typeName)
 
 Oh man, it seems we're still procrastinating! We haven't reached the bottom of the rabbit hole just yet. Now we're preparing for the **BoxTypeFactory** to create the actual type.
 
-Two things worth noting, though. One thing is that if **t** is an interface, then we'll let our new type implement it as mentioned earlier. This will let us pretend that the box isn't even there during data binding. The other thing is that we're obtaining a **FieldInfo** instance to represent the **_** field of **BoxType&lt;T&gt;**, which as you'll recall holds the instance of **T** that we'll be delegating all our method calls and property accesses to. Once we have the **FieldInfo**, we can actually forget all about **BoxType&lt;T&gt;**. It's sort of baked into the **TypeBuilder** as the superclass of the type we're creating, but apart from that, **BoxTypeFactory** is oblivious to it.
+Two things worth noting, though. One thing is that if **t** is an interface, then we'll let our new type implement it as mentioned earlier. This will let us pretend that the box isn't even there during data binding. The other thing is that we're obtaining a **FieldInfo** instance to represent the **\_** field of **BoxType&lt;T&gt;**, which as you'll recall holds the instance of **T** that we'll be delegating all our method calls and property accesses to. Once we have the **FieldInfo**, we can actually forget all about **BoxType&lt;T&gt;**. It's sort of baked into the **TypeBuilder** as the superclass of the type we're creating, but apart from that, **BoxTypeFactory** is oblivious to it.
 
 But now! Now there's nowhere left to hide. Let's take a deep breath, dive in and reflect:
 
@@ -444,8 +444,8 @@ class BoxTypeFactory
     var parameters = m.GetParameters();
 
     // Create a builder for the current method.
-    var methodBuilder = _boxBuilder.DefineMethod(m.Name, 
-        MethodAttributes.Public | MethodAttributes.Virtual, 
+    var methodBuilder = _boxBuilder.DefineMethod(m.Name,
+        MethodAttributes.Public | MethodAttributes.Virtual,
         m.ReturnType,
         parameters.Select(p => p.ParameterType).ToArray());
     var gen = methodBuilder.GetILGenerator();
@@ -502,7 +502,7 @@ protected void Page_Load(object sender, EventArgs e)
     c => new {
       Biscuit = c.Eats(Food.Biscuit),
       Meatballs = c.Eats(Food.Meatballs),
-      You = c.Eats(Food.You), 
+      You = c.Eats(Food.You),
       c.Bark
     });
   _grid.DataBind();

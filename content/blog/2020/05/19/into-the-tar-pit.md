@@ -2,6 +2,11 @@
 :blog-post/tags [:tech :software-development]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2020-05-19T22:30:00"
+
+:blog-post/description
+
+A critique of "Out of the Tar Pit".
+
 :page/body
 
 # Into the tar pit
