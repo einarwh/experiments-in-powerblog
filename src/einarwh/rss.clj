@@ -5,21 +5,24 @@
    [hiccup.core :refer [html]]
    [powerpack.markdown :as md])
   (:import [java.time ZoneId]
-           [java.time.format DateTimeFormatter]))
+           [java.time.format DateTimeFormatter]
+           [java.net URLEncoder]))
+
+(defn escape-url [url]
+  (URLEncoder/encode url "UTF-8"))
 
 (defn time-str [ldt]
   #_(str (.toOffsetDateTime
         (.atZone ldt (ZoneId/of "Europe/Oslo"))))
   (.format (.atZone ldt (ZoneId/of "Europe/Oslo")) DateTimeFormatter/ISO_OFFSET_DATE_TIME))
 
-
 (defn feed-entry [post]
   [::atom/entry
    [::atom/title (:page/title post)]
    [::atom/updated (time-str (:blog-post/published post))]
-   [::atom/author (:person/full-name (:blog-post/author post))]
+   [::atom/author [:name (:person/full-name (:blog-post/author post))]]
    [::atom/link {:href (str "https://einarwh.no" (:page/uri post))}]
-   [::atom/id (str "urn:einarwh-no:feed:post:" (:page/uri post))]
+   [::atom/id (str "urn:einarwh-no:feed:post:" (escape-url (:page/uri post)))]
    [::atom/content {:type "html"} 
     (html
         [:div
@@ -35,5 +38,5 @@
        [::atom/id "urn:einarwh-no:feed"]
        [::atom/updated (time-str (-> posts first :blog-post/published))]
        [::atom/title {:type "text"} "einarwh"]
-       [::atom/link {:rel "self" :href "http://einarwh.no/feed/atom.xml"}]
+       [::atom/link {:rel "self" :href "https://einarwh.no/feed/atom.xml"}]
        (map feed-entry posts)])))
