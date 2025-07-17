@@ -1,7 +1,6 @@
 :page/title What's a tomato?
 :blog-post/tags [:tech :modelling :ddd ]
 :blog-post/author {:person/id :einarwh}
-
 :blog-post/published #time/ldt "2025-05-11T21:00:00"
 
 :blog-post/description
