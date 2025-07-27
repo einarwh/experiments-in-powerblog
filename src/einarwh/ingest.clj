@@ -5,12 +5,18 @@
   (cond
     (re-find #"^blog/index\.md$" file-name)
     :page.kind/blog-list
-    
+
+    (re-find #"^aoc/index\.md$" file-name)
+    :page.kind/aoc-list 
+
     (re-find #"^feed/" file-name)
     :page.kind/feed
 
     (re-find #"^blog/" file-name)
     :page.kind/blog-post
+    
+    (re-find #"^aoc/" file-name)
+    :page.kind/aoc-post
 
     (re-find #"^index\.md" file-name)
     :page.kind/frontpage
