@@ -53,6 +53,15 @@
      [:a {:href "/feed/atom.xml"} "feed"]]]
    [:hr]])
 
+(def aoc-header
+  [:header
+   [:div {:id "blog-header"} 
+    [:span {:style "display:inline-block"}
+     [:a {:href "/"} "einarwh"]]
+    [:span {:style "float: right;"}
+     [:a {:href "/aoc/"} "aoc"]]]
+   [:hr]])
+
 (def elm-app [:div {:id "elm-app"} []])
 
 (defn render-blog-list [context page]
@@ -68,8 +77,7 @@
 
 (defn render-aoc-list [context page]
   (layout {}
-          (md/render-html (:page/body page))
-          header
+          aoc-header
           [:h1 "Advent of Code"]
           [:ul {:class "blog-post-list"}
            (for [post (get-aoc-posts (:app/db context))]
@@ -93,7 +101,7 @@
 
 (defn render-aoc-post [context page]
   (layout {}
-          header
+          aoc-header
           [:h1 (str "Advent of Code " (:aoc/year page))]
           [:h1 (str "Day " (:aoc/day page) ": " (:page/title page))]
           [:a {:href (:aoc/puzzle-url page)} (:aoc/puzzle-url page)]
