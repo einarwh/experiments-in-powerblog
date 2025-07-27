@@ -26,6 +26,12 @@
  {:db/ident :aoc/puzzle-url
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one}
+ {:db/ident :aoc/year
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one}
+ {:db/ident :aoc/day
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one}
  {:db/ident :aoc/puzzle-timestamp
   :dte/valueType :java.time/local-date-time
   :db/cardinality :db.cardinality/one}

@@ -53,6 +53,8 @@
      [:a {:href "/feed/atom.xml"} "feed"]]]
    [:hr]])
 
+(def elm-app [:div {:id "elm-app"} []])
+
 (defn render-blog-list [context page]
   (layout {}
           (md/render-html (:page/body page))
@@ -70,10 +72,10 @@
           header
           [:h1 "Advent of Code"]
           [:ul {:class "blog-post-list"}
-           (for [blog-post (get-aoc-posts (:app/db context))]
+           (for [post (get-aoc-posts (:app/db context))]
              [:li {class "blog-post-list-item"}
-              [:p {:class "blog-post-list-date"} (ymd (:aoc/puzzle-timestamp blog-post))]
-              [:a {:href (:page/uri blog-post)} (:page/title blog-post)]])]))
+              [:p {:class "blog-post-list-date"} (ymd (:aoc/puzzle-timestamp post))]
+              [:a {:href (:page/uri post)} (:page/title post)]])]))
 
 (defn render-feed [context _]
   (let [posts (get-blog-posts (:app/db context))] 
@@ -90,7 +92,12 @@
   (render-article context page))
 
 (defn render-aoc-post [context page]
-  (render-article context page))
+  (layout {}
+          header
+          [:h1 (str "Advent of Code " (:aoc/year page))]
+          [:h1 (str "Day " (:aoc/day page) ": " (:page/title page))]
+          [:a {:href (:aoc/puzzle-url page)} (:aoc/puzzle-url page)]
+          (md/render-html (:page/body page))))
 
 (defn render-draft [context page]
   (render-article context page))
