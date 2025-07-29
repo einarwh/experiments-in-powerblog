@@ -44,6 +44,17 @@
    [:body
     content]])
 
+(defn aoc-layout [{:keys [title aocjs]} & content]
+  [:html
+   [:head
+    (when title [:title title])
+    [:link {:rel "icon" :sizes "any" :type "image/svg+xml" :href "/images/favfish.svg"}]
+    [:script {:data-goatcounter "https://einarwh.goatcounter.com/count" :async true :src "https://gc.zgo.at/count.js"}]
+    (when aocjs [:script {:src aocjs}])
+    ]
+   [:body
+    content]])
+
 (def header
   [:header
    [:div {:id "blog-header"} 
@@ -100,12 +111,18 @@
   (render-article context page))
 
 (defn render-aoc-post [context page]
-  (layout {}
+  (aoc-layout {:aocjs (:aoc/js page)}
           aoc-header
           [:h1 (str "Advent of Code " (:aoc/year page))]
           [:h1 (str "Day " (:aoc/day page) ": " (:page/title page))]
           [:a {:href (:aoc/puzzle-url page)} (:aoc/puzzle-url page)]
-          (md/render-html (:page/body page))))
+          (md/render-html (:page/body page))
+          [:script "document.addEventListener(\"DOMContentLoaded\", () => {
+        const app = Elm.Main.init({
+          node: document.getElementById(\"elm-app\"),
+        });
+      });"] 
+          ))
 
 (defn render-draft [context page]
   (render-article context page))
