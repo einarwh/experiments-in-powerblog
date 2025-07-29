@@ -112,16 +112,15 @@
 
 (defn render-aoc-post [context page]
   (aoc-layout {:aocjs (:aoc/js page)}
-          aoc-header
-          [:h1 (str "Advent of Code " (:aoc/year page))]
-          [:h1 (str "Day " (:aoc/day page) ": " (:page/title page))]
-          [:a {:href (:aoc/puzzle-url page)} (:aoc/puzzle-url page)]
-          (md/render-html (:page/body page))
-          [:script "document.addEventListener(\"DOMContentLoaded\", () => {
+          aoc-header 
+              [:div {:id "elm-app"}]
+          [:script "
+      function lambda() {
         const app = Elm.Main.init({
           node: document.getElementById(\"elm-app\"),
         });
-      });"] 
+      }
+      document.addEventListener(\"DOMContentLoaded\", lambda);"] 
           ))
 
 (defn render-draft [context page]
