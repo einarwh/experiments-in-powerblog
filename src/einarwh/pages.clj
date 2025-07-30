@@ -73,7 +73,18 @@
      [:a {:href "/aoc/"} "aoc"]]]
    [:hr]])
 
-(def elm-app [:div {:id "elm-app" :width "10"} []])
+(defn render-front-page [context page]
+  (layout {}
+          header 
+          (md/render-html (:page/body page))
+          [:hr]
+          [:h1 "Latest blog posts"]
+          [:ul {:class "blog-post-list"}
+           (for [blog-post (take 3 (get-blog-posts (:app/db context)))]
+             [:li {class "blog-post-list-item"}
+              [:p {:class "blog-post-list-date"} (ymd (:blog-post/published blog-post))]
+              [:a {:href (:page/uri blog-post)} (:page/title blog-post)]
+              [:div (:blog-post/description blog-post)]])]))
 
 (defn render-blog-list [context page]
   (layout {}
@@ -128,7 +139,7 @@
 
 (defn render-page [context page]
   (case (:page/kind page)
-    :page.kind/frontpage (render-blog-list context page)
+    :page.kind/frontpage (render-front-page context page)
     :page.kind/feed (render-feed context page)
     :page.kind/blog-list (render-blog-list context page)
     :page.kind/blog-post (render-blog-post context page)
