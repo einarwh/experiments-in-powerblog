@@ -1,0 +1,1 @@
+cp -r target/powerpack/* ../einarwh-no
