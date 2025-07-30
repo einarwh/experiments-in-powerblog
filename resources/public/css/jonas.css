@@ -15,9 +15,10 @@ html {
 body {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
-  max-width: 900px;
+  max-width: clamp(300px, 100vw, 900px);
   font-size: 18px;
   line-height: 1.3;
+  /* background-color: aquamarine; */
 }
 p,
 pre,

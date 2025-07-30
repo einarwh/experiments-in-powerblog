@@ -5596,7 +5596,7 @@ var $author$project$Main$view = function (model) {
 							[
 								$elm$html$Html$Attributes$align('center'),
 								A2($elm$html$Html$Attributes$style, 'font-family', 'Courier New'),
-								A2($elm$html$Html$Attributes$style, 'font-size', 'clamp(1.5rem, 3vw, 2rem)'),
+								A2($elm$html$Html$Attributes$style, 'font-size', '32px'),
 								A2($elm$html$Html$Attributes$style, 'padding', '10px')
 							]),
 						_List_fromArray(
@@ -5627,9 +5627,7 @@ var $author$project$Main$view = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$align('center'),
-								A2($elm$html$Html$Attributes$style, 'padding-bottom', '10px'),
-								A2($elm$html$Html$Attributes$style, 'font-family', 'Courier New'),
-								A2($elm$html$Html$Attributes$style, 'font-size', 'clamp(1.0rem, 1.8vw, 2rem)')
+								A2($elm$html$Html$Attributes$style, 'padding-bottom', '10px')
 							]),
 						_List_fromArray(
 							[
@@ -5754,8 +5752,7 @@ var $author$project$Main$view = function (model) {
 							[
 								$elm$html$Html$Attributes$align('center'),
 								A2($elm$html$Html$Attributes$style, 'font-family', 'Courier New'),
-								A2($elm$html$Html$Attributes$style, 'font-size', '24px'),
-								A2($elm$html$Html$Attributes$style, 'width', '200px')
+								A2($elm$html$Html$Attributes$style, 'font-size', '24px')
 							]),
 						_List_fromArray(
 							[
@@ -5788,12 +5785,17 @@ var $author$project$Main$view = function (model) {
 								$elm$html$Html$Attributes$align('center'),
 								A2($elm$html$Html$Attributes$style, 'font-family', 'Courier New'),
 								A2($elm$html$Html$Attributes$style, 'font-size', textFontSize),
-								A2($elm$html$Html$Attributes$style, 'padding', '20px'),
-								A2($elm$html$Html$Attributes$style, 'width', '200px')
+								A2($elm$html$Html$Attributes$style, 'padding', '20px')
 							]),
 						_List_fromArray(
 							[
-								A2($elm$html$Html$div, _List_Nil, elements)
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										A2($elm$html$Html$Attributes$style, 'max-width', '100%')
+									]),
+								elements)
 							]))
 					]))
 			]));

@@ -73,7 +73,7 @@
      [:a {:href "/aoc/"} "aoc"]]]
    [:hr]])
 
-(def elm-app [:div {:id "elm-app"} []])
+(def elm-app [:div {:id "elm-app" :width "10"} []])
 
 (defn render-blog-list [context page]
   (layout {}
@@ -113,7 +113,7 @@
 (defn render-aoc-post [context page]
   (aoc-layout {:aocjs (:aoc/js page)}
           aoc-header 
-              [:div {:id "elm-app"}]
+              [:div {:id "elm-app" :style "max-width: 100vw"}]
           [:script "
       function lambda() {
         const app = Elm.Main.init({
