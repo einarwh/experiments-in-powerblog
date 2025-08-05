@@ -5202,9 +5202,9 @@ var $elm$browser$Browser$element = _Browser_element;
 var $author$project$Main$defaultTickInterval = 100;
 var $author$project$Main$initBoss = {a: 2, c: 9, d: 103};
 var $author$project$Main$initModel = function () {
-	var player = {a: $elm$core$Maybe$Nothing, d: 100, t: _List_Nil, B: $elm$core$Maybe$Nothing};
+	var player = {a: $elm$core$Maybe$Nothing, d: 100, u: _List_Nil, B: $elm$core$Maybe$Nothing};
 	var boss = $author$project$Main$initBoss;
-	var model = {l: boss, Z: '', r: false, y: true, b: player, u: _List_Nil, V: $author$project$Main$defaultTickInterval};
+	var model = {l: boss, Z: '', s: false, y: true, b: player, r: _List_Nil, V: $author$project$Main$defaultTickInterval};
 	return model;
 }();
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
@@ -5629,7 +5629,7 @@ var $elm$time$Time$every = F2(
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$subscriptions = function (model) {
-	return (model.y || model.r) ? $elm$core$Platform$Sub$none : A2(
+	return (model.y || model.s) ? $elm$core$Platform$Sub$none : A2(
 		$elm$time$Time$every,
 		model.V,
 		function (_v0) {
@@ -5659,7 +5659,7 @@ var $author$project$Main$updateClear = function (model) {
 	return $author$project$Main$initModel;
 };
 var $author$project$Main$updateFight = function (model) {
-	if (model.r) {
+	if (model.s) {
 		var m = $author$project$Main$initModel;
 		return _Utils_update(
 			m,
@@ -5850,7 +5850,7 @@ var $author$project$Main$getAllStats = function (player) {
 		$elm$core$Maybe$withDefault,
 		$author$project$Main$defaultStats,
 		A2($elm$core$Maybe$map, $author$project$Main$getWeaponStats, player.B));
-	var ringStats = A2($elm$core$List$map, $author$project$Main$getRingStats, player.t);
+	var ringStats = A2($elm$core$List$map, $author$project$Main$getRingStats, player.u);
 	var armorStats = A2(
 		$elm$core$Maybe$withDefault,
 		$author$project$Main$defaultStats,
@@ -5986,7 +5986,7 @@ var $author$project$Main$equipPlayer = F2(
 			player,
 			{
 				a: a,
-				t: rs,
+				u: rs,
 				B: $elm$core$Maybe$Just(w)
 			});
 	});
@@ -6030,12 +6030,12 @@ var $author$project$Main$fightRound = function (model) {
 			{d: 0});
 		var rounds = A2(
 			$elm$core$List$append,
-			model.u,
+			model.r,
 			_List_fromArray(
 				[line1, 'The player wins!']));
 		return _Utils_update(
 			model,
-			{l: updatedBoss, b: updatedPlayer, u: rounds});
+			{l: updatedBoss, b: updatedPlayer, r: rounds});
 	} else {
 		if (!pHp) {
 			var updatedPlayer = _Utils_update(
@@ -6046,12 +6046,12 @@ var $author$project$Main$fightRound = function (model) {
 				{d: bHp});
 			var rounds = A2(
 				$elm$core$List$append,
-				model.u,
+				model.r,
 				_List_fromArray(
 					[line1, line2, 'The boss wins!']));
 			return _Utils_update(
 				model,
-				{l: updatedBoss, b: updatedPlayer, u: rounds});
+				{l: updatedBoss, b: updatedPlayer, r: rounds});
 		} else {
 			var updatedPlayer = _Utils_update(
 				player,
@@ -6061,12 +6061,12 @@ var $author$project$Main$fightRound = function (model) {
 				{d: bHp});
 			var rounds = A2(
 				$elm$core$List$append,
-				model.u,
+				model.r,
 				_List_fromArray(
 					[line1, line2]));
 			return _Utils_update(
 				model,
-				{l: updatedBoss, b: updatedPlayer, u: rounds});
+				{l: updatedBoss, b: updatedPlayer, r: rounds});
 		}
 	}
 };
@@ -6078,7 +6078,7 @@ var $elm$core$List$sortBy = _List_sortBy;
 var $author$project$Main$updateFindCheapestWin = function (model) {
 	updateFindCheapestWin:
 	while (true) {
-		if (model.r) {
+		if (model.s) {
 			var $temp$model = $author$project$Main$initModel;
 			model = $temp$model;
 			continue updateFindCheapestWin;
@@ -6105,7 +6105,7 @@ var $author$project$Main$updateFindCheapestWin = function (model) {
 							return $author$project$Main$calculateTotalCost(m.b);
 						},
 						A2($elm$core$List$filterMap, $author$project$Main$fightToWin, models))));
-			var rings = best.b.t;
+			var rings = best.b.u;
 			var weapon = A2($elm$core$Maybe$withDefault, 0, best.b.B);
 			var armor = best.b.a;
 			var equipped = A2(
@@ -6125,7 +6125,7 @@ var $author$project$Main$fightToLose = function (model) {
 var $author$project$Main$updateFindMostExpensiveLoss = function (model) {
 	updateFindMostExpensiveLoss:
 	while (true) {
-		if (model.r) {
+		if (model.s) {
 			var $temp$model = $author$project$Main$initModel;
 			model = $temp$model;
 			continue updateFindMostExpensiveLoss;
@@ -6153,7 +6153,7 @@ var $author$project$Main$updateFindMostExpensiveLoss = function (model) {
 								return $author$project$Main$calculateTotalCost(m.b);
 							},
 							A2($elm$core$List$filterMap, $author$project$Main$fightToLose, models)))));
-			var rings = worst.b.t;
+			var rings = worst.b.u;
 			var weapon = A2($elm$core$Maybe$withDefault, 0, worst.b.B);
 			var armor = worst.b.a;
 			var equipped = A2(
@@ -6176,8 +6176,9 @@ var $author$project$Main$updateHeal = function (model) {
 		model,
 		{
 			l: $author$project$Main$initBoss,
-			r: false,
-			b: $author$project$Main$healPlayer(model.b)
+			s: false,
+			b: $author$project$Main$healPlayer(model.b),
+			r: _List_Nil
 		});
 };
 var $elm$core$List$filter = F2(
@@ -6225,7 +6226,7 @@ var $elm$core$Basics$neq = _Utils_notEqual;
 var $author$project$Main$updateRing = F2(
 	function (ring, model) {
 		var player = model.b;
-		var rings = player.t;
+		var rings = player.u;
 		var updated = A2($elm$core$List$member, ring, rings) ? A2(
 			$elm$core$List$filter,
 			function (r) {
@@ -6234,7 +6235,7 @@ var $author$project$Main$updateRing = F2(
 			rings) : (($elm$core$List$length(rings) < 2) ? A2($elm$core$List$cons, ring, rings) : rings);
 		var p = _Utils_update(
 			player,
-			{t: updated});
+			{u: updated});
 		return _Utils_update(
 			model,
 			{b: p});
@@ -6242,7 +6243,7 @@ var $author$project$Main$updateRing = F2(
 var $author$project$Main$updateTick = function (model) {
 	return ((!model.l.d) || (!model.b.d)) ? _Utils_update(
 		model,
-		{r: true, y: true}) : $author$project$Main$fightRound(model);
+		{s: true, y: true}) : $author$project$Main$fightRound(model);
 };
 var $author$project$Main$updateWeapon = F2(
 	function (weapon, model) {
@@ -6617,7 +6618,7 @@ var $author$project$Main$ToggleRing = function (a) {
 var $author$project$Main$ringRow = F3(
 	function (player, ringName, ring) {
 		var stats = $author$project$Main$getRingStats(ring);
-		var isChecked = A2($elm$core$List$member, ring, player.t);
+		var isChecked = A2($elm$core$List$member, ring, player.u);
 		return A2(
 			$elm$html$Html$tr,
 			_List_Nil,
@@ -6893,7 +6894,7 @@ var $author$project$Main$weaponsTable = function (player) {
 var $author$project$Main$view = function (model) {
 	var totalCost = $author$project$Main$calculateTotalCost(model.b);
 	var resultStr = (!model.l.d) ? 'Result: WIN' : ((!model.b.d) ? 'Result: LOSS' : '?');
-	var elements = A2($elm$core$List$concatMap, $author$project$Main$toRoundElement, model.u);
+	var elements = A2($elm$core$List$concatMap, $author$project$Main$toRoundElement, model.r);
 	var commandsStr = '';
 	return A2(
 		$elm$html$Html$table,
@@ -7137,7 +7138,7 @@ var $author$project$Main$view = function (model) {
 									[
 										A2($elm$html$Html$Attributes$style, 'width', '80px'),
 										$elm$html$Html$Events$onClick($author$project$Main$Fight),
-										$elm$html$Html$Attributes$disabled((!model.y) || model.r)
+										$elm$html$Html$Attributes$disabled((!model.y) || model.s)
 									]),
 								_List_fromArray(
 									[
