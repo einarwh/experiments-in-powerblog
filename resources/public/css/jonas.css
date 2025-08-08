@@ -21,8 +21,17 @@ html {
 .greyed {
   color: #808080;
 }
+.draw {
+  color: black;
+}
 .hero {
   color: #3e9c3e;
+}
+.ok {
+  color: #3e9c3e;
+}
+.err {
+  color: #e34444;
 }
 @media (prefers-color-scheme: dark) {
   .mark-err.adaptive {
@@ -36,6 +45,15 @@ html {
   }
   .hero.adaptive {
     color: #afe1af;
+  }
+  .draw.adaptive {
+    color: white;
+  }
+  .ok.adaptive {
+    color: #afe1af;
+  }
+  .err.adaptive {
+    color: #faa0a0;
   }
 }
 
