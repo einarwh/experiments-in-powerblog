@@ -21,6 +21,9 @@ html {
 .greyed {
   color: #808080;
 }
+.hero {
+  color: #3e9c3e;
+}
 @media (prefers-color-scheme: dark) {
   .mark-err.adaptive {
     background: #e34444;
@@ -30,6 +33,9 @@ html {
   }
   .greyed.adaptive {
     color: #d0d0d0;
+  }
+  .hero.adaptive {
+    color: #afe1af;
   }
 }
 
