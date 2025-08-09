@@ -33,6 +33,26 @@ html {
 .err {
   color: #e34444;
 }
+.draw-hero {
+  color: #3e9c3e;
+  /* font-weight: bold; */
+}
+.draw-dark-green {
+  color: #3e9c3e;
+}
+.draw-yellow {
+  color: #ffd700;
+}
+.draw-brown {
+  color: #a0522d;
+}
+.draw-empty {
+  color: #e0e0e0;
+}
+.draw-wall {
+  color: #000000;
+}
+
 @media (prefers-color-scheme: dark) {
   .mark-err.adaptive {
     background: #e34444;
@@ -54,6 +74,24 @@ html {
   }
   .err.adaptive {
     color: #faa0a0;
+  }
+  .draw-hero.adaptive {
+    color: #afe1af;
+  }
+  .draw-dark-green.adaptive {
+    color: #afe1af;
+  }
+  .draw-brown.adaptive {
+    color: #f4cb95;
+  }
+  .draw-yellow.adaptive {
+    color: #ffff8f;
+  }
+  .draw-empty.adaptive {
+    color: #404040;
+  }
+  .draw-wall.adaptive {
+    color: #ffffff;
   }
 }
 
