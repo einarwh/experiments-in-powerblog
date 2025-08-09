@@ -30,7 +30,7 @@ html {
 .ok {
   color: #3e9c3e;
 }
-.err {
+.wrong {
   color: #e34444;
 }
 .draw-hero {
@@ -72,7 +72,7 @@ html {
   .ok.adaptive {
     color: #afe1af;
   }
-  .err.adaptive {
+  .wrong.adaptive {
     color: #faa0a0;
   }
   .draw-hero.adaptive {
