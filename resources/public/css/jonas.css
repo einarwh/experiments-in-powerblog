@@ -18,6 +18,12 @@ html {
 .mark-err {
   background: #faa0a0;
 }
+.mark-uncertain {
+  background: #ffff8f;
+}
+.mark-highlight {
+  background: #ffff8f;
+}
 .greyed {
   color: #808080;
 }
@@ -41,7 +47,8 @@ html {
   color: #3e9c3e;
 }
 .draw-yellow {
-  color: #ffd700;
+  color: #d5b60a;
+  /* color: #cfb53b; */
 }
 .draw-brown {
   color: #a0522d;
@@ -59,6 +66,15 @@ html {
   }
   .mark-ok.adaptive {
     background: #3e9c3e;
+  }
+  .mark-ok.uncertain {
+    /* background: #d5b60a; */
+    background: #daa520;
+    /* background: #cfb53b; */
+  }
+  .mark-highlight.adaptive {
+    background: #d5b60a;
+    /* background: #cfb53b; */
   }
   .greyed.adaptive {
     color: #d0d0d0;
