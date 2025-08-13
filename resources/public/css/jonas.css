@@ -34,26 +34,29 @@ html {
   color: black;
 }
 .hero {
-  color: #3e9c3e;
+  color: #2b772b;
 }
 .ok {
-  color: #3e9c3e;
+  color: #2b772b;
 }
 .wrong {
   color: #e34444;
 }
 .draw-hero {
-  color: #3e9c3e;
+  color: #2b772b;
   /* font-weight: bold; */
 }
 .draw-light-green {
   color: #afe1af;
 }
 .draw-dark-green {
-  color: #3e9c3e;
+  color: #1a6b1a;
+}
+.draw-dark-blue {
+  color: #3e419c;
 }
 .draw-yellow {
-  color: #d5b60a;
+  color: #737000;
   /* color: #cfb53b; */
 }
 .draw-brown {
@@ -71,19 +74,19 @@ html {
     background: #e34444;
   }
   .mark-ok.adaptive {
-    background: #3e9c3e;
+    background: #1a6b1a;
   }
   .mark-ok.uncertain {
     /* background: #d5b60a; */
-    background: #d5b60a;
+    background: #737000;
     /* background: #cfb53b; */
   }
   .draw-highlight.adaptive {
-    color: #d5b60a;
+    color: #737000;
     /* background: #cfb53b; */
   }
   .mark-highlight.adaptive {
-    background: #d5b60a;
+    background: #737000;
     /* background: #cfb53b; */
   }
   .greyed.adaptive {
@@ -105,10 +108,13 @@ html {
     color: #afe1af;
   }
   .draw-light-green.adaptive {
-    color: #228b22;
+    color: #1a6b1a;
   }
   .draw-dark-green.adaptive {
     color: #afe1af;
+  }
+  .draw-dark-blue.adaptive {
+    color: #b6cfef;
   }
   .draw-brown.adaptive {
     color: #f4cb95;
