@@ -24,6 +24,9 @@ html {
 .mark-highlight {
   background: #ffff8f;
 }
+.draw-highlight {
+  color: #ffff8f;
+}
 .greyed {
   color: #808080;
 }
@@ -42,6 +45,9 @@ html {
 .draw-hero {
   color: #3e9c3e;
   /* font-weight: bold; */
+}
+.draw-light-green {
+  color: #afe1af;
 }
 .draw-dark-green {
   color: #3e9c3e;
@@ -69,7 +75,11 @@ html {
   }
   .mark-ok.uncertain {
     /* background: #d5b60a; */
-    background: #daa520;
+    background: #d5b60a;
+    /* background: #cfb53b; */
+  }
+  .draw-highlight.adaptive {
+    color: #d5b60a;
     /* background: #cfb53b; */
   }
   .mark-highlight.adaptive {
@@ -93,6 +103,9 @@ html {
   }
   .draw-hero.adaptive {
     color: #afe1af;
+  }
+  .draw-light-green.adaptive {
+    color: #228b22;
   }
   .draw-dark-green.adaptive {
     color: #afe1af;
