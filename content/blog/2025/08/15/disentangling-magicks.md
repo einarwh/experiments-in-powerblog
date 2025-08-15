@@ -1,12 +1,8 @@
 :page/title Disentangling intertwingled magicks in ASP.NET Core Web APIs
-:blog-post/tags [:tech :net :aspnet]
+:blog-post/tags [:tech ]
 :blog-post/author {:person/id :einarwh}
 
-:blog-post/published #time/ldt "2025-08-15T21:00:00"
-
-:blog-post/description
-
-The typical ASP.NET Core Web API relies heavily on at least two kinds of "magick": model binding and generation of OpenAPI documents. They are joined at the hip through C# type declarations, the sources of OpenAPI schema the targets of binding. In this blog post, I take a look at the gotchas and caveats and short-comings of this arrangement.
+<!-- :blog-post/published #time/ldt "2014-12-27T00:00:00" -->
 
 :page/body
 
@@ -183,4 +179,4 @@ To summarize the situation for lists of string-things, dropping everything about
 
 Where does this leave us? We have seen that life at the intersection of magicks is neither simple nor easy, and sometimes it simply breaks down. There are not only quirks and corner cases, but failed cases as well. The fact that model binding fails to respect lists of non-nullable reference types is a problem.
 
-We could conceivably settle for more lenient target types for model binding and do more validation ourselves, but this would undermine the assumption that the OpenAPI generation magick relies on - that the target type _is_ the schema to validate against. This is not necessarily true. We may wish to do further validation that is not easily expressed in a C# type. When faced with such limits, we tend to reach for annotations to guide and strengthen the magick. But there is of course another alternative - to abandon the magick itself! But who would do such a thing?
+We could conceivably settle for more lenient target types for model binding and do more validation ourselves, but this would undermine the assumption that the OpenAPI generation magick relies on - that the target type _is_ the schema to validate against. This is not necessarily true. We may wish to do further validation that is not easily expressed in a C# type. When faced with such limits, we tend to reach for annotations to guide and strengthen the magick. But there is of course another alternative - to abandon the magick itself. But who would do such a thing?
