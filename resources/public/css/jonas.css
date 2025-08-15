@@ -68,6 +68,9 @@ html {
 .draw-wall {
   color: #000000;
 }
+.inline-code {
+  color: #3e419c;
+}
 
 @media (prefers-color-scheme: dark) {
   .mark-err.adaptive {
@@ -128,6 +131,9 @@ html {
   .draw-wall.adaptive {
     color: #ffffff;
   }
+  .inline-code {
+    color: #b6cfef;
+  }
 }
 
 body {
@@ -180,7 +186,6 @@ blockquote {
   color: var(--blockquote-fg);
   font-style: italic;
 }
-
 pre {
   overflow-x: auto;
 }
