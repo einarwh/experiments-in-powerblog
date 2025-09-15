@@ -20,9 +20,9 @@ As you may know, nullable value types is a much older concept than nullable refe
 
 For value types, <span class="inline-code">T?</span> is syntactic sugar for the wrapper type <span class="inline-code">Nullable&lt;T&gt;</span>. An expression like <span class="inline-code">int? maybe = 5</span> compiles to <span class="inline-code">int? maybe = new Nullable(5)</span>, wrapping the integer value in a nullable value. This means that <span class="inline-code">T?</span> and <span class="inline-code">T</span> are distinct types.
 
-Nullable reference types are a very different beast. For reference types, <span class="inline-code">T?</span> is a communication device. It says something about intensions. In essence it says "I expect nulls here". Its counterpart <span class="inline-code">T</span> communicates the opposite. It says "there shouldn't be nulls here". But once the compiler has done it's job of warning that you may be violating your own intensions, there is no difference. <span class="inline-code">T?</span> and <span class="inline-code">T</span> are the same type, and that type allows nulls.
+Nullable reference types are a very different beast. For reference types, <span class="inline-code">T?</span> is a communication device. It says something about intentions. In essence it says "I expect nulls here". Its counterpart <span class="inline-code">T</span> communicates the opposite: "there shouldn't be nulls here". But once the compiler has done its job of warning that you may be violating your own intentions, there is no difference. <span class="inline-code">T?</span> and <span class="inline-code">T</span> are the same type, and that type allows nulls.
 
-"So what?" you may ask. How is this a problem? I'm glad you asked! Let's take a look at an example to illustrate the consequences of overloading <span class="inline-code">?</span> to mean different things for value types and reference types.
+"So what?" you may ask. How is this a problem? I'm glad you asked! Let's take a look at an example to illustrate the consequences of overloading <span class="inline-code">T?</span> to mean different things for value types and reference types.
 
 The [Enumerable](https://learn.microsoft.com/en-us/dotnet/api/system.linq.enumerable?view=net-9.0) class contains many extension methods for types that implement the <span class="inline-code">IEnumerable&lt;T&gt;</span> interface. However, it does not contain a method that corresponds to [List.choose](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-collections-listmodule.html#choose) in F#! Let's try to fix that.
 
@@ -43,7 +43,7 @@ This compiles, but unfortunately it doesn't quite work.
 
 The intention here is to call the <span class="inline-code">fn</span> function on each element, and then to filter out any null values. You'll note that <span class="inline-code">fn</span> returns a <span class="inline-code">TR?</span> value, indicating a nullable value (for value types), or at least something that could be null (for reference types), whereas the return type of <span class="inline-code">SelectNotNull</span> is <span class="inline-code">IEnumerable&lt;TR&gt;</span>. No allowance for null there. Indeed, that's the whole point of <span class="inline-code">SelectNotNull</span>!
 
-What is the problem? After all, it compiles? Well, what happens when we try to use it?
+What is the problem? After all, it compiles. Well, what happens when we try to use it?
 
 Let's start with reference types. We write the following code to test our new method.
 
@@ -89,7 +89,11 @@ public static IEnumerable<TR> SelectNotNull<T, TR>(
 }
 ```
 
-So, the only thing I've done here is to create two copies of the exact same code, and add a different type constraint to each copy. Luckily, since type constraints are part of the signature of the method and there is no ambiguity, I am allowed to make this overload. Not only that, but it solves our problem! Now it works for both strings and ints!
+So, the only thing I've done here is to create two copies of the exact same code, and add a different type constraint to each copy. Now first, am I even allowed to do this? After all, I can't declare methods with identical signatures in C#. But they're not identical! They just look that way! Indeed the whole point is that constraining <span class="inline-code">TR</span> as class and struct means that <span class="inline-code">TR?</span> is interpreted to mean <span class="inline-code">TR</span> and <span class="inline-code">Nullable&lt;TR&gt;</span> respectively, creating unique overloads. The code just looks identical due to the overloaded syntax.
+
+<blockquote>Note: I originally wrote that this overload was possible since type constraints are part of the method signature. This is inaccurate and misses the point I was trying to make :-)</blockquote>
+
+So the compiler allows it. Not only that, but it solves our problem! Now it works for both strings and ints!
 
 If you think this is nuts, you're right. It is. But it is also completely understandable. Now the compiler doesn't have to choose between reference type interpretation and value type interpretation of <span class="inline-code">T?</span>. It can do both, since we've given it two methods to work with. The type constraint makes the choice of interpretation unambiguous.
 
