@@ -137,6 +137,8 @@
 (defn render-draft [context page]
   (render-article context page))
 
+(defn render-html-page [_ page] page)
+
 (defn render-page [context page]
   (case (:page/kind page)
     :page.kind/frontpage (render-front-page context page)
@@ -145,4 +147,5 @@
     :page.kind/blog-post (render-blog-post context page)
     :page.kind/aoc-list (render-aoc-list context page)
     :page.kind/aoc-post (render-aoc-post context page)
+    :page.kind/html-page (render-html-page context page)
     :page.kind/draft (render-draft context page)))
