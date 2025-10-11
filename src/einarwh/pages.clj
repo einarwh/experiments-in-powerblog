@@ -137,7 +137,8 @@
 (defn render-draft [context page]
   (render-article context page))
 
-(defn render-html-page [_ page] page)
+(defn render-html-page [_ page]
+  (:page/body page))
 
 (defn render-page [context page]
   (case (:page/kind page)
