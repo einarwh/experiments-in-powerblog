@@ -7,6 +7,7 @@
   (-> {:site/title "einarwh"
        :powerpack/render-page #'pages/render-page
        :powerpack/create-ingest-tx #'ingest/create-tx
+       :powerpack/content-file-suffixes ["md" "edn" "html"]
 
        :optimus/bundles {"app.css"
                          {:public-dir "public"
