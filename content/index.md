@@ -7,7 +7,7 @@ I write a [blog](/blog/) and do [talks](https://einarwh.github.io/talks) at conf
 
 I enjoy Advent of Code. I have made some [visualizations](/aoc/).
 
-I have published my own hype cycles for [Agile](/hypecycles/agile.html), [Artificial Intelligence](/hypecycles/ai.html) and [Enterprise Architecture](/hypecycles/ea.html).
+I have published my own hype cycles for [agile](/hypecycles/agile/), [artificial intelligence](/hypecycles/ai/) and [enterprise architecture](/hypecycles/ea/).
 
 I like whimsical hobby projects. Some examples include [Hypercat](https://hypercat.azurewebsites.net/), a concatenative programming language that uses the URL as a stack of values, [Hyperpictures](https://hyperpictures.azurewebsites.net/), a hypermedia-driven tool for composing pictures, and [Hyperwolf](https://hyperwolf.azurewebsites.net/), a hypermedia adaptation of the game "Werewolves and Wanderer".
 
