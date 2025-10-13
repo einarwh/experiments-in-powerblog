@@ -1,423 +1,962 @@
- <html>
-<body>
+<html>
+  <body>
+    <h1 style="font-family: Arial, Helvetica, sans-serif; font-size: 28px">
+      Hype Cycle for Artificial Intelligence
+    </h1>
 
-<h1 style="font-family:Arial, Helvetica, sans-serif; font-size:28px">Hype Cycle for Artificial Intelligence</h1>
+    <svg width="1200" height="680" xmlns="http://www.w3.org/2000/svg">
+      <style>
+        .axisname {
+          font: bold 18px Arial, Helvetica, sans-serif;
+        }
+        .phasename {
+          font: 12px Arial, Helvetica, sans-serif;
+          fill: grey;
+        }
+        .spring {
+          font: 24px Arial, Helvetica, sans-serif;
+          fill: green;
+        }
+        .winter {
+          font: 24px Arial, Helvetica, sans-serif;
+          fill: lightgrey;
+        }
+      </style>
 
-<svg width="1200" height="680" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    .axisname {
-        font: bold 18px Arial, Helvetica, sans-serif;
-    }
-    .phasename {
-        font: 12px Arial, Helvetica, sans-serif;
-        fill: grey;
-    }
-    .spring {
-      font: 24px Arial, Helvetica, sans-serif;
-      fill: green;
-    }
-    .winter {
-      font: 24px Arial, Helvetica, sans-serif;
-      fill: lightgrey;
-    }
-  </style>
-  
-  <!-- Horizontal lines -->
-  <line x1="60"  y1="10" x2="1020"  y2="10" stroke-width="1.5" stroke="lightgrey" />
-  <line x1="60" y1="472" x2="1020" y2="472" stroke-width="1.5" stroke="lightgrey" />
-  <line x1="60" y1="512" x2="1020" y2="512" stroke-width="1.5" stroke="lightgrey" />
+      <!-- Horizontal lines -->
+      <line
+        x1="60"
+        y1="10"
+        x2="1020"
+        y2="10"
+        stroke-width="1.5"
+        stroke="lightgrey"
+      />
+      <line
+        x1="60"
+        y1="472"
+        x2="1020"
+        y2="472"
+        stroke-width="1.5"
+        stroke="lightgrey"
+      />
+      <line
+        x1="60"
+        y1="512"
+        x2="1020"
+        y2="512"
+        stroke-width="1.5"
+        stroke="lightgrey"
+      />
 
-  <!-- Vertical lines -->
-  <line x1="60"  y1="10" x2="60"  y2="512" stroke-width="1.5" stroke="lightgrey" />
-  <line x1="306" y1="10" x2="306" y2="472" stroke-width="1.5" stroke="lightgrey" />
-  <line x1="423" y1="10" x2="423" y2="472" stroke-width="1.5" stroke="lightgrey" />
-  <line x1="593" y1="10" x2="593" y2="472" stroke-width="1.5" stroke="lightgrey" />
-  <line x1="798" y1="10" x2="798" y2="472" stroke-width="1.5" stroke="lightgrey" />
-  <line x1="1020" y1="10" x2="1020" y2="512" stroke-width="1.5" stroke="lightgrey" />
+      <!-- Vertical lines -->
+      <line
+        x1="60"
+        y1="10"
+        x2="60"
+        y2="512"
+        stroke-width="1.5"
+        stroke="lightgrey"
+      />
+      <line
+        x1="306"
+        y1="10"
+        x2="306"
+        y2="472"
+        stroke-width="1.5"
+        stroke="lightgrey"
+      />
+      <line
+        x1="423"
+        y1="10"
+        x2="423"
+        y2="472"
+        stroke-width="1.5"
+        stroke="lightgrey"
+      />
+      <line
+        x1="593"
+        y1="10"
+        x2="593"
+        y2="472"
+        stroke-width="1.5"
+        stroke="lightgrey"
+      />
+      <line
+        x1="798"
+        y1="10"
+        x2="798"
+        y2="472"
+        stroke-width="1.5"
+        stroke="lightgrey"
+      />
+      <line
+        x1="1020"
+        y1="10"
+        x2="1020"
+        y2="512"
+        stroke-width="1.5"
+        stroke="lightgrey"
+      />
 
-  <!-- Text -->
-  <text text-anchor="middle" transform="translate(55,240) rotate(-90)" class="axisname">EXPECTATIONS</text>
-  <text text-anchor="middle" transform="translate(520,537)" class="axisname">TIME</text>
+      <!-- Text -->
+      <text
+        text-anchor="middle"
+        transform="translate(55,240) rotate(-90)"
+        class="axisname"
+      >
+        EXPECTATIONS
+      </text>
+      <text
+        text-anchor="middle"
+        transform="translate(520,537)"
+        class="axisname"
+      >
+        TIME
+      </text>
 
-  <text text-anchor="middle" transform="translate(182,493)" class="phasename">Innovation</text>
-  <text text-anchor="middle" transform="translate(182,507)" class="phasename">Trigger</text>
+      <text
+        text-anchor="middle"
+        transform="translate(182,493)"
+        class="phasename"
+      >
+        Innovation
+      </text>
+      <text
+        text-anchor="middle"
+        transform="translate(182,507)"
+        class="phasename"
+      >
+        Trigger
+      </text>
 
-  <text text-anchor="middle" transform="translate(364,493)" class="phasename">Peak of Inflated</text>
-  <text text-anchor="middle" transform="translate(364,507)" class="phasename">Expectations</text>
+      <text
+        text-anchor="middle"
+        transform="translate(364,493)"
+        class="phasename"
+      >
+        Peak of Inflated
+      </text>
+      <text
+        text-anchor="middle"
+        transform="translate(364,507)"
+        class="phasename"
+      >
+        Expectations
+      </text>
 
-  <text text-anchor="middle" transform="translate(502,493)" class="phasename">Trough of</text>
-  <text text-anchor="middle" transform="translate(502,507)" class="phasename">Disillusionment</text>
+      <text
+        text-anchor="middle"
+        transform="translate(502,493)"
+        class="phasename"
+      >
+        Trough of
+      </text>
+      <text
+        text-anchor="middle"
+        transform="translate(502,507)"
+        class="phasename"
+      >
+        Disillusionment
+      </text>
 
-  <text text-anchor="middle" transform="translate(692,493)" class="phasename">Slope of</text>
-  <text text-anchor="middle" transform="translate(692,507)" class="phasename">Enlightenment</text>
+      <text
+        text-anchor="middle"
+        transform="translate(692,493)"
+        class="phasename"
+      >
+        Slope of
+      </text>
+      <text
+        text-anchor="middle"
+        transform="translate(692,507)"
+        class="phasename"
+      >
+        Enlightenment
+      </text>
 
-  <text text-anchor="middle" transform="translate(905,493)" class="phasename">Plateau of</text>
-  <text text-anchor="middle" transform="translate(905,507)" class="phasename">Productivity</text>
+      <text
+        text-anchor="middle"
+        transform="translate(905,493)"
+        class="phasename"
+      >
+        Plateau of
+      </text>
+      <text
+        text-anchor="middle"
+        transform="translate(905,507)"
+        class="phasename"
+      >
+        Productivity
+      </text>
 
-  <!-- Curves -->
-  <path id="idealcurve" d="M 132 455 C 192 446, 230 290 244 240 C 265 150, 325 60 384 70 C 430 78, 438 198 442 240 C 447 276, 450 395 518 408 C 610 426, 660 342 698 316 C 764 260, 870 242 930 242" stroke-width="1.5" stroke="black" fill="transparent"/>
+      <!-- Curves -->
+      <path
+        id="idealcurve"
+        d="M 132 455 C 192 446, 230 290 244 240 C 265 150, 325 60 384 70 C 430 78, 438 198 442 240 C 447 276, 450 395 518 408 C 610 426, 660 342 698 316 C 764 260, 870 242 930 242"
+        stroke-width="1.5"
+        stroke="black"
+        fill="transparent"
+      />
 
-  <path id="hypecurve"  d="M 132 455 C 192 446, 230 290 244 240 C 265 150, 325 60 384 70 C 430 78, 438 198 442 240 C 447 276, 450 395 518 408 C 570 420, 582 600 590 680" stroke-width="1.5" stroke="none" fill="none"/>
+      <path
+        id="hypecurve"
+        d="M 132 455 C 192 446, 230 290 244 240 C 265 150, 325 60 384 70 C 430 78, 438 198 442 240 C 447 276, 450 395 518 408 C 570 420, 582 600 590 680"
+        stroke-width="1.5"
+        stroke="none"
+        fill="none"
+      />
 
-<text text-anchor="middle" transform="translate(120,40)" class="spring" visibility="hidden">
-  <set attributeName="visibility" to="visible" begin="5s" dur="4s" />
-  <set attributeName="visibility" to="visible" begin="30s" dur="4s" />
-  <set attributeName="visibility" to="visible" begin="60s" dur="4s" />
-  <set attributeName="visibility" to="visible" begin="90s" dur="4s" />
-  <set attributeName="visibility" to="visible" begin="120s" dur="4s" />
-  <set attributeName="visibility" to="visible" begin="150s" dur="4s" />
-  AI spring
-</text>
-<text text-anchor="middle" transform="translate(120,40)" class="winter" visibility="hidden">
-  <set attributeName="visibility" to="visible" begin="0s" dur="5s" />
-  <set attributeName="visibility" to="visible" begin="9s" dur="21s" />
-  <set attributeName="visibility" to="visible" begin="34s" dur="26s" />
-  <set attributeName="visibility" to="visible" begin="64s" dur="26s" />
-  <set attributeName="visibility" to="visible" begin="94s" dur="26s" />
-  <set attributeName="visibility" to="visible" begin="124s" dur="26s" />
-  <set attributeName="visibility" to="visible" begin="154s" dur="626s" />
-  AI winter
-</text>
+      <text
+        text-anchor="middle"
+        transform="translate(120,40)"
+        class="spring"
+        visibility="hidden"
+      >
+        <set attributeName="visibility" to="visible" begin="5s" dur="4s" />
+        <set attributeName="visibility" to="visible" begin="20s" dur="4s" />
+        <set attributeName="visibility" to="visible" begin="40s" dur="4s" />
+        <set attributeName="visibility" to="visible" begin="60s" dur="4s" />
+        <set attributeName="visibility" to="visible" begin="80s" dur="4s" />
+        <set attributeName="visibility" to="visible" begin="100s" dur="4s" />
+        AI spring
+      </text>
+      <text
+        text-anchor="middle"
+        transform="translate(120,40)"
+        class="winter"
+        visibility="hidden"
+      >
+        <set attributeName="visibility" to="visible" begin="0s" dur="5s" />
+        <set attributeName="visibility" to="visible" begin="9s" dur="11s" />
+        <set attributeName="visibility" to="visible" begin="24s" dur="16s" />
+        <set attributeName="visibility" to="visible" begin="44s" dur="16s" />
+        <set attributeName="visibility" to="visible" begin="64s" dur="16s" />
+        <set attributeName="visibility" to="visible" begin="84s" dur="16s" />
+        <set attributeName="visibility" to="visible" begin="104s" dur="616s" />
+        AI winter
+      </text>
 
-  <!-- Wave 1 -->
+      <!-- Wave 1 -->
 
-  <circle r="5" fill="white" stroke="grey" id="ai-1-1">
-    <animateMotion id="op" begin="5s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-1-1">
+        <animateMotion
+          id="op"
+          begin="5s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-1-2">
-    <animateMotion id="op" begin="5.3s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-1-2">
+        <animateMotion
+          id="op"
+          begin="5.3s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-1-3">
-    <animateMotion id="op" begin="5.4s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-1-3">
+        <animateMotion
+          id="op"
+          begin="5.4s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-1-4">
-    <animateMotion id="op" begin="5.5s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-1-4">
+        <animateMotion
+          id="op"
+          begin="5.5s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-1-5">
-    <animateMotion id="op" begin="5.7s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-1-5">
+        <animateMotion
+          id="op"
+          begin="5.7s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-1-6">
-    <animateMotion id="op" begin="5.75s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-1-6">
+        <animateMotion
+          id="op"
+          begin="5.75s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-1-7">
-    <animateMotion id="op" begin="5.80s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-1-7">
+        <animateMotion
+          id="op"
+          begin="5.80s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-1-8">
-    <animateMotion id="op" begin="5.9s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-1-8">
+        <animateMotion
+          id="op"
+          begin="5.9s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-1-9">
-    <animateMotion id="op" begin="6.0s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-1-9">
+        <animateMotion
+          id="op"
+          begin="6.0s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <!-- Wave 2 -->
+      <!-- Wave 2 -->
 
-  <circle r="5" fill="white" stroke="grey" id="ai-2-1">
-    <animateMotion id="op" begin="30s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-2-1">
+        <animateMotion
+          id="op"
+          begin="20s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-2-2">
-    <animateMotion id="op" begin="30.2s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-2-2">
+        <animateMotion
+          id="op"
+          begin="20.2s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-2-3">
-    <animateMotion id="op" begin="30.35s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-2-3">
+        <animateMotion
+          id="op"
+          begin="20.35s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-2-4">
-    <animateMotion id="op" begin="30.5s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-2-4">
+        <animateMotion
+          id="op"
+          begin="20.5s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-2-5">
-    <animateMotion id="op" begin="30.6s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-2-5">
+        <animateMotion
+          id="op"
+          begin="20.6s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-2-6">
-    <animateMotion id="op" begin="30.75s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-2-6">
+        <animateMotion
+          id="op"
+          begin="20.75s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-2-7">
-    <animateMotion id="op" begin="30.82s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-2-7">
+        <animateMotion
+          id="op"
+          begin="20.82s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-2-8">
-    <animateMotion id="op" begin="30.95s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-2-8">
+        <animateMotion
+          id="op"
+          begin="20.95s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-2-9">
-    <animateMotion id="op" begin="31.0s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-2-9">
+        <animateMotion
+          id="op"
+          begin="21.0s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <!-- Wave 3 -->
+      <!-- Wave 3 -->
 
-  <circle r="5" fill="white" stroke="grey" id="ai-3-1">
-    <animateMotion id="op" begin="60s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-3-1">
+        <animateMotion
+          id="op"
+          begin="60s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-3-2">
-    <animateMotion id="op" begin="60.1s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-3-2">
+        <animateMotion
+          id="op"
+          begin="40.1s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-3-3">
-    <animateMotion id="op" begin="60.25s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-3-3">
+        <animateMotion
+          id="op"
+          begin="40.25s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-3-4">
-    <animateMotion id="op" begin="60.4s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-3-4">
+        <animateMotion
+          id="op"
+          begin="40.4s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-3-5">
-    <animateMotion id="op" begin="60.6s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-3-5">
+        <animateMotion
+          id="op"
+          begin="40.6s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-3-6">
-    <animateMotion id="op" begin="60.72s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-3-6">
+        <animateMotion
+          id="op"
+          begin="40.72s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-3-7">
-    <animateMotion id="op" begin="60.80s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-3-7">
+        <animateMotion
+          id="op"
+          begin="40.80s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-3-8">
-    <animateMotion id="op" begin="60.88s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-3-8">
+        <animateMotion
+          id="op"
+          begin="40.88s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle r="5" fill="white" stroke="grey" id="ai-3-9">
-    <animateMotion id="op" begin="61.0s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-    <mpath xlink:href="#hypecurve"></mpath>
-    </animateMotion>
-  </circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-3-9">
+        <animateMotion
+          id="op"
+          begin="41.0s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-    <!-- Wave 4 -->
+      <!-- Wave 4 -->
 
-    <circle r="5" fill="white" stroke="grey" id="ai-4-1">
-      <animateMotion id="op" begin="90s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-4-2">
-      <animateMotion id="op" begin="90.3s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-4-3">
-      <animateMotion id="op" begin="90.4s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-4-4">
-      <animateMotion id="op" begin="90.5s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-4-5">
-      <animateMotion id="op" begin="90.7s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-4-6">
-      <animateMotion id="op" begin="90.75s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-4-7">
-      <animateMotion id="op" begin="90.80s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-4-8">
-      <animateMotion id="op" begin="90.9s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-4-9">
-      <animateMotion id="op" begin="91.0s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <!-- Wave 5 -->
-    <circle r="5" fill="white" stroke="grey" id="ai-5-1">
-      <animateMotion id="op" begin="120s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-5-2">
-      <animateMotion id="op" begin="120.2s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-5-3">
-      <animateMotion id="op" begin="120.35s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-5-4">
-      <animateMotion id="op" begin="120.5s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-5-5">
-      <animateMotion id="op" begin="120.6s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-5-6">
-      <animateMotion id="op" begin="120.75s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-5-7">
-      <animateMotion id="op" begin="120.82s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-5-8">
-      <animateMotion id="op" begin="120.95s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-5-9">
-      <animateMotion id="op" begin="121.0s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <!-- Wave 6 -->
-    <circle r="5" fill="white" stroke="grey" id="ai-6-1">
-      <animateMotion id="op" begin="150s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-6-2">
-      <animateMotion id="op" begin="150.1s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-6-3">
-      <animateMotion id="op" begin="150.25s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-6-4">
-      <animateMotion id="op" begin="150.4s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-6-5">
-      <animateMotion id="op" begin="150.6s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-6-6">
-      <animateMotion id="op" begin="150.72s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-6-7">
-      <animateMotion id="op" begin="150.80s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-6-8">
-      <animateMotion id="op" begin="150.88s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>
-  
-    <circle r="5" fill="white" stroke="grey" id="ai-6-9">
-      <animateMotion id="op" begin="151.0s" dur="3s" rotate="auto" fill="none" repeatCount="0" >
-      <mpath xlink:href="#hypecurve"></mpath>
-      </animateMotion>
-    </circle>  
+      <circle r="5" fill="green" stroke="grey" id="ai-4-1">
+        <animateMotion
+          id="op"
+          begin="90s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-  <circle cx="0" cy="0" r="8" fill="white" stroke="none" id="hidden">
-</circle>
+      <circle r="5" fill="green" stroke="grey" id="ai-4-2">
+        <animateMotion
+          id="op"
+          begin="60.3s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
+      <circle r="5" fill="green" stroke="grey" id="ai-4-3">
+        <animateMotion
+          id="op"
+          begin="60.4s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-</svg>
+      <circle r="5" fill="green" stroke="grey" id="ai-4-4">
+        <animateMotion
+          id="op"
+          begin="60.5s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
 
-</body>
-</html> 
+      <circle r="5" fill="green" stroke="grey" id="ai-4-5">
+        <animateMotion
+          id="op"
+          begin="60.7s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-4-6">
+        <animateMotion
+          id="op"
+          begin="60.75s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-4-7">
+        <animateMotion
+          id="op"
+          begin="60.80s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-4-8">
+        <animateMotion
+          id="op"
+          begin="60.9s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-4-9">
+        <animateMotion
+          id="op"
+          begin="61.0s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <!-- Wave 5 -->
+      <circle r="5" fill="green" stroke="grey" id="ai-5-1">
+        <animateMotion
+          id="op"
+          begin="120s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-5-2">
+        <animateMotion
+          id="op"
+          begin="80.2s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-5-3">
+        <animateMotion
+          id="op"
+          begin="80.35s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-5-4">
+        <animateMotion
+          id="op"
+          begin="80.5s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-5-5">
+        <animateMotion
+          id="op"
+          begin="80.6s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-5-6">
+        <animateMotion
+          id="op"
+          begin="80.75s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-5-7">
+        <animateMotion
+          id="op"
+          begin="80.82s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-5-8">
+        <animateMotion
+          id="op"
+          begin="80.95s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-5-9">
+        <animateMotion
+          id="op"
+          begin="81.0s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <!-- Wave 6 -->
+      <circle r="5" fill="green" stroke="grey" id="ai-6-1">
+        <animateMotion
+          id="op"
+          begin="150s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-6-2">
+        <animateMotion
+          id="op"
+          begin="100.1s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-6-3">
+        <animateMotion
+          id="op"
+          begin="100.25s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-6-4">
+        <animateMotion
+          id="op"
+          begin="100.4s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-6-5">
+        <animateMotion
+          id="op"
+          begin="100.6s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-6-6">
+        <animateMotion
+          id="op"
+          begin="100.72s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-6-7">
+        <animateMotion
+          id="op"
+          begin="100.80s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-6-8">
+        <animateMotion
+          id="op"
+          begin="100.88s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle r="5" fill="green" stroke="grey" id="ai-6-9">
+        <animateMotion
+          id="op"
+          begin="101.0s"
+          dur="3s"
+          rotate="auto"
+          fill="none"
+          repeatCount="0"
+        >
+          <mpath xlink:href="#hypecurve"></mpath>
+        </animateMotion>
+      </circle>
+
+      <circle
+        cx="0"
+        cy="0"
+        r="8"
+        fill="white"
+        stroke="none"
+        id="hidden"
+      ></circle>
+    </svg>
+  </body>
+</html>
