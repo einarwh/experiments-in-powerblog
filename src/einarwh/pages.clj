@@ -1,7 +1,8 @@
 (ns einarwh.pages
   (:require [datomic-type-extensions.api :as d]
+            [einarwh.feed :as feed]
             [powerpack.markdown :as md]
-            [einarwh.feed :as feed])
+            [ring.util.response :as response])
   (:import (java.time LocalDateTime)
            (java.time.format DateTimeFormatter)))
 
@@ -140,6 +141,10 @@
 (defn render-html-page [_ page]
   (:page/body page))
 
+(defn render-pdf-file [_ page]
+  (-> (response/file-response (:page/file-name page))
+      (response/content-type "application/pdf")))
+
 (defn render-page [context page]
   (case (:page/kind page)
     :page.kind/frontpage (render-front-page context page)
@@ -149,4 +154,5 @@
     :page.kind/aoc-list (render-aoc-list context page)
     :page.kind/aoc-post (render-aoc-post context page)
     :page.kind/html-page (render-html-page context page)
-    :page.kind/draft (render-draft context page)))
+    :page.kind/draft (render-draft context page)
+    :page.kind/pdf (render-pdf-file context page)))
