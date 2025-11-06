@@ -12,7 +12,7 @@
 
 I have been writing and talking about socio-technical API patterns. Such patterns are a subset of a larger group of socio-technical integration patterns.
 
-I particularly interesting socio-technical integration pattern is _the stalemate_, in which two or more autonomous teams can't reach an agreement on how to integrate their systems. Classic: synchronous vs asynchronous integration. Each solution has pros and cons.
+A particularly interesting socio-technical integration pattern is _the stalemate_, in which two or more autonomous teams can't reach an agreement on how to integrate their systems. Classic: synchronous vs asynchronous integration. Each solution has pros and cons.
 
 The basic socio-technical situation looks like this. The awkwardness is palpable.
 
