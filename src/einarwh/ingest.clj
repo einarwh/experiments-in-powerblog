@@ -3,7 +3,7 @@
             [powerpack.ingest :as ingest]))
 
 (defmethod ingest/parse-file :pdf [_ file-name file]
-  [{:page/uri (str "/pdf/" file-name)
+  [{:page/uri (str "/" file-name)
     :page/file-name (.getAbsolutePath file)
     :page/kind :page.kind/pdf}])
 
