@@ -1,2 +1,4 @@
 [{:page/uri "/feed/atom.xml"
-  :page/kind :page.kind/feed}]
+  :page/kind :page.kind/feed}
+ {:page/uri "/slides/"
+  :page/kind :page.kind/slides-list}]

@@ -155,4 +155,5 @@
     :page.kind/aoc-post (render-aoc-post context page)
     :page.kind/html-page (render-html-page context page)
     :page.kind/draft (render-draft context page)
+    :page.kind/slides-list (render-article context page)
     :page.kind/pdf (render-pdf-file context page)))
