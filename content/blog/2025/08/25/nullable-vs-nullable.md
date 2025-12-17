@@ -1,11 +1,8 @@
 :page/title Nullable vs nullable in C#
 :blog-post/tags [:tech ]
 :blog-post/author {:person/id :einarwh}
-
 :blog-post/published #time/ldt "2025-08-25T19:30:00"
-
 :blog-post/description
-
 In C#, nullable means something very different for reference types and value types, but the syntax is the same for both. That's bound to lead to problems.
 
 :page/body

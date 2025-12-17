@@ -1,7 +1,6 @@
 (ns einarwh.core
   (:require [einarwh.ingest :as ingest]
-            [einarwh.pages :as pages]
-            [powerpack.highlight :as highlight]))
+            [einarwh.pages :as pages]))
 
 (def config
   (-> {:site/title "einarwh"
@@ -11,7 +10,7 @@
 
        :optimus/bundles {"app.css"
                          {:public-dir "public"
-                          :paths ["/css/jonas.css" "/css/themes/ascetic.min.css"]}}
+                          :paths ["/css/jonas.css" "/css/themes/ascetic.mod.css"]}}
 
        :optimus/assets [{:public-dir "public"
                          :paths [#".*\.js" #".*\.svg" #".*\.jpg" #".*\.png" #".*\.gif" #".*\.mp4"]}]
@@ -25,7 +24,6 @@
                                             [:crop {:preset :square}]]
                           :retina-optimized? true
                           :retina-quality 0.4
-                          :width 184}}}}
-      highlight/install))
+                          :width 184}}}}))
 
 

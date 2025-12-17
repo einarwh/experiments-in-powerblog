@@ -41,7 +41,8 @@
    [:head
     (when title [:title title])
     [:link {:rel "icon" :sizes "any" :type "image/svg+xml" :href "/images/favfish.svg"}]
-    [:script {:data-goatcounter "https://einarwh.goatcounter.com/count" :async true :src "https://gc.zgo.at/count.js"}]]
+    [:script {:data-goatcounter "https://einarwh.goatcounter.com/count" :async true :src "https://gc.zgo.at/count.js"}]
+    [:script {:src "/js/highlight.min.js"}] [:script "hljs.highlightAll();"]]
    [:body
     content]])
 
