@@ -1,6 +1,4 @@
 @import url("vars.css");
-@import url("pygments.css");
-@import url("syntax-highlight.css");
 
 :root {
   color-scheme: light dark;
@@ -201,12 +199,12 @@ blockquote {
 pre {
   overflow-x: auto;
 }
-pre,
+/* pre,
 code {
   font-family: monospace;
   font-size: 1.1rem;
   white-space: pre;
-}
+} */
 ul {
   list-style-position: inside;
 }

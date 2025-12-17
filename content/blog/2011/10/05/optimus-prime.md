@@ -2,6 +2,7 @@
 :blog-post/tags [:tech :programming :dotnet :csharp]
 :blog-post/author {:person/id :einarwh}
 :blog-post/published #time/ldt "2011-10-05T23:00:00"
+
 :page/body
 
 # Optimus Prime
@@ -93,8 +94,8 @@ Unsurprisingly, then, the end result is the same, regardless of the implementati
 ```csharp
 foreach (int i in new Incrementer())
 {
-  Console.WriteLine(i); 
-  if (i == 10) { break; } 
+  Console.WriteLine(i);
+  if (i == 10) { break; }
 }
 ```
 
@@ -135,7 +136,7 @@ public class NumberSequence : IEnumerable<int>
   }
 }
 
-public class NumberEnumerator : IEnumerator<int>, 
+public class NumberEnumerator : IEnumerator<int>,
   IComparable<NumberEnumerator>
 {
   private readonly int _increment;
@@ -248,12 +249,12 @@ public class BrokenRecordEnumerator<T> : IEnumerator<T>
 So you could write code like this:
 
 ```csharp
-var words = new [] { "Hello", "dear", "friend" }; 
-int wordCount = 0; 
-foreach (string s in new BrokenRecord(words)) 
+var words = new [] { "Hello", "dear", "friend" };
+int wordCount = 0;
+foreach (string s in new BrokenRecord(words))
 {
   Console.WriteLine(s);
-  if (++wordCount == 10) { break; } 
+  if (++wordCount == 10) { break; }
 }
 ```
 
@@ -284,15 +285,15 @@ You have a finite list of consecutive integers, starting at 2. You take the firs
 
 Here's a simple example of the primes from 2-20.
 
-> 2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20
+> 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
 
 The number 2 is a prime! Cross out all the multiples of 2.
 
-> 2  3  X  5  X  7  X  9  X 11  X 13  X 15  X 17  X 19  X
+> 2 3 X 5 X 7 X 9 X 11 X 13 X 15 X 17 X 19 X
 
 The number 3 is also a prime! Now cross out all its multiples:
 
-> 2  3  X  5  X  7  X  X  X 11  X 13  X  X  X 17  X 19  X
+> 2 3 X 5 X 7 X X X 11 X 13 X X X 17 X 19 X
 
 And we keep going for 5, 7, 11, 13, 17 and 19. As it turns out, all the multiples have already been covered by other prime-multiples, so there are actually no more numbers being crossed out. But algorithmically, we obviously need to go through the same process for all the primes.
 
@@ -320,9 +321,9 @@ public class PrimeSequence : IEnumerable<int>
 
 public class SimplePrimeEnumerator : IEnumerator<int>
 {
-  private readonly IEnumerator<int> _candidates = 
+  private readonly IEnumerator<int> _candidates =
     new NumberSequence(1, 1).GetEnumerator();
-  private IPriorityQueue<NumberEnumerator> _pq = 
+  private IPriorityQueue<NumberEnumerator> _pq =
     new IntervalHeap<NumberEnumerator>();
 
   public int Current
@@ -371,7 +372,7 @@ An interesting thing to point out is that the prime-multiple sequence doesn't ha
 
 Now this implementation is actually pretty decent. There's just one thing that leaps to mind as sort of wasted effort. We're checking _every number there is_ to see if it could possibly be a prime. Yet we know that 2 is the _only_ even number that is a prime (all the others, well, they'd be divisible by 2, right?). So half of our checks are completely in vain.
 
-What if we baked in a little bit of smarts to handle this special case? Say we create a *PrimeSequence* like so:
+What if we baked in a little bit of smarts to handle this special case? Say we create a _PrimeSequence_ like so:
 
 ```csharp
 public class PrimeSequence : IEnumerable<int>
@@ -380,7 +381,7 @@ public class PrimeSequence : IEnumerable<int>
   {
     yield return 2;
     var e = new OddPrimeEnumerator();
-    while (e.MoveNext()) 
+    while (e.MoveNext())
     {
       yield return e.Current;
     }
@@ -402,9 +403,9 @@ The **OddPrimeEnumerator** is actually quite similar to the naive **PrimeEnumera
 ```csharp
 public class OddPrimeEnumerator : IEnumerator<int>
 {
-  private readonly IEnumerator<int> _candidates = 
+  private readonly IEnumerator<int> _candidates =
     new NumberEnumerator(3, 2);
-  private readonly IPriorityQueue<NumberEnumerator> _pq = 
+  private readonly IPriorityQueue<NumberEnumerator> _pq =
     new IntervalHeap<NumberEnumerator>();
 
   public int Current
@@ -481,7 +482,7 @@ public class WheelSequence : IEnumerable<int>
   private readonly int _startValue;
   private readonly IEnumerable<int> _;
 
-  public WheelSequence(int startValue, 
+  public WheelSequence(int startValue,
     IEnumerable<int> skipSequence)
   {
     _startValue = startValue;
@@ -491,7 +492,7 @@ public class WheelSequence : IEnumerable<int>
   public IEnumerator<int> GetEnumerator()
   {
     yield return _startValue;
-    var wse = new WheelSequenceEnumerator(_startValue, 
+    var wse = new WheelSequenceEnumerator(_startValue,
                                           _.GetEnumerator());
     while (wse.MoveNext())
     {
@@ -510,7 +511,7 @@ public class WheelSequenceEnumerator : IEnumerator<int>
   private readonly IEnumerator<int> _;
   private int _value;
 
-  public WheelSequenceEnumerator(int startValue, 
+  public WheelSequenceEnumerator(int startValue,
     IEnumerator<int> skip)
   {
     _value = startValue;
@@ -548,13 +549,13 @@ Now we can replace our original naive **PrimeEnumerator** with one that uses whe
 ```csharp
 public class WheelPrimeEnumerator : IEnumerator<int>
 {
-  private readonly IEnumerator<int> _candidates = 
-    new WheelSequence(11, 
+  private readonly IEnumerator<int> _candidates =
+    new WheelSequence(11,
       new BrokenRecord<int>(
         new[] { 4, 2, 4, 2, 4, 6, 2, 6 }
       )
     ).GetEnumerator();
-  private readonly IPriorityQueue<NumberEnumerator> _pq = 
+  private readonly IPriorityQueue<NumberEnumerator> _pq =
     new IntervalHeap<NumberEnumerator>();
 
   public int Current
@@ -584,10 +585,10 @@ public class WheelPrimeEnumerator : IEnumerator<int>
           var temp = _pq.DeleteMin();
           temp.MoveNext();
           _pq.Add(temp);
-        } while ((n > _pq.FindMin().Current) || 
+        } while ((n > _pq.FindMin().Current) ||
                  (crossedOut && n == _pq.FindMin().Current));
-      }              
-    } 
+      }
+    }
   }
 
   object IEnumerator.Current
