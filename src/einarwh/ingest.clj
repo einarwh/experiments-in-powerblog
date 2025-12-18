@@ -16,9 +16,6 @@
     :page.kind/aoc-list 
     
     (re-find #"^hypecycles/" file-name)
-    :page.kind/html-page 
-    
-    (re-find #"^hype/" file-name)
     :page.kind/blog-post
 
     (re-find #"^feed/" file-name)
