@@ -3,6 +3,4 @@
 
 # Hype Cycle for Enterprise Architecture
 
-<span>
-  <img style="background-color: white" src="/svg/hypecycle-ea.svg"/ alt="Hype Cycle for Enterprise Architecture">
-</span>
+![Hype Cycle for Enterprise Architecture](/svg/hypecycle-ea.svg)

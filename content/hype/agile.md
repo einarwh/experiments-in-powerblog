@@ -3,6 +3,4 @@
 
 # Hype Cycle for Agile
 
-<span>
-  <img src="/svg/hypecycle-agile.svg"/ alt="Hype Cycle for Agile">
-</span>
+![Hype Cycle for Agile](/svg/hypecycle-agile.svg)
