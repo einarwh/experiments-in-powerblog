@@ -4,5 +4,5 @@
 # Hype Cycle for Agile
 
 <span>
-  <img style="background-color: white" src="/svg/hypecycle-agile.svg"/ alt="Hype Cycle for Agile">
+  <img src="/svg/hypecycle-agile.svg"/ alt="Hype Cycle for Agile">
 </span>

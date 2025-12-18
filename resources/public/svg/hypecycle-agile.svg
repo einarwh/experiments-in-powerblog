@@ -2,87 +2,113 @@
       <style>
         .axisname {
           font: bold 18px Arial, Helvetica, sans-serif;
+          fill: #000;
         }
         .phasename {
           font: 12px Arial, Helvetica, sans-serif;
-          fill: grey;
+          fill: #808080;
+        }
+        .axisline {
+          stroke: #CCC;
+          stroke-width: 1px;
+        }
+        .pathcurve { stroke: #000; }
+        .normal {
+          r: 5px;
+          fill: #ADD8E6;
+          stroke: #666;
+          visibility: hidden;
+        }
+        .slow {
+          r: 5px;
+          fill: #00008B;
+          stroke: #666;
+          visibility: hidden;
+        }
+        .speed {
+          r: 5px;
+          fill: #FFF;
+          stroke: #666;
+          visibility: hidden;
+        }
+        @media (prefers-color-scheme: dark) {
+          .axisname { fill: #FFF; }
+          .phasename { fill: #D3D3D3; }
+          .axisline {
+            stroke: #666;
+          }
+          .pathcurve { stroke: #fff; }
+          .normal { stroke: #CCC; }
+          .slow { stroke: #CCC; }
+          .speed { stroke: #CCC; }
         }
       </style>
 
       <!-- Horizontal lines -->
       <line
+        class="axisline"
         x1="60"
         y1="10"
         x2="1020"
         y2="10"
-        stroke-width="1.5"
-        stroke="lightgrey"
       />
       <line
+        class="axisline"
         x1="60"
         y1="472"
         x2="1020"
         y2="472"
-        stroke-width="1.5"
-        stroke="lightgrey"
       />
       <line
+        class="axisline"
         x1="60"
         y1="512"
         x2="1020"
         y2="512"
-        stroke-width="1.5"
-        stroke="lightgrey"
       />
 
       <!-- Vertical lines -->
       <line
+        class="axisline"
         x1="60"
         y1="10"
         x2="60"
         y2="512"
-        stroke-width="1.5"
-        stroke="lightgrey"
       />
       <line
+        class="axisline"
         x1="306"
         y1="10"
         x2="306"
         y2="472"
-        stroke-width="1.5"
-        stroke="lightgrey"
       />
       <line
+        class="axisline"
         x1="423"
         y1="10"
         x2="423"
         y2="472"
-        stroke-width="1.5"
-        stroke="lightgrey"
       />
       <line
+        class="axisline"
         x1="593"
         y1="10"
         x2="593"
         y2="472"
-        stroke-width="1.5"
-        stroke="lightgrey"
       />
       <line
+        class="axisline"
         x1="798"
         y1="10"
         x2="798"
         y2="472"
-        stroke-width="1.5"
-        stroke="lightgrey"
       />
       <line
+        class="axisline"
         x1="1020"
         y1="10"
         x2="1020"
         y2="512"
-        stroke-width="1.5"
-        stroke="lightgrey"
       />
 
       <!-- Text -->
@@ -196,10 +222,10 @@
 
       <!-- Curves -->
       <path
+        class="pathcurve"
         id="idealcurve"
         d="M 132 455 C 192 446, 230 290 244 240 C 265 150, 325 60 384 70 C 430 78, 438 198 442 240 C 447 276, 450 395 518 408 C 610 426, 660 342 698 316 C 764 260, 870 242 930 242"
         stroke-width="1.5"
-        stroke="black"
         fill="transparent"
       />
 
@@ -249,7 +275,8 @@
   <circle cx="590" cy="680" r="3" stroke="none" fill="blue" />
  -->
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-1">
+      <circle class="normal" id="normal-1">
+        <set attributeName="visibility" to="visible" begin="0s" fill="freeze" />
         <animateMotion
           begin="0s"
           dur="10s"
@@ -261,7 +288,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-2">
+      <circle class="normal" id="normal-2">
+        <set attributeName="visibility" to="visible" begin="0.4s" fill="freeze" />
         <animateMotion
           begin="0.4s"
           dur="10s"
@@ -273,7 +301,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-3">
+      <circle class="normal" id="normal-3">
+        <set attributeName="visibility" to="visible" begin="1s" fill="freeze" />
         <animateMotion
           begin="1s"
           dur="10s"
@@ -285,7 +314,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-4">
+      <circle class="normal" id="normal-4">
+        <set attributeName="visibility" to="visible" begin="1.2s" fill="freeze" />
         <animateMotion
           begin="1.2s"
           dur="10s"
@@ -297,7 +327,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-5">
+      <circle class="normal" id="normal-5">
+        <set attributeName="visibility" to="visible" begin="1.4s" fill="freeze" />
         <animateMotion
           begin="1.4s"
           dur="10s"
@@ -309,7 +340,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-6">
+      <circle class="normal" id="normal-6">
+        <set attributeName="visibility" to="visible" begin="1.8s" fill="freeze" />
         <animateMotion
           begin="1.8s"
           dur="10s"
@@ -321,7 +353,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-7">
+      <circle class="normal" id="normal-7">
+        <set attributeName="visibility" to="visible" begin="2.1s" fill="freeze" />
         <animateMotion
           begin="2.1s"
           dur="10s"
@@ -333,7 +366,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-8">
+      <circle class="normal" id="normal-8">
+        <set attributeName="visibility" to="visible" begin="2.2s" fill="freeze" />
         <animateMotion
           begin="2.2s"
           dur="10s"
@@ -345,7 +379,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-9">
+      <circle class="normal" id="normal-9">
+        <set attributeName="visibility" to="visible" begin="2.8s" fill="freeze" />
         <animateMotion
           begin="2.8s"
           dur="10s"
@@ -357,7 +392,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-10">
+      <circle class="normal" id="normal-10">
+        <set attributeName="visibility" to="visible" begin="3.0s" fill="freeze" />
         <animateMotion
           begin="3.0s"
           dur="10s"
@@ -369,7 +405,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-11">
+      <circle class="normal" id="normal-11">
+        <set attributeName="visibility" to="visible" begin="3.2s" fill="freeze" />
         <animateMotion
           begin="3.2s"
           dur="10s"
@@ -381,7 +418,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-12">
+      <circle class="normal" id="normal-12">
+        <set attributeName="visibility" to="visible" begin="3.5s" fill="freeze" />
         <animateMotion
           begin="3.5s"
           dur="10s"
@@ -393,7 +431,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-13">
+      <circle class="normal" id="normal-13">
+        <set attributeName="visibility" to="visible" begin="4.0s" fill="freeze" />
         <animateMotion
           begin="4.0s"
           dur="10s"
@@ -405,7 +444,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-14">
+      <circle class="normal" id="normal-14">
+        <set attributeName="visibility" to="visible" begin="4.2s" fill="freeze" />
         <animateMotion
           begin="4.2s"
           dur="10s"
@@ -417,7 +457,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-15">
+      <circle class="normal" id="normal-15">
+        <set attributeName="visibility" to="visible" begin="4.65s" fill="freeze" />
         <animateMotion
           begin="4.65s"
           dur="10s"
@@ -429,7 +470,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-16">
+      <circle class="normal" id="normal-16">
+        <set attributeName="visibility" to="visible" begin="5.0s" fill="freeze" />
         <animateMotion
           begin="5.0s"
           dur="10s"
@@ -441,7 +483,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-17">
+      <circle class="normal" id="normal-17">
+        <set attributeName="visibility" to="visible" begin="5.15s" fill="freeze" />
         <animateMotion
           begin="5.15s"
           dur="10s"
@@ -453,7 +496,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-18">
+      <circle class="normal" id="normal-18">
+        <set attributeName="visibility" to="visible" begin="5.5s" fill="freeze" />
         <animateMotion
           begin="5.5s"
           dur="10s"
@@ -465,7 +509,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-19">
+      <circle class="normal" id="normal-19">
+        <set attributeName="visibility" to="visible" begin="5.9s" fill="freeze" />
         <animateMotion
           begin="5.9s"
           dur="10s"
@@ -477,7 +522,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-20">
+      <circle class="normal" id="normal-20">
+        <set attributeName="visibility" to="visible" begin="6.5s" fill="freeze" />
         <animateMotion
           begin="6.5s"
           dur="10s"
@@ -489,7 +535,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-21">
+      <circle class="normal" id="normal-21">
+        <set attributeName="visibility" to="visible" begin="6.8s" fill="freeze" />
         <animateMotion
           begin="6.8s"
           dur="10s"
@@ -501,7 +548,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-22">
+      <circle class="normal" id="normal-22">
+        <set attributeName="visibility" to="visible" begin="7.3s" fill="freeze" />
         <animateMotion
           begin="7.3s"
           dur="10s"
@@ -513,7 +561,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-23">
+      <circle class="normal" id="normal-23">
+        <set attributeName="visibility" to="visible" begin="7.4s" fill="freeze" />
         <animateMotion
           begin="7.4s"
           dur="10s"
@@ -525,7 +574,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-24">
+      <circle class="normal" id="normal-24">
+        <set attributeName="visibility" to="visible" begin="7.85s" fill="freeze" />
         <animateMotion
           begin="7.85s"
           dur="10s"
@@ -537,7 +587,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-25">
+      <circle class="normal" id="normal-25">
+        <set attributeName="visibility" to="visible" begin="8.1s" fill="freeze" />
         <animateMotion
           begin="8.1s"
           dur="10s"
@@ -549,7 +600,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-26">
+      <circle class="normal" id="normal-26">
+        <set attributeName="visibility" to="visible" begin="8.3s" fill="freeze" />
         <animateMotion
           begin="8.3s"
           dur="10s"
@@ -561,7 +613,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-27">
+      <circle class="normal" id="normal-27">
+        <set attributeName="visibility" to="visible" begin="8.8s" fill="freeze" />
         <animateMotion
           begin="8.8s"
           dur="10s"
@@ -573,7 +626,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-28">
+      <circle class="normal" id="normal-28">
+        <set attributeName="visibility" to="visible" begin="9.0s" fill="freeze" />
         <animateMotion
           begin="9.0s"
           dur="10s"
@@ -585,7 +639,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-29">
+      <circle class="normal" id="normal-29">
+        <set attributeName="visibility" to="visible" begin="9.1s" fill="freeze" />
         <animateMotion
           begin="9.1s"
           dur="10s"
@@ -597,7 +652,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="lightblue" stroke="lightgrey" id="normal-30">
+      <circle class="normal" id="normal-30">
+        <set attributeName="visibility" to="visible" begin="9.7s" fill="freeze" />
         <animateMotion
           begin="9.7s"
           dur="10s"
@@ -609,7 +665,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="darkblue" stroke="grey" id="slow-1">
+      <circle class="slow" stroke="grey" id="slow-1">
+        <set attributeName="visibility" to="visible" begin="0.3s" fill="freeze" />
         <animateMotion
           begin="0.3s"
           dur="20s"
@@ -621,7 +678,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="darkblue" stroke="grey" id="slow-2">
+      <circle class="slow" id="slow-2">
+        <set attributeName="visibility" to="visible" begin="1.4s" fill="freeze" />
         <animateMotion
           begin="1.4s"
           dur="20s"
@@ -633,7 +691,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="darkblue" stroke="grey" id="slow-3">
+      <circle class="slow" id="slow-3">
+        <set attributeName="visibility" to="visible" begin="2.5s" fill="freeze" />
         <animateMotion
           begin="2.5s"
           dur="20s"
@@ -645,7 +704,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="darkblue" stroke="grey" id="slow-4">
+      <circle class="slow" id="slow-4">
+        <set attributeName="visibility" to="visible" begin="4.5s" fill="freeze" />
         <animateMotion
           begin="4.5s"
           dur="20s"
@@ -657,7 +717,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="darkblue" stroke="grey" id="slow-5">
+      <circle class="slow" id="slow-5">
+        <set attributeName="visibility" to="visible" begin="6.2s" fill="freeze" />
         <animateMotion
           begin="6.2s"
           dur="20s"
@@ -669,7 +730,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="darkblue" stroke="grey" id="slow-6">
+      <circle class="slow" id="slow-6">
+        <set attributeName="visibility" to="visible" begin="7.5s" fill="freeze" />
         <animateMotion
           begin="7.5s"
           dur="20s"
@@ -681,7 +743,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="darkblue" stroke="grey" id="slow-7">
+      <circle class="slow" id="slow-7">
+        <set attributeName="visibility" to="visible" begin="7.9s" fill="freeze" />
         <animateMotion
           begin="7.9s"
           dur="20s"
@@ -693,7 +756,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="darkblue" stroke="grey" id="slow-8">
+      <circle class="slow" id="slow-8">
+        <set attributeName="visibility" to="visible" begin="8.5s" fill="freeze" />
         <animateMotion
           begin="8.5s"
           dur="20s"
@@ -705,7 +769,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="darkblue" stroke="grey" id="slow-9">
+      <circle class="slow" id="slow-9">
+        <set attributeName="visibility" to="visible" begin="9.9s" fill="freeze" />
         <animateMotion
           begin="9.9s"
           dur="20s"
@@ -717,7 +782,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="darkblue" stroke="grey" id="slow-10">
+      <circle class="slow" id="slow-10">
+        <set attributeName="visibility" to="visible" begin="10.5s" fill="freeze" />
         <animateMotion
           begin="10.5s"
           dur="20s"
@@ -729,7 +795,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="darkblue" stroke="grey" id="slow-11">
+      <circle class="slow" id="slow-11">
+        <set attributeName="visibility" to="visible" begin="11.5s" fill="freeze" />
         <animateMotion
           begin="11.5s"
           dur="20s"
@@ -741,7 +808,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="darkblue" stroke="grey" id="slow-12">
+      <circle class="slow" id="slow-12">
+        <set attributeName="visibility" to="visible" begin="12.9s" fill="freeze" />
         <animateMotion
           begin="12.9s"
           dur="20s"
@@ -753,7 +821,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="darkblue" stroke="grey" id="slow-13">
+      <circle class="slow" id="slow-13">
+        <set attributeName="visibility" to="visible" begin="14.5s" fill="freeze" />
         <animateMotion
           begin="14.5s"
           dur="20s"
@@ -765,7 +834,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="darkblue" stroke="grey" id="slow-14">
+      <circle class="slow" id="slow-14">
+        <set attributeName="visibility" to="visible" begin="16.4s" fill="freeze" />
         <animateMotion
           begin="16.4s"
           dur="20s"
@@ -777,7 +847,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="darkblue" stroke="grey" id="slow-15">
+      <circle class="slow" id="slow-15">
+        <set attributeName="visibility" to="visible" begin="17.2s" fill="freeze" />
         <animateMotion
           begin="17.2s"
           dur="20s"
@@ -789,7 +860,8 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="darkblue" stroke="grey" id="slow-16">
+      <circle class="slow" id="slow-16">
+        <set attributeName="visibility" to="visible" begin="19.2s" fill="freeze" />
         <animateMotion
           begin="19.2s"
           dur="20s"
@@ -801,7 +873,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="white" stroke="grey" id="speed-1">
+      <circle class="speed" id="speed-1">
+        <set attributeName="visibility" to="visible" begin="10s" />
+        <set attributeName="visibility" to="hidden" begin="13s" fill="freeze" />
         <animateMotion
           id="op"
           begin="10s"
@@ -814,7 +888,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="white" stroke="grey" id="speed-2">
+      <circle class="speed" id="speed-2">
+        <set attributeName="visibility" to="visible" begin="30s" />
+        <set attributeName="visibility" to="hidden" begin="33s" fill="freeze" />
         <animateMotion
           id="op"
           begin="30s"
@@ -827,7 +903,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="white" stroke="grey" id="speed-3">
+      <circle class="speed" id="speed-3">
+        <set attributeName="visibility" to="visible" begin="60s" />
+        <set attributeName="visibility" to="hidden" begin="63s" fill="freeze" />
         <animateMotion
           id="op"
           begin="60s"
@@ -840,7 +918,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="white" stroke="grey" id="speed-4">
+      <circle class="speed" id="speed-4">
+        <set attributeName="visibility" to="visible" begin="90s" />
+        <set attributeName="visibility" to="hidden" begin="93s" fill="freeze" />
         <animateMotion
           id="op"
           begin="90s"
@@ -853,7 +933,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="white" stroke="grey" id="speed-5">
+      <circle class="speed" id="speed-5">
+        <set attributeName="visibility" to="visible" begin="120s" />
+        <set attributeName="visibility" to="hidden" begin="123s" fill="freeze" />
         <animateMotion
           id="op"
           begin="120s"
@@ -866,7 +948,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="white" stroke="grey" id="speed-6">
+      <circle class="speed" id="speed-6">
+        <set attributeName="visibility" to="visible" begin="150s" />
+        <set attributeName="visibility" to="hidden" begin="153s" fill="freeze" />
         <animateMotion
           id="op"
           begin="150s"
@@ -879,7 +963,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="white" stroke="grey" id="speed-7">
+      <circle class="speed" id="speed-7">
+        <set attributeName="visibility" to="visible" begin="180s" />
+        <set attributeName="visibility" to="hidden" begin="183s" fill="freeze" />
         <animateMotion
           id="op"
           begin="180s"
@@ -892,7 +978,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="white" stroke="grey" id="speed-8">
+      <circle class="speed" id="speed-8">
+        <set attributeName="visibility" to="visible" begin="210s" />
+        <set attributeName="visibility" to="hidden" begin="213s" fill="freeze" />
         <animateMotion
           id="op"
           begin="210s"
@@ -905,7 +993,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="white" stroke="grey" id="speed-9">
+      <circle class="speed" id="speed-9">
+        <set attributeName="visibility" to="visible" begin="240s" />
+        <set attributeName="visibility" to="hidden" begin="243s" fill="freeze" />
         <animateMotion
           id="op"
           begin="240s"
@@ -918,7 +1008,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="white" stroke="grey" id="speed-10">
+      <circle class="speed" id="speed-10">
+        <set attributeName="visibility" to="visible" begin="270s" />
+        <set attributeName="visibility" to="hidden" begin="273s" fill="freeze" />
         <animateMotion
           id="op"
           begin="270s"
@@ -949,12 +1041,12 @@
         id="jira-circle"
       ></circle>
 
-      <circle
+      <!-- <circle
         cx="0"
         cy="0"
         r="8"
-        fill="white"
+        fill="yellow"
         stroke="none"
         id="hidden"
-      ></circle>
+      ></circle> -->
     </svg>
