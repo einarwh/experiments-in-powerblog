@@ -1,97 +1,57 @@
 <svg width="1080" height="600" xmlns="http://www.w3.org/2000/svg">
-      <style>
-        .axisname {
-          font: bold 18px Arial, Helvetica, sans-serif;
-        }
-        .phasename {
-          font: 12px Arial, Helvetica, sans-serif;
-          fill: grey;
-        }
-        .spring {
-          font: 24px Arial, Helvetica, sans-serif;
-          fill: green;
-        }
-        .winter {
-          font: 24px Arial, Helvetica, sans-serif;
-          fill: lightgrey;
-        }
-      </style>
+  <style>
+    .spring {
+      font: 24px Arial, Helvetica, sans-serif;
+      fill: #008000;
+    }
+    .winter {
+      font: 24px Arial, Helvetica, sans-serif;
+      fill: lightgrey;
+    }
+    .axisname {
+      font: bold 18px Arial, Helvetica, sans-serif;
+      fill: #000;
+    }
+    .phasename {
+      font: 12px Arial, Helvetica, sans-serif;
+      fill: #808080;
+    }
+    .axisline {
+      stroke: #CCC;
+      stroke-width: 1px;
+    }
+    .pathcurve { stroke: #000; }
+    .ai {
+      r: 5px;
+      fill: #008000;
+      stroke: #666;
+      visibility: hidden;
+    }
+    @media (prefers-color-scheme: dark) {
+      .spring { fill: #88E788;}
+      .winter { fill: #666;}
+      .axisname { fill: #FFF; }
+      .phasename { fill: #D3D3D3; }
+      .axisline {
+        stroke: #666;
+      }
+      .pathcurve { stroke: #fff; }
+      .ai { stroke: #CCC; fill: #88E788; }
+    }
+  </style>
+  
+  <!-- Horizontal lines -->
+  <line class="axisline" x1="60"  y1="10" x2="1020"  y2="10" />
+  <line class="axisline" x1="60" y1="472" x2="1020" y2="472" />
+  <line class="axisline" x1="60" y1="512" x2="1020" y2="512" />
 
-      <!-- Horizontal lines -->
-      <line
-        x1="60"
-        y1="10"
-        x2="1020"
-        y2="10"
-        stroke-width="1.5"
-        stroke="lightgrey"
-      />
-      <line
-        x1="60"
-        y1="472"
-        x2="1020"
-        y2="472"
-        stroke-width="1.5"
-        stroke="lightgrey"
-      />
-      <line
-        x1="60"
-        y1="512"
-        x2="1020"
-        y2="512"
-        stroke-width="1.5"
-        stroke="lightgrey"
-      />
-
-      <!-- Vertical lines -->
-      <line
-        x1="60"
-        y1="10"
-        x2="60"
-        y2="512"
-        stroke-width="1.5"
-        stroke="lightgrey"
-      />
-      <line
-        x1="306"
-        y1="10"
-        x2="306"
-        y2="472"
-        stroke-width="1.5"
-        stroke="lightgrey"
-      />
-      <line
-        x1="423"
-        y1="10"
-        x2="423"
-        y2="472"
-        stroke-width="1.5"
-        stroke="lightgrey"
-      />
-      <line
-        x1="593"
-        y1="10"
-        x2="593"
-        y2="472"
-        stroke-width="1.5"
-        stroke="lightgrey"
-      />
-      <line
-        x1="798"
-        y1="10"
-        x2="798"
-        y2="472"
-        stroke-width="1.5"
-        stroke="lightgrey"
-      />
-      <line
-        x1="1020"
-        y1="10"
-        x2="1020"
-        y2="512"
-        stroke-width="1.5"
-        stroke="lightgrey"
-      />
+  <!-- Vertical lines -->
+  <line class="axisline" x1="60"  y1="10" x2="60"  y2="512" />
+  <line class="axisline" x1="306" y1="10" x2="306" y2="472" />
+  <line class="axisline" x1="423" y1="10" x2="423" y2="472" />
+  <line class="axisline" x1="593" y1="10" x2="593" y2="472" />
+  <line class="axisline" x1="798" y1="10" x2="798" y2="472" />
+  <line class="axisline" x1="1020" y1="10" x2="1020" y2="512" />
 
       <!-- Text -->
       <text
@@ -186,10 +146,10 @@
 
       <!-- Curves -->
       <path
+        class="pathcurve"
         id="idealcurve"
         d="M 132 455 C 192 446, 230 290 244 240 C 265 150, 325 60 384 70 C 430 78, 438 198 442 240 C 447 276, 450 395 518 408 C 610 426, 660 342 698 316 C 764 260, 870 242 930 242"
         stroke-width="1.5"
-        stroke="black"
         fill="transparent"
       />
 
@@ -233,7 +193,9 @@
 
       <!-- Wave 1 -->
 
-      <circle r="5" fill="green" stroke="grey" id="ai-1-1">
+      <circle class="ai" id="ai-1-1">
+        <set attributeName="visibility" to="visible" begin="5s" />
+        <set attributeName="visibility" to="hidden" begin="8s" fill="freeze" />
         <animateMotion
           id="op"
           begin="5s"
@@ -246,7 +208,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-1-2">
+      <circle class="ai" id="ai-1-2">
+        <set attributeName="visibility" to="visible" begin="5.3s" />
+        <set attributeName="visibility" to="hidden" begin="8.3s" fill="freeze" />
         <animateMotion
           id="op"
           begin="5.3s"
@@ -259,7 +223,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-1-3">
+      <circle class="ai" id="ai-1-3">
+        <set attributeName="visibility" to="visible" begin="5.4s" />
+        <set attributeName="visibility" to="hidden" begin="8.4s" fill="freeze" />
         <animateMotion
           id="op"
           begin="5.4s"
@@ -272,7 +238,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-1-4">
+      <circle class="ai" id="ai-1-4">
+        <set attributeName="visibility" to="visible" begin="5.5s" />
+        <set attributeName="visibility" to="hidden" begin="8.5s" fill="freeze" />
         <animateMotion
           id="op"
           begin="5.5s"
@@ -285,7 +253,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-1-5">
+      <circle class="ai" id="ai-1-5">
+        <set attributeName="visibility" to="visible" begin="5.7s" />
+        <set attributeName="visibility" to="hidden" begin="8.7s" fill="freeze" />
         <animateMotion
           id="op"
           begin="5.7s"
@@ -298,7 +268,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-1-6">
+      <circle class="ai" id="ai-1-6">
+        <set attributeName="visibility" to="visible" begin="5.75s" />
+        <set attributeName="visibility" to="hidden" begin="8.75s" fill="freeze" />
         <animateMotion
           id="op"
           begin="5.75s"
@@ -311,7 +283,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-1-7">
+      <circle class="ai" id="ai-1-7">
+        <set attributeName="visibility" to="visible" begin="5.80s" />
+        <set attributeName="visibility" to="hidden" begin="8.80s" fill="freeze" />
         <animateMotion
           id="op"
           begin="5.80s"
@@ -324,7 +298,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-1-8">
+      <circle class="ai" id="ai-1-8">
+        <set attributeName="visibility" to="visible" begin="5.9s" />
+        <set attributeName="visibility" to="hidden" begin="8.9s" fill="freeze" />
         <animateMotion
           id="op"
           begin="5.9s"
@@ -337,7 +313,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-1-9">
+      <circle class="ai" id="ai-1-9">
+        <set attributeName="visibility" to="visible" begin="6.0s" />
+        <set attributeName="visibility" to="hidden" begin="9.0s" fill="freeze" />
         <animateMotion
           id="op"
           begin="6.0s"
@@ -352,7 +330,9 @@
 
       <!-- Wave 2 -->
 
-      <circle r="5" fill="green" stroke="grey" id="ai-2-1">
+      <circle class="ai" id="ai-2-1">
+        <set attributeName="visibility" to="visible" begin="20s" />
+        <set attributeName="visibility" to="hidden" begin="23s" fill="freeze" />
         <animateMotion
           id="op"
           begin="20s"
@@ -365,7 +345,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-2-2">
+      <circle class="ai" id="ai-2-2">
+        <set attributeName="visibility" to="visible" begin="20.2s" />
+        <set attributeName="visibility" to="hidden" begin="23.2s" fill="freeze" />
         <animateMotion
           id="op"
           begin="20.2s"
@@ -378,7 +360,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-2-3">
+      <circle class="ai" id="ai-2-3">
+        <set attributeName="visibility" to="visible" begin="20.35s" />
+        <set attributeName="visibility" to="hidden" begin="23.35s" fill="freeze" />
         <animateMotion
           id="op"
           begin="20.35s"
@@ -391,7 +375,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-2-4">
+      <circle class="ai" id="ai-2-4">
+        <set attributeName="visibility" to="visible" begin="20.5s" />
+        <set attributeName="visibility" to="hidden" begin="23.5s" fill="freeze" />
         <animateMotion
           id="op"
           begin="20.5s"
@@ -404,7 +390,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-2-5">
+      <circle class="ai" id="ai-2-5">
+        <set attributeName="visibility" to="visible" begin="20.6s" />
+        <set attributeName="visibility" to="hidden" begin="23.6s" fill="freeze" />
         <animateMotion
           id="op"
           begin="20.6s"
@@ -417,7 +405,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-2-6">
+      <circle class="ai" id="ai-2-6">
+        <set attributeName="visibility" to="visible" begin="20.75s" />
+        <set attributeName="visibility" to="hidden" begin="23.75s" fill="freeze" />
         <animateMotion
           id="op"
           begin="20.75s"
@@ -430,7 +420,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-2-7">
+      <circle class="ai" id="ai-2-7">
+        <set attributeName="visibility" to="visible" begin="20.82s" />
+        <set attributeName="visibility" to="hidden" begin="23.82s" fill="freeze" />
         <animateMotion
           id="op"
           begin="20.82s"
@@ -443,7 +435,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-2-8">
+      <circle class="ai" id="ai-2-8">
+        <set attributeName="visibility" to="visible" begin="20.95s" />
+        <set attributeName="visibility" to="hidden" begin="23.95s" fill="freeze" />
         <animateMotion
           id="op"
           begin="20.95s"
@@ -456,7 +450,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-2-9">
+      <circle class="ai" id="ai-2-9">
+        <set attributeName="visibility" to="visible" begin="21s" />
+        <set attributeName="visibility" to="hidden" begin="24s" fill="freeze" />
         <animateMotion
           id="op"
           begin="21.0s"
@@ -471,7 +467,9 @@
 
       <!-- Wave 3 -->
 
-      <circle r="5" fill="green" stroke="grey" id="ai-3-1">
+      <circle class="ai" id="ai-3-1">
+        <set attributeName="visibility" to="visible" begin="40s" />
+        <set attributeName="visibility" to="hidden" begin="43s" fill="freeze" />
         <animateMotion
           id="op"
           begin="40s"
@@ -484,7 +482,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-3-2">
+      <circle class="ai" id="ai-3-2">
+        <set attributeName="visibility" to="visible" begin="40.1s" />
+        <set attributeName="visibility" to="hidden" begin="43.1s" fill="freeze" />
         <animateMotion
           id="op"
           begin="40.1s"
@@ -497,7 +497,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-3-3">
+      <circle class="ai" id="ai-3-3">
+        <set attributeName="visibility" to="visible" begin="40.25s" />
+        <set attributeName="visibility" to="hidden" begin="43.25s" fill="freeze" />
         <animateMotion
           id="op"
           begin="40.25s"
@@ -510,7 +512,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-3-4">
+      <circle class="ai" id="ai-3-4">
+        <set attributeName="visibility" to="visible" begin="40.4s" />
+        <set attributeName="visibility" to="hidden" begin="43.4s" fill="freeze" />
         <animateMotion
           id="op"
           begin="40.4s"
@@ -523,7 +527,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-3-5">
+      <circle class="ai" id="ai-3-5">
+        <set attributeName="visibility" to="visible" begin="40.6s" />
+        <set attributeName="visibility" to="hidden" begin="43.6s" fill="freeze" />
         <animateMotion
           id="op"
           begin="40.6s"
@@ -536,7 +542,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-3-6">
+      <circle class="ai" id="ai-3-6">
+        <set attributeName="visibility" to="visible" begin="40.72s" />
+        <set attributeName="visibility" to="hidden" begin="43.72s" fill="freeze" />
         <animateMotion
           id="op"
           begin="40.72s"
@@ -549,7 +557,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-3-7">
+      <circle class="ai" id="ai-3-7">
+        <set attributeName="visibility" to="visible" begin="40.80s" />
+        <set attributeName="visibility" to="hidden" begin="43.80s" fill="freeze" />
         <animateMotion
           id="op"
           begin="40.80s"
@@ -562,7 +572,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-3-8">
+      <circle class="ai" id="ai-3-8">
+        <set attributeName="visibility" to="visible" begin="40.88s" />
+        <set attributeName="visibility" to="hidden" begin="43.88s" fill="freeze" />
         <animateMotion
           id="op"
           begin="40.88s"
@@ -575,7 +587,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-3-9">
+      <circle class="ai" id="ai-3-9">
+        <set attributeName="visibility" to="visible" begin="41.0s" />
+        <set attributeName="visibility" to="hidden" begin="44.0s" fill="freeze" />
         <animateMotion
           id="op"
           begin="41.0s"
@@ -590,7 +604,9 @@
 
       <!-- Wave 4 -->
 
-      <circle r="5" fill="green" stroke="grey" id="ai-4-1">
+      <circle class="ai" id="ai-4-1">
+        <set attributeName="visibility" to="visible" begin="60s" />
+        <set attributeName="visibility" to="hidden" begin="63s" fill="freeze" />
         <animateMotion
           id="op"
           begin="60s"
@@ -603,7 +619,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-4-2">
+      <circle class="ai" id="ai-4-2">
+        <set attributeName="visibility" to="visible" begin="60.3s" />
+        <set attributeName="visibility" to="hidden" begin="63.3s" fill="freeze" />
         <animateMotion
           id="op"
           begin="60.3s"
@@ -616,7 +634,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-4-3">
+      <circle class="ai" id="ai-4-3">
+        <set attributeName="visibility" to="visible" begin="60.4s" />
+        <set attributeName="visibility" to="hidden" begin="63.4s" fill="freeze" />
         <animateMotion
           id="op"
           begin="60.4s"
@@ -629,7 +649,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-4-4">
+      <circle class="ai" id="ai-4-4">
+        <set attributeName="visibility" to="visible" begin="60.5s" />
+        <set attributeName="visibility" to="hidden" begin="63.5s" fill="freeze" />
         <animateMotion
           id="op"
           begin="60.5s"
@@ -642,7 +664,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-4-5">
+      <circle class="ai" id="ai-4-5">
+        <set attributeName="visibility" to="visible" begin="60.7s" />
+        <set attributeName="visibility" to="hidden" begin="63.7s" fill="freeze" />
         <animateMotion
           id="op"
           begin="60.7s"
@@ -655,7 +679,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-4-6">
+      <circle class="ai" id="ai-4-6">
+        <set attributeName="visibility" to="visible" begin="60.75s" />
+        <set attributeName="visibility" to="hidden" begin="63.75s" fill="freeze" />
         <animateMotion
           id="op"
           begin="60.75s"
@@ -668,7 +694,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-4-7">
+      <circle class="ai" id="ai-4-7">
+        <set attributeName="visibility" to="visible" begin="60.80s" />
+        <set attributeName="visibility" to="hidden" begin="63.80s" fill="freeze" />
         <animateMotion
           id="op"
           begin="60.80s"
@@ -681,7 +709,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-4-8">
+      <circle class="ai" id="ai-4-8">
+        <set attributeName="visibility" to="visible" begin="60.90s" />
+        <set attributeName="visibility" to="hidden" begin="63.90s" fill="freeze" />
         <animateMotion
           id="op"
           begin="60.9s"
@@ -694,7 +724,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-4-9">
+      <circle class="ai" id="ai-4-9">
+        <set attributeName="visibility" to="visible" begin="61s" />
+        <set attributeName="visibility" to="hidden" begin="64s" fill="freeze" />
         <animateMotion
           id="op"
           begin="61.0s"
@@ -708,7 +740,9 @@
       </circle>
 
       <!-- Wave 5 -->
-      <circle r="5" fill="green" stroke="grey" id="ai-5-1">
+      <circle class="ai" id="ai-5-1">
+        <set attributeName="visibility" to="visible" begin="80s" />
+        <set attributeName="visibility" to="hidden" begin="83s" fill="freeze" />
         <animateMotion
           id="op"
           begin="80s"
@@ -721,7 +755,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-5-2">
+      <circle class="ai" id="ai-5-2">
+        <set attributeName="visibility" to="visible" begin="80.2s" />
+        <set attributeName="visibility" to="hidden" begin="83.2s" fill="freeze" />
         <animateMotion
           id="op"
           begin="80.2s"
@@ -734,7 +770,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-5-3">
+      <circle class="ai" id="ai-5-3">
+        <set attributeName="visibility" to="visible" begin="80.35s" />
+        <set attributeName="visibility" to="hidden" begin="83.35s" fill="freeze" />
         <animateMotion
           id="op"
           begin="80.35s"
@@ -747,7 +785,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-5-4">
+      <circle class="ai" id="ai-5-4">
+        <set attributeName="visibility" to="visible" begin="80.5s" />
+        <set attributeName="visibility" to="hidden" begin="83.5s" fill="freeze" />
         <animateMotion
           id="op"
           begin="80.5s"
@@ -760,7 +800,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-5-5">
+      <circle class="ai" id="ai-5-5">
+        <set attributeName="visibility" to="visible" begin="80.6s" />
+        <set attributeName="visibility" to="hidden" begin="83.6s" fill="freeze" />
         <animateMotion
           id="op"
           begin="80.6s"
@@ -773,7 +815,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-5-6">
+      <circle class="ai" id="ai-5-6">
+        <set attributeName="visibility" to="visible" begin="80.75s" />
+        <set attributeName="visibility" to="hidden" begin="83.75s" fill="freeze" />
         <animateMotion
           id="op"
           begin="80.75s"
@@ -786,7 +830,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-5-7">
+      <circle class="ai" id="ai-5-7">
+        <set attributeName="visibility" to="visible" begin="80.82s" />
+        <set attributeName="visibility" to="hidden" begin="83.82s" fill="freeze" />
         <animateMotion
           id="op"
           begin="80.82s"
@@ -799,7 +845,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-5-8">
+      <circle class="ai" id="ai-5-8">
+        <set attributeName="visibility" to="visible" begin="80.95s" />
+        <set attributeName="visibility" to="hidden" begin="83.95s" fill="freeze" />
         <animateMotion
           id="op"
           begin="80.95s"
@@ -812,7 +860,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-5-9">
+      <circle class="ai" id="ai-5-9">
+        <set attributeName="visibility" to="visible" begin="81s" />
+        <set attributeName="visibility" to="hidden" begin="84s" fill="freeze" />
         <animateMotion
           id="op"
           begin="81.0s"
@@ -826,7 +876,9 @@
       </circle>
 
       <!-- Wave 6 -->
-      <circle r="5" fill="green" stroke="grey" id="ai-6-1">
+      <circle class="ai" id="ai-6-1">
+        <set attributeName="visibility" to="visible" begin="100s" />
+        <set attributeName="visibility" to="hidden" begin="103s" fill="freeze" />
         <animateMotion
           id="op"
           begin="100s"
@@ -839,7 +891,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-6-2">
+      <circle class="ai" id="ai-6-2">
+        <set attributeName="visibility" to="visible" begin="100.1s" />
+        <set attributeName="visibility" to="hidden" begin="103.1s" fill="freeze" />
         <animateMotion
           id="op"
           begin="100.1s"
@@ -852,7 +906,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-6-3">
+      <circle class="ai" id="ai-6-3">
+        <set attributeName="visibility" to="visible" begin="100.25s" />
+        <set attributeName="visibility" to="hidden" begin="103.25s" fill="freeze" />
         <animateMotion
           id="op"
           begin="100.25s"
@@ -865,7 +921,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-6-4">
+      <circle class="ai" id="ai-6-4">
+        <set attributeName="visibility" to="visible" begin="100.4s" />
+        <set attributeName="visibility" to="hidden" begin="103.4s" fill="freeze" />
         <animateMotion
           id="op"
           begin="100.4s"
@@ -878,7 +936,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-6-5">
+      <circle class="ai" id="ai-6-5">
+        <set attributeName="visibility" to="visible" begin="100.6s" />
+        <set attributeName="visibility" to="hidden" begin="103.6s" fill="freeze" />
         <animateMotion
           id="op"
           begin="100.6s"
@@ -891,7 +951,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-6-6">
+      <circle class="ai" id="ai-6-6">
+        <set attributeName="visibility" to="visible" begin="100.72s" />
+        <set attributeName="visibility" to="hidden" begin="103.72s" fill="freeze" />
         <animateMotion
           id="op"
           begin="100.72s"
@@ -904,7 +966,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-6-7">
+      <circle class="ai" id="ai-6-7">
+        <set attributeName="visibility" to="visible" begin="100.80s" />
+        <set attributeName="visibility" to="hidden" begin="103.80s" fill="freeze" />
         <animateMotion
           id="op"
           begin="100.80s"
@@ -917,7 +981,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-6-8">
+      <circle class="ai" id="ai-6-8">
+        <set attributeName="visibility" to="visible" begin="100.88s" />
+        <set attributeName="visibility" to="hidden" begin="103.88s" fill="freeze" />
         <animateMotion
           id="op"
           begin="100.88s"
@@ -930,7 +996,9 @@
         </animateMotion>
       </circle>
 
-      <circle r="5" fill="green" stroke="grey" id="ai-6-9">
+      <circle class="ai" id="ai-6-9">
+        <set attributeName="visibility" to="visible" begin="101.0s" />
+        <set attributeName="visibility" to="hidden" begin="104.0s" fill="freeze" />
         <animateMotion
           id="op"
           begin="101.0s"
@@ -943,12 +1011,4 @@
         </animateMotion>
       </circle>
 
-      <circle
-        cx="0"
-        cy="0"
-        r="8"
-        fill="white"
-        stroke="none"
-        id="hidden"
-      ></circle>
 </svg>
