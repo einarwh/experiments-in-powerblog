@@ -10,26 +10,17 @@
 
 <p class="blog-post-date">February 9, 2026</p>
 
-Many people use JSON documents for persistence, whether in a key-value store of some sort, or simply as a blob that happens to contain structured data. A benefit of this approach is that it is _schemaless_, as opposed to the rigid structures typically imposed by relational databases. This allows the documents to evolve seamlessly with the application - properties can be added, changed, or removed at will.
+Many people use JSON documents for persistence, whether in a key-value store of some sort, or simply as a blob that happens to contain structured data. 
 
-Example:
+A much-touted benefit of this approach is that it is _schemaless_, as opposed to the rigid structures typically imposed by relational databases. This allows the documents to evolve seamlessly with the application - properties can be added, changed, or removed at will.
 
-Say I have a JSON document representing something sad and enterprisey, like a customer.
+The main drawback is that it is _schemaless_, and that over the lifetime of the application, properties will have been added, changed or removed. This can be problematic, because while the exact structure of the JSON documents can vary, the application typically has a single interpretation of all them all. JSON is a serialization format, after all.
 
-``````json
-{
-  "username": "john",
-  "email": "john.doe@foomail.com",
-  "age": 27,
-}```
+In a statically typed language, the value will typically be represented by some _type_ when it is involved in anything interesting. When the interesting work is done, we serialize the value into JSON to persist it. As such, a JSON document is a value put on hold, halted at some particular point in time.  
 
-The main drawback is that it is schemaless, and that over the lifetime of the application, properties will have been added, changed or removed. This can be problematic, because while the exact structure of the JSON documents can vary, the application typically has a single interpretation of all them all. JSON is a serialization format, after all.
+Later, when we want to work with the value again, we deserialize it back into an instance of a type again. But types, alas, can moving targets. They may be great contracts for a single point in time, but as we all know, the defining feature of time is that it passes. As it does, the type faces a conundrum. Should it stand still - which is what good contracts do - or go with the flow? Most chose the latter. In most applications, the type only exists in its latest incarnation. Whereas for the halted values, the serialized JSON? That may be a different matter entirely. It may very well be that our JSON document was serialized from an instance of type T, and now we try to deserialize it into an instance of a slightly different type T'.
 
-In a statically typed language, the data will typically be represented by some _type_. When we persist the value, we serialize it into JSON. And when we want to work with the data again, we deserialize it back into an instance of that type. But types, alas, can moving targets. They may be great contracts for a single point in time, but across time, they become more problematic. In most applications, the type only exists in its latest incarnation, whereas the serialized JSON? That may be a different matter entirely. It may very well be that our JSON document was serialized from an instance of T0, and now we try to deserialize it into an instance of T1.
-
-It is here we pay the potential cost of the free-wheeling evolution of the data in our application. We discover that schemaless isn't _really_ schemaless - it means that the schema is implied rather than explicit. Lacking an explicit schema, it is the type that acts as the deserialization target that substitutes as schema. Sometimes this leads to unpleasant surprises. One bad outcome is that deserialization fails outright, and we find that we may have to migrate some data after all. Another is that deserialization succeeds, but the deserialized instance violates some assumption we have about the data. This is the realm of _null_. Deserializing may work, but dereferencing may not.
-
-For instance, our JSON document may have been the result of serializing an instance of a class Customer that looked like this:
+For instance, say we have a class representing something sad and enterprisey, like a customer. In its original conception, at time t<sub>0</sub>, it may look something like this.
 
 ```csharp
 class Customer
@@ -37,9 +28,22 @@ class Customer
     public string UserName { get; set; }
     public string Email { get; set; }
     public int Age { get; set; }
-}```
+}
+```
 
-Our application evolves, and we decide to add a new property to this class. It is a display name that the customer is free to change at will. So now the class looks like this.
+For a particular customer value, that we may colloquially refer as "John", this will yield the following JSON when serialized: 
+
+```json
+{
+    "userName": "john", 
+    "email": "john.doe@foomail.com", 
+    "age": 33
+}
+```
+
+So far so good. I am sure you are familiar with this process. 
+
+Now assume that time passes and that our application evolves, as applications are wont to do. At this new point in time, t<sub>2</sub>, we decide to add a new property to this class. It is a _display name_ that the customer is free to change at will! So now the class looks like this.
 
 ```csharp
 class Customer
@@ -48,25 +52,45 @@ class Customer
     public string DisplayName { get; set; }
     public string Email { get; set; }
     public int Age { get; set; }
-}```
+}
+```
 
 We persist new values of this type, yielding JSON documents like this.
 
-`````json
+```json
 {
-  "username": "jane",
-  "displayName": "Jane D'oh",
-  "email": "jane.doh@quuxmail.com",
-  "age": 25
-}```
+    "userName": "jane", 
+    "displayName": "Jane D'oh",
+    "email": "jane.doh@quuxpost.org", 
+    "age": 44
+}
+```
 
-We make sure that display name is always set to a value, because after all, null is the bane of existence.
+When we create new customer objects, we make sure that display name is always set to a value, because after all, null is the bane of existence. 
 
-Now what happens when we deserialize the `john` document back into an instance of Customer? Well, chances are that the deserialization library we use will blithely accept the document, translating the fact that _displayName_ is undefined into a null value. Oops?
+But what about John? That is, what happens when we take the first JSON document and attempt to deserialize it into an instance of the second class? We are taking a value created at t<sub>1</sub> and try to make it conform to the expectations of t<sub>2</sub>. Is that OK?
 
-But maybe it's not a big problem! Maybe things work just fine. At least for a while! There may be some delay before we discover that everything is not well. Say our UX component gladly rendered null as an empty string. But then someone found out that it would look better to uppercase the display name before rendering it, and now suddenly we are dereferencing null. Oops!
+Well, chances are that the deserialization library we use will blithely accept the document, translating the fact that _displayName_ is undefined into a null value. So the deserialization is likely to succeed, unless you do something to prevent that. But the serialization library will have made a silent translation based on an assumption, and you will have a null in your application. And after all, null is the bane of existence. 
 
-How do we fix this? One way is to introduce a proper, explicit schema: we associate each JSON document with a JSON Schema. When we want to augment the customer data, we introduce a new version of the customer schema. But all the old values are still associated with the original schema. So now we can distinguish between the expectations we have of john and jane.
+Is this really a problem though? Maybe not! Or at least maybe not immediately, at time t<sub>2</sub>, which is where we are right now. Maybe things work just fine at time t<sub>2</sub>. 
+
+But of course, time t<sub>2</sub> is not perpetuity. Time moves on, and t<sub>2</sub> will eventually be superceded by time t<sub>3</sub> and t<sub>4</sub>. Will things still work? It's hard to tell. We may not run into trouble ever, or there may simply be some delay before shit hits the fan. For instance, it may be that our UX component gladly renders null as an empty string. But if at t<sub>3</sub>, someone decides that it would look better to uppercase the display name before rendering it, suddenly we are dereferencing null. Oops! 
+
+How do we avoid this? It's very annoying to have things that may suddenly blow up like that. In general, we don't want time bombs in our applications if we can avoid them.
+
+But before we start reaching for solutions, it's important to understand _why_ this happens. The problem is that the contract moved but the value stood still! 
+
+In other words, it is here we pay the cost of the free-wheeling evolution of the data in our application. We discover that schemaless isn't _really_ schemaless - it just means that the schema is implied rather than explicit. Lacking an explicit schema, it is the type that is forced to take on the role as schema. But it's ill equipped to do so, since the type represents a single point in time, whereas the JSON documents - the arrested values - will be spread out in time. Sometimes this can lead to unpleasant surprises. 
+
+One bad outcome is that deserialization fails outright, and we find that we may have to migrate some data after all. Another, more insiduous, is that deserializing may work, but dereferencing may not. This was the case in our example.
+
+One way to fix this problem is to introduce a proper, explicit schema for our JSON documents. We will associate each JSON document with a JSON Schema. 
+
+The original schema for customer values may look something like this:
+
+
+
+When we want to augment the customer data, we introduce a new version of the corresponding schema. But all the old values are still associated with the original schema. This is great, because it means we can distinguish between the expectations we have of John and Jane. If we want to consolidate those expectations, e.g. by making the John document conform to the Jane schema, we will have to amend the document through some migration process.
 
 Yes, I know what you're thinking. This puts us in the hilarious situation of having "schemaless persistance, but also btw here is the schema". There are a number of benefits to this "bring your own schema" approach though. We retain most of the flexibility of the schemaless approach. We can evolve the schema without immediately migrating data unless we want to. We are not confined to a single schema at a time. At the same time we have a proper contract for our documents, which tells us whether or not they are valid.
 
