@@ -88,7 +88,34 @@ One way to fix this problem is to introduce a proper, explicit schema for our JS
 
 The original schema for customer values may look something like this:
 
-
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "/cat/schema-20260310.json",
+  "title": "Cat",
+  "description": "Validation schema for cat blobs.",
+  "type": "object",
+  "required": ["name", "age", "miceCaught", "espressosSpilled"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "age": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "miceCaught": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "espressosSpilled": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}
+```
 
 When we want to augment the customer data, we introduce a new version of the corresponding schema. But all the old values are still associated with the original schema. This is great, because it means we can distinguish between the expectations we have of John and Jane. If we want to consolidate those expectations, e.g. by making the John document conform to the Jane schema, we will have to amend the document through some migration process.
 
