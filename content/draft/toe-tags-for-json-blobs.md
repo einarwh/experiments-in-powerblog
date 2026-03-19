@@ -80,9 +80,9 @@ How do we associcate our JSON documents with the appropriate schema? This brings
 
 Rule: "no bodies in the morgue without a toe tag".
 
-There are two main approaches. Either the association is external to the JSON document, or it is internal, that is, embedded _within_ the document. Each approach has some pros and cons, and each can be done in more than one way.
+There are two main approaches. Either the association is external to the JSON document, that is, outside the document somewhere, or it is internal, that is, embedded within the document. Each approach has some pros and cons, and each can be done in more than one way.
 
-Keeping the link between the document, the schema and the validation external to the document has the benefit that it is very clean, very decoupled, very flexible. We can even pull out the fancy and honorary designation _orthogonal_. I call this the ledger approach. Tying a tag to the document's toe isn't the right metaphor for this. It's more like maintaining a ledger, a log where you list the names of documents and the results of validating them against schemas.
+Keeping the link (between the document, the schema and the validation) external to the document has the benefit that it is very clean, very decoupled, very flexible. We can even pull out the fancy and honorary designation _orthogonal_ to describe how the document and its contract relate to each other. I call this the ledger approach, because tying a tag to the document's toe isn't the right metaphor for this. It's more like maintaining a ledger, a log where you list the names of documents and the results of validating them against schemas.
 
 Example: what a ledger may look like
 Blob-ID | Schema | Validation Result
