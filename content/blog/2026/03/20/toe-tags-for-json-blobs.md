@@ -12,7 +12,7 @@ How do we deal with schemaless JSON documents in applications that continually e
 
 # Toe tags for JSON blobs
 
-<p class="blog-post-date">February 9, 2026</p>
+<p class="blog-post-date">March 20, 2026</p>
 
 Many people use JSON documents for persistence, whether in a key-value store of some sort, or simply as a blob that happens to contain structured data. 
 
@@ -201,16 +201,13 @@ public string Serialize(Customer customer, string schemaName)
 
 Here I'm using System.Text.Json for serialization and JsonSchema.Net for validation. There may be more clever and performant ways of doing this, by integrating more tightly with the serializer library. But this is easy to understand and suffices to illustrate the point. 
 
-// TODO: Maybe include the part about deserialization here? 
-// TODO: How does this solve the time gap?
+Maybe you feel that we're done now. Maybe you feel that including the link to the schema is enough, and it could be. But how do you know if the document conforms to the schema or not? You don't necessarily. 
 
-Maybe you feel that including the link to the schema is enough, and it could be. But how do you know if the document conforms to the schema or not? You don't necessarily. 
-
-But you could know it indirectly. If you always perform a schema validation whenever you serialize a value into JSON, you could in choose to _reject_ any JSON documents that failed validation. That way, the very presence of the document means that it is valid! But this is a pretty radical approach, and may not be what you want. Operations will be interrupted. You will need to log it as en error and figure out what went wrong. Data will be lost, because it won't be persisted. This may be unacceptable, in particular since this is a problem that occurs during serialization. Your application already accepted the value into its midst. If the value was unacceptable somehow, the application should have rejected it earlier and allowed for correction. 
+You could know it indirectly. If you always perform a schema validation whenever you serialize a value into JSON, you could in choose to _reject_ any JSON documents that failed validation. That way, the very presence of the document means that it is valid! But this is a pretty radical approach, and may not be what you want. Operations will be interrupted. You will need to log it as en error and figure out what went wrong. Data will be lost, because it won't be persisted. This may be unacceptable, in particular since this is a problem that occurs during serialization. Your application already accepted the value into its midst. If the value was unacceptable somehow, the application should have rejected it earlier and allowed for correction. 
 
 A gentler approach is to accept the document, but to mark it as invalid. That would require you to scribble more stuff on the toe tag so to speak. That is, you would need to explicitly state the result of the validation. The simplest version would be to include a boolean flag in the document. I suggest adding a little bit more while you're at it. Since different tools may have slightly different interpretations of the JSON Schema standard, it makes sense to include the name of the tool that was used for validation. 
 
-To add this extra bit of metadata, I have to extend my Serialize method a little bit. 
+To add this extra bit of metadata, we have to extend the Serialize method a little bit. 
 
 ```csharp
 public string Serialize(Customer customer, string schemaName, JsonSchema schema)
@@ -234,7 +231,7 @@ public string Serialize(Customer customer, string schemaName, JsonSchema schema)
 }
 ```
 
-This yields the following JSON document. 
+This yields the following JSON document:
 
 ```json
 {
@@ -250,12 +247,12 @@ This yields the following JSON document.
 }
 ```
 
-This is nice, because it gives me all I need to reproduce the validation result if I should want to. (Omitting the fact that you can pass various evaluation options to the validation tool.)
+This is nice, because it gives me all we need to reproduce the validation result if we should want to. (Omitting the fact that you can pass various evaluation options to the validation tool.)
 
 But ok, what have we gained by this? We have attached a toe tag to the JSON document. Does this solve our original problem with the time gap between the serialized value and the type acting as deserialization target? No! It solves nothing on its own. We are just being explicit and keeping notes. When it's time to resuscitate John from his deep slumber, we still have to deal with the time gap, the fact that the world has moved ahead while John was in limbo. 
 
 So how should we deal with it? There are two obvious solutions. 
 
-We could of course perform a migration whenever we introduce a new version of the contract. This is a process that is out-of-band to the application. But that is a little bit cumbersome, even worrisome, because when should we run that process, and what happens while it is running? How should we synchronize it with the deployment of our application?
+We could of course perform a migration of JSON documents whenever we introduce a new version of the contract. This is a process that is out-of-band to the application. But that is a little bit cumbersome, even worrisome, because when should we run that process, and what happens while it is running? How should we synchronize it with the deployment of our application? 
 
 The alternative is to handle the data migration just-in-time for each JSON document. After all, it is when John leaves the morgue that he will have to face the new reality. That's when the leap must be made from t<sub>0</sub> to t<sub>1</sub> (or later, if John has been dormant for a long time). John will have to go through a series of transformations, typically involving being outfitted with suitable default values for new properties, or mappings of old ones to new ones. Then he will be ready to face life in the here and now again! And when it's time to go back to sleep, he will of course be serialized according to the latest version of the contract, since he will be a modern customer, good as new. 
