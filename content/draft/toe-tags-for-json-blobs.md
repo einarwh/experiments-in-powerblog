@@ -18,7 +18,7 @@ The main drawback is that it is _schemaless_, and that over the lifetime of the 
 
 In a statically typed language, the value will typically be represented by some _type_ when it is involved in anything interesting. When the interesting work is done, we serialize the value into JSON to persist it. As such, a JSON document is a value put on hold, halted at some particular point in time. (JSON is a serialization format, after all.) 
 
-Later, when we want to work with the value again, we deserialize it back into an instance of a type again. But types, alas, can moving targets. They may be great contracts for a single point in time, but as we all know, the defining feature of time is that it passes. As it does, the type faces a conundrum. Should it stand still - which is what good contracts do - or go with the flow? Most chose the latter. In most applications, the type only exists in its latest incarnation. But for the halted values, the serialized JSON, the situation may be differnt. It may very well be that our JSON document was serialized from an instance of type T, and now we try to deserialize it into an instance of a slightly different type T'.
+Later, when we want to work with the value again, we deserialize it back into an instance of a type again. But types, alas, can moving targets. They may be great contracts for a single point in time, but as we all know, the defining feature of time is that it passes. As it does, the type faces a conundrum. Should it stand still - which is what good contracts do - or go with the flow? Most chose the latter. In most applications, the type only exists in its latest incarnation. But for the halted values, the serialized JSON, the situation may be different. It may very well be that our JSON document was serialized from an instance of type T, and now we try to deserialize it into an instance of a slightly different type T'.
 
 For instance, say we have a class representing something sad and enterprisey, like a customer. In its original conception, at time t<sub>0</sub>, it may look something like this.
 
@@ -156,19 +156,17 @@ A caveat in the case of Azure Blob Storage is that the key names must be valid H
 
 I wonder what the appropriate metaphor for this is. It's not really a toe tag, and it's not quite a ledger. It is perhaps more like putting a sticker on the outside of each mortuary drawer. You know the typically stainless steel drawers where the bodies are kept at refrigerator temperature? You scribble whatever you want on the sticker, but you don't attach it to the body itself. Which means that when you when you inspect the body, you don't have the metadata. You have to go back to the drawer for that.
 
-What should we think of the drawer-sticker approach? The metadata is typically tightly coupled to a particular storage mechanism. This means that it's not easily portable. If you ever decide to move your JSON documents, you will have to perform some sort of separate migration of the metadata. Maybe you'll be able to map it onto some other storage-specific mechanism, or you will have to find some other solution, such as a ledger or a toe tag. As we have seen, there may also be somewhat arbitrary constraints on what you may write on the stickers. 
+What should we think of the drawer-sticker approach? The metadata is typically tightly coupled to a particular storage mechanism. This means that it's not easily portable. If you ever decide to move your JSON documents, you will have to perform some sort of separate migration of the metadata. In addition to moving the bodies themselves, you'll also have to peel the stickers off the drawers so to speak. Maybe you'll be able to map what was written on the stickers onto some other storage-specific mechanism, or you will have to find some other solution, such as a ledger or a toe tag. As we have seen, there may also be somewhat arbitrary constraints on what you may write on the stickers in the first place. 
 
-So much for the external approaches. 
+So much for the external approaches. The internal approach means that the association between the content of the JSON document and the schema used to validate it is put _inside the document itself_. Yes, yes, I can feel some of you recoiling in disgust, your sensitivies violated by this profane idea! Certainly this is less clean, less decoupled and less flexible than using a ledger. It's not orthogonal at all. Instead it _fuses_ the process of schema validation with the process of serialization! It _complects_ them, to use Rich Hickey's term. Surely this must be bad? And yet... this is my preferred approach. This is what I think of as the toe-tag approach.
 
-The internal approach means that the association between the content of the JSON document and the schema used to validate it is put _inside the document itself_. Yes, yes, I can feel some of you recoiling in disgust, your sensitivies violated! Certainly this is less clean, less decoupled and less flexible than using a ledger. It's not orthogonal at all. Instead it _fuses_ the process of schema validation with the process of serialization! It _complects_ them, to use Rich Hickey's term. Surely this must be bad? And yet... this is my preferred approach. This is what I think of as the toe-tag approach.
+As always, it is a matter of trade-offs and context. I am trading some purity and orthogonality that doesn't really _do_ much for me, with some tangible benefits that _do_ do something for me. When the link to the schema as well the result of validating against that schema is embedded within the document, they are always present. That makes the document entirely stand-alone. If I have the JSON document, I also know which schema it is supposed to satisfy, and whether or not it does. I don't even need to know where the JSON document has been stored. I can share a JSON document with you, and the information follows right along. This also means that it is trivial to move the JSON documents from one persistance store to another without losing anything.
 
-As always, it is a matter of trade-offs and context. I am trading some purity and orthogonality that doesn't really _do_ much for me, with some tangible benefits that _do_ do something for me. When the link to the schema and the validation result are embedded within the document, they are always present. That makes the document entirely stand-alone. If I have the JSON document, I also know which schema it is supposed to satisfy, and whether or not it does. I don't even need to know where the JSON document has been stored. You can share a JSON document with me, and the information follows right along. This also means that it is trivial to move the JSON documents from one persistance store to another without losing anything.
-
-I don't need any knowledge of ledgers. There are no logs to dig through, nothing to compare, combine or collate. I immediately know that this document with exactly this content has been validated against this schema. There is no comparing of timestamps between a ledger of validations and when the document was last modified. It's all there. There is only one place to look, and that is within the document itself. I can open it in my favorite editor and there it is.
+No-one needs to know about any ledgers or other external sources of information. There are no logs to dig through, nothing to compare, combine or collate. I know immediately and without a doubt that this document with exactly this content has been validated against this schema. There is no comparing of timestamps between a ledger of validations and when the document was last modified. There is only one place to look, and that is within the document itself. I can open it in my favorite editor and there it is.
 
 To summarize, the invariant _no bodies in my morgue without a toe tag_ is more important to me than the decoupling of bodies and tags. You could argue that it's more than a toe tag, it's like scribbling on the body itself, but that's OK with me. If that's what it takes, I'll do it.
 
-Yes, of course there are ways to undermine this process if you really want to. You can manually edit the document to _lie_ about the validation process for instance. You can delete the entire schema property! Ha-ha! The toe tag is gone! What now?!? But this kind of active self-sabotage is not very relevant. You can always shoot yourself in the foot if you're dedicated enough. It is more interesting and more relevant to consider the normal situation and the normal situation is pretty pleasant. Every document will be tagged with the schema outlining its contract.
+Yes, of course there are ways to undermine this process if you really want to. You can manually edit the document to _lie_ about the validation process for instance. You can delete the entire schema property! Ha-ha! The toe tag is gone! What now?!? But this kind of active self-sabotage is not very relevant. You can always find ways to shoot yourself in the foot if you're dedicated enough. It is more interesting and more relevant to consider the normal situation and the normal situation is pretty pleasant. The normal situation is that every document will be linked to a schema outlining its contract.
 
 What exactly should we write on the toe tag though? There are many possible variations that you can choose from, depending on your context, needs and preferences. The first thing you'll want to do though, is to add a $schema property to the root element of your JSON document. The value of this property should correspond to the value of the $id property of the JSON Schema.
 
@@ -197,7 +195,21 @@ Maybe you feel that including the link to the schema is enough, and it could be.
 
 But you could know it indirectly. If you always perform a schema validation whenever you serialize a value into JSON, you could in choose to _reject_ any JSON documents that failed validation. That way, the very presence of the document means that it is valid! But this is a pretty radical approach, and may not be what you want. Operations will be interrupted. You will need to log it as en error and figure out what went wrong. 
 
-A gentler approach would be to accept the document, but to mark it as invalid. That would require you to scribble more stuff on the toe tag so to speak. That is, you need to explicitly state the result of the validation. 
+A gentler approach would be to accept the document, but to mark it as invalid. That would require you to scribble more stuff on the toe tag so to speak. That is, you need to explicitly state the result of the validation. The simplest version would be to include a boolean flag. I suggest adding a little bit more while you're at it. Since different tools may have slightly different interpretations of the JSON Schema standard, it makes sense to include the name of the tool that was used for validation. 
+
+```json
+{
+    "$schema": "/hellish-enterprise/customer-schema-20260101.json",
+    "$validation": {
+        "tool": "JsonSchema.Net-9.1.3",
+        "timestamp": "2026-03-17T07:52:34.837129Z",
+        "result": true    
+    },
+    "userName": "john", 
+    "email": "john.doe@foomail.com", 
+    "birthDate": "2002-08-13"
+}
+```
 
 
 
