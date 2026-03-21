@@ -145,7 +145,7 @@ A more pressing question is: how do we associcate our JSON documents with the ap
 
 There are two main approaches that I can think of. Either the association is external to the JSON document, that is, outside the document somewhere in the great elsewhere, or it is internal, that is, embedded within the document. Each approach has some pros and cons, and each can be done in more than one way.
 
-## The ledger approach
+### The ledger approach
 
 Keeping the association external to the document has the benefit that it is very clean, very decoupled, very flexible. We can even pull out the honorary designation _orthogonal_ to describe how the document and its schema relate to each other. A toe tag isn't the right metaphor for this approach though. It's more like maintaining a ledger, a log where you list the names of documents and the results of validating them against schemas. Hence I call this the ledger approach. 
 
@@ -166,7 +166,7 @@ What are the pros and cons of this approach? The ledger is completely decoupled 
 
 A benefit of the ledger approach is that all the information about schemas and validation can be viewed in the same place. A drawback is that you must know about the ledger in order to find it! A developer unfamiliar with the solution may not know that there is any schema validation going on at all. They will look at the blob and see... JSON. If the ledger is just entries in a log, it means that a developer will have to sift and sort through it when they want to see the associations between documents and schemas, as well as the validation results. I think this is a bit cumbersome and reduces the utility of schema validation.
 
-## The drawer sticker approach
+### The drawer sticker approach
 
 A tempting variation is to use any built-in support for metadata that the persistance technology may offer. For instance, Azure Blob Storage allows you to associate _user defined metadata_ in the form of key-value pairs with any given blob. You could for instance define a "schema" property, the value of which is the ID or URL to your schema, e.g. "/hellish-enterprise/customer-schema-20260101.json". You could also define a "valid" property with "true" and "false" as the obvious values.
 
@@ -176,7 +176,7 @@ I wonder what the appropriate metaphor for this is. It's not really a toe tag, a
 
 What should we think of the drawer-sticker approach? The metadata is typically tightly coupled to a particular storage mechanism. This means that it's not easily portable. If you ever decide to move your JSON documents, you will have to perform some sort of separate migration of the metadata. In addition to moving the bodies themselves, you'll also have to peel the stickers off the drawers so to speak. Maybe you'll be able to map what was written on the stickers onto some other storage-specific mechanism. If not, you will have to find some other solution, such as a introducing a ledger or a toe tag. As we have seen, there may also be somewhat arbitrary constraints on what you may write on the stickers in the first place. 
 
-## The toe tag approach
+### The toe tag approach
 
 So much for the external approaches. The internal approach means that the association between the content of the JSON document and the schema used to validate it is put _inside the document itself_. Yes, yes, I can feel some of you recoiling in disgust, your sensitivies violated by this profane idea! Certainly this is less clean, less decoupled and less flexible than using a ledger. It's not orthogonal, it's some other kind of gonal. Indeed it _fuses_ the process of schema validation with the process of serialization! It _complects_ them, to use Rich Hickey's term. Surely this must be bad? And yet... this is my preferred approach. This is what I think of as the toe tag approach.
 
@@ -188,7 +188,7 @@ To summarize, the invariant _no bodies in the morgue without a toe tag_ is more 
 
 Yes, of course there are ways to undermine this process if you really want to. You can manually edit the document to _lie_ about the validation process for instance. You can delete the entire schema property! Ha-ha! The toe tag is gone! What now?!? But this kind of active self-sabotage is not very relevant. You can always find ways to shoot yourself in the foot if you're dedicated enough. It is more relevant to consider the normal situation and the normal situation is pretty pleasant. The normal situation is that every document will be linked to a schema outlining its contract.
 
-## Tag size
+### Tag size
 
 What exactly should we write on the toe tag though? There are many possible variations that you can choose from, depending on your context, needs and preferences. The one thing you'll definitely want to do though, is to add a $schema property to the root element of your JSON document. The value of this property should correspond to the value of the $id property of the JSON Schema.
 

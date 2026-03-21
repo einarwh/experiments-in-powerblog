@@ -6,7 +6,7 @@
 
 :blog-post/description
 
-Politeness is supposed to be symmetric, that is, reciprocal between people. But unfortunately it's not always like that.  
+Politeness is supposed to be symmetric. That is, reciprocal between people. But unfortunately it's not always like that.  
 
 :page/body
 
@@ -28,15 +28,15 @@ It is part of the social contract that we will be reasonably polite in our inter
 
 Like trust, politeness is a kind of social glue. And just like trust can be misused by social engineers to achieve goals, so politeness can be misused in the social game. It is a space that can be both skewed and exploited. 
 
-And hence we have all encountered people who in various degrees feel free to bullshit their way through life, using cheap rhetoric, engaging in logical fallacies, and making unfounded statements and sweeping generalizions with extreme confidence. They are supported in this by the general expectation of politeness, which demands of us that we suffer such things in silence. In a spectacular case of irony, it is considered rude to point out the reality of such statements or to challenge them, because it will be too embarrassing for someone to be outed as a bullshitter or a bully.
+And hence we have all encountered people who in various degrees feel free to bullshit their way through life, using cheap rhetoric, engaging in logical fallacies, treating their own conjectures and proclamations as fact, making unfounded assertions and sweeping generalizions, all with extreme confidence. They are supported in this by the general expectation of politeness, which demands of us that we suffer such things in silence. In a spectacular case of irony, it is considered rude to point out the reality of such statements or to challenge them, because it will be too embarrassing for someone to be outed as a bullshitter or a bully.
 
 That means that someone might use the principle of politeness as a two-phased weapon in a play for dominance. First by violating it themselves, and then in invoking it if and when they should be challenged by someone pointing out their violation!
-
-In some cases this will be deliberate. There are sociopaths among us. But presumably a more common situation is that people simply don't realize that they have double standards. It is hard to see ourselves from the outside, after all. 
 
 Even the notion of psychological safety can be used as a weapon by those who expect politeness to work asymmetrically in their favour, in a particularly bold move. You can't point out that someone is bullshitting, because that might make them feel unsafe. In other words, psychological safety is used as an excuse to silence people.
 
 This is obviously a gross abuse of psychological safety. The real point of psychological safety is to create a space that makes it safe to express your opinion without fear of retribution. It is not to create an environment devoid of critical, even uncomfortable questions, or where no-one ever asks you to provide evidence for your claims. But that doesn't mean it can't be weaponized to that effect. 
+
+In some cases this will be deliberate. There are sociopaths among us. But presumably a more common situation is that people simply don't realize that they have double standards. It is hard to see ourselves from the outside, after all. 
 
 ### What to do?
 
