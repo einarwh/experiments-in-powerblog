@@ -6,7 +6,7 @@
 
 :page/body
 
-# Massively multiplayer online imitation game
+# I refuse to play the massively multiplayer online imitation game
 
 <p class="blog-post-date">February 8, 2025</p>
 
