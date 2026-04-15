@@ -18,13 +18,13 @@ Playing Turing's imitation game 24/7 sucks. But the good news is we don't have t
 
 There's a recurring theme whenever AI slopheads defend their use of generative tools for writing. They seem to think that it's some sort of gotcha that as a reader, I may not be able to distinguish perfectly between human-written and AI-generated text. "HA! HA! Checkmate!" But it's not. It's not checkmate, and it's not a gotcha. Or if it is, I'm not the one getting gotten.
 
-AI slopheads are trying to cast the situation as an instance of Turing's imitation game: Suddenly it's _on me_ to prove that I can successfully identify human-written and AI-generated text 100% of the time. And if I can't, well, that must prove that there is no meaningful difference between the two. It doesn't, but let's ignore that for now.
+AI slopheads try to cast the situation as an instance of Turing's imitation game: Suddenly it's _on me_ to prove that I can successfully identify human-written and AI-generated text 100% of the time. And if I can't, well, that must prove that there is no meaningful difference between the two. It doesn't, but let's ignore that for now.
 
 Here's the real crux: I have no interest in playing that game. None. Why would I? 
 
 AI slopheads are vastly overestimating my commitment to reading any particular piece of text, as if text were somehow scarce and hard to come by. But that's absurd. There is an unimaginable abundance of text. There's text everywhere. The job is not to find something - anything! - to read, but something good that's worth my time. If I start reading something and it seems like slop to me, I stop reading. I move on. I read something else. 
 
-But "A-HA! GOTCHA!" the slophead who put their name to the text might exclaim; "I actually wrote that text! It wasn't generated! That's my vapid prose!" To which I can only say "WEIRD FLEX!" Except I can't say that, because I'm not there, I'm gone (as the song goes). I have no interest in spending my limited time on Earth in fine-sorting bad human-written text from bad AI-generated text. You are welcome to do so of course. But I won't. There's an opportunity cost to playing the imitation game, and I'm not paying it. I simply turn my attention somewhere else as quickly as possible to minimize the waste. 
+But "A-HA! GOTCHA!" the slophead who put their name to the text might exclaim; "I actually wrote that text! It wasn't generated! That's my vapid prose!" To which I can only say "WEIRD FLEX!" Except I can't say that, because I'm not there, I'm gone (as the song goes). I have no interest in spending my limited time on Earth fine-sorting bad human-written text from bad AI-generated text. You are welcome to do so of course. But I won't. There's an opportunity cost to playing the imitation game, and I'm not paying it. I simply turn my attention somewhere else as quickly as possible to minimize the waste. 
 
 In the movie War Games, the AI super computer describes nuclear war as "a strange game", and notes that "the only winning move is not to play". It is the same with the imitation game. I refuse to play. And I win. 
 
