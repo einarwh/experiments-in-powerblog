@@ -26,7 +26,7 @@ AI slopheads are vastly overestimating my commitment to reading any particular p
 
 But A-HA! GOTCHA! the slophead who put their name to the text might exclaim; I actually wrote that text! It wasn't generated! That's my vapid prose! To which I can only say WEIRD FLEX! Except I can't say that, because I'm not there, I'm gone (as the song goes). I have no interest in spending my limited time on Earth in fine-sorting bad human-written text from bad AI-generated text. You are welcome to do so of course. But I won't. There's an opportunity cost to playing the imitation game, and I'm not paying it. I simply turn my attention somewhere else as quickly as possible to minimize the waste. 
 
-In the movie War Games, the super computer describes nuclear war as "a strange game", and notes that "the only winning move is not to play". It is the same with the imitation game. I refuse to play. And I win. 
+In the movie War Games, the AI super computer describes nuclear war as "a strange game", and notes that "the only winning move is not to play". It is the same with the imitation game. I refuse to play. And I win. 
 
 AI slopheads seem to think that what I'm describing is impossible, because "these tools aren't going anywhere", and hence soon ALL TEXT WILL BE SHIT. That's not only obviously wrong, it also speaks volumes about the slopheads themselves.
 
