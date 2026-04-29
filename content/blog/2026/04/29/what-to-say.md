@@ -14,7 +14,7 @@ If you want to do a talk at a software conference, it's not enough to figure out
 
 <p class="blog-post-date">April 29, 2026</p>
 
-On my way to the agenda committee meeting for NDC Oslo this morning, I randomly had what felt like an insight. What happened (I think) is that my brain took a proto-insight that had been floating around in the sea of neurons for quite some time and suggested a couple of words to describe it. On playing those words back to itself, my brain quickly decided that my brain was onto something. 
+On my way to the agenda committee meeting for NDC Oslo this morning, I randomly had what felt like an insight. What happened (I think) is that my brain took a proto-insight that had been floating around in its sea of neurons for quite some time and suggested a couple of words to describe it. On playing those words back to itself, my brain quickly decided that my brain was onto something. 
 
 The insight was this: many prospective speakers seem to think that the job is to find a _topic_ to talk about, but the real job is to articulate and convey a _message_. It's not enough to figure out what you want to talk about, you also need to figure out what you want to say about it. Unfortunately many speakers seem to stop short of this important step.
 
