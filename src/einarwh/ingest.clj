@@ -26,6 +26,9 @@
     
     (re-find #"^aoc/" file-name)
     :page.kind/aoc-post
+    
+    (re-find #"^html" file-name)
+    :page.kind/html-page
 
     (re-find #"^index\.md" file-name)
     :page.kind/frontpage
