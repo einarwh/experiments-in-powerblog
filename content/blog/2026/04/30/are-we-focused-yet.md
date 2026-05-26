@@ -24,7 +24,7 @@ We ought to know by now. As an industry, we have spent significant time and effo
 
 I don't have any numbers, but I know what my personal experience and gut feelings tell me. But I would like to ask you as well. 
 
-As you see it, what has the impact of OKRs been on "focus" and "flow" in your team?
+As you see it, what has been the impact of OKRs on "focus" and "flow" in your team?
  - Noticeably positive!
  - Negligible
  - Probably negative tbh
