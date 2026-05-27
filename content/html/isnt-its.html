@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>it isn't this - it's that</title>
+    <style>
+        body, html {
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: clamp(0.5rem, 4vw, 4rem);
+          font-family: "Arial", sans-serif;
+          font-weight: normal;
+          white-space: nowrap;
+        }
+
+        .fade-top {
+          opacity: 0; 
+          animation: fadeInOutTop 6s ease-in-out 0s infinite;
+        }
+
+        @keyframes fadeInOutTop {
+          0% { opacity: 0; }
+          15% { opacity: 1; }
+          55% { opacity: 1; }
+          85% { opacity: 0; }
+        }
+
+        .fade-bot {
+          opacity: 0; 
+          animation: fadeInOutBot 6s ease-in-out 0s infinite;
+        }
+
+        @keyframes fadeInOutBot {
+          0% { opacity: 0; }
+          30% { opacity: 0; }
+          50% { opacity: 1; }
+          65% { opacity: 1; }
+          95% { opacity: 0; }
+        }
+
+        .container {
+          display: flex;
+          flex-direction: column; 
+          height: 100vh; 
+          width: 100vw;
+        }
+
+        .top-section, .bottom-section {
+          flex: 1; 
+          display: flex;
+          align-items: center;
+          justify-content: center; 
+        }
+
+        .top-section { background-color: #000000; color: #FFFFFF }
+        .bottom-section { background-color: #FFFFFF; ; color: #000000 }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="top-section">
+    <p id="top-text" class="fade-top"></p>
+  </div>
+  <div class="bottom-section">
+    <p id="bot-text" class="fade-bot"></p>
+  </div>
+</div>
+
+    <script>
+        const lines = [
+            ["\"trust me\" isn't a strategy", "it's a liability"],
+            ["ai isn't replacing human work", "it's replacing human conversation"],
+            ["ai isn't just for chatbots", "it's changing how we build software"],
+            ["ai safety isn't just for regulators", "it's a builder responsibility"],
+            ["accessibility isn't a checklist", "it's a mindset"],
+            ["building offline-first apps isn't just a feature", "it's a necessity"],
+            ["building software isn't just complex", "it's exhausting"],
+            ["css isn't good or bad", "it's powerful"],
+            ["ethics isn't a design review afterthought", "it's a quality signal"],
+            ["great feedback isn't about ego", "it's about collaboration"],
+            ["language in tech isn't just clumsy", "it's consequential"],
+            ["oauth 2.1 isn't a revolution", "it's a consolidation"],
+            ["our expertise isn't the syntax", "it's knowing what to build"],
+            ["resilience isn't just a compliance checkbox", "it's a survival strategy"],
+            ["resilience isn't optional", "it's mission-critical"],
+            ["success isn't just about individual skill", "it's about how people work together"],
+            ["tdd isn't just enduring", "it's evolving"],
+            ["that isn't true separation", "it's substitution"],
+            ["the actor model isn't bleeding-edge tech", "it's a battle-tested pattern"],
+            ["the attack surface isn't just bigger", "it's fundamentally different"],
+            ["the gap isn't models", "it's architecture"],
+            ["the magic isn't in speed itself", "it's in the rhythm"],
+            ["the problem isn't the ai", "it's the missing context"],
+            ["the question isn't just \"is it correct?\"", "it's \"did it actually help?\""],
+            ["the real challenge isn't the tools", "it's the missing guidelines"],
+            ["the secret isn't a bigger model", "it's smarter retrieval"],
+            ["this isn't a demo", "it's a design exploration"],
+            ["this isn't a geopolitics story", "it's a risk story"],
+            ["this isn't a hot take", "it's a pattern"],
+            ["this isn't a model capability problem", "it's a knowledge infrastructure problem"],
+            ["this isn't a project demo", "it's an engineering story"],
+            ["this isn't about perfection", "it's about progress"],
+            ["this isn't just a talk", "it's a wake-up call"],
+            ["this isn't a conspiracy", "it's a pattern"],
+            ["this isn't a hype session", "it's a call to action"],
+            ["this isn't a passive lecture", "it's a live-fire mission"],
+            ["this isn't a tooling failure", "it's a constraint failure"],
+            ["this isn't a tooling problem", "it's a mental model problem"],
+            ["this session isn't about hype", "it's about perspective"],
+            ["understanding its quirks isn't just important", "it's essential"],    
+        ];
+
+        var lineNo = 0;
+
+        function getRandomLine() {
+            const i = Math.floor(Math.random() * lines.length);
+            if (i == lineNo) {
+                return getRandomLine();
+            } else {
+                lineNo = i;
+                return lines[lineNo];
+            }
+        }
+
+        function changeText() {
+            const [topText, botText] = getRandomLine();
+            topTextElement.innerText = topText;
+            botTextElement.innerText = botText;
+        }
+
+        const topTextElement = document.getElementById('top-text');
+        const botTextElement = document.getElementById('bot-text');
+
+        topTextElement.addEventListener('animationstart', changeText);
+        topTextElement.addEventListener('animationiteration', changeText);
+        
+    </script>
+</body>
+</html>
