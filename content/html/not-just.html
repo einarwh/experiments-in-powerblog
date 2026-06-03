@@ -1,175 +1,169 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>not just...</title>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #111;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #111;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
 
-        .shimmer-text {
-            position: absolute;
-            font-size: clamp(0.5rem, 4vw, 3rem);
-            font-family: "Arial", sans-serif;
-            font-weight: normal;
-            white-space: nowrap;
-            transform: translate(-50%, -50%);
-            left: 50%;
-            top: 50%;
-            background: linear-gradient(135deg, #ffffff, #5E5E5E, #ffffff);
-            background-clip: text;
-            color: transparent;
-            background-size: 200% 100%;
-            animation: shimmer 3s linear infinite;
-        }
+      .shimmer-text {
+        position: absolute;
+        font-size: clamp(0.5rem, 4vw, 3rem);
+        font-family: "Arial", sans-serif;
+        font-weight: normal;
+        white-space: nowrap;
+        transform: translate(-50%, -50%);
+        left: 50%;
+        top: 50%;
+        background: linear-gradient(135deg, #ffffff, #5e5e5e, #ffffff);
+        background-clip: text;
+        color: transparent;
+        background-size: 200% 100%;
+        animation: shimmer 3s linear infinite;
+      }
 
-        @keyframes shimmer {
-            0% {
-                background-position: 200% 0;
-            }
-            100% {
-                background-position: -200% 0;
-            }
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
         }
+        100% {
+          background-position: -200% 0;
+        }
+      }
     </style>
-    <script data-goatcounter="https://einarwh.goatcounter.com/count" async="" src="https://gc.zgo.at/count.js"></script>
-</head>
-<body>
-
-    <div id="bouncing-text" class="shimmer-text">not just at work, but in every area of life</div>
+    <script
+      data-goatcounter="https://einarwh.goatcounter.com/count"
+      async=""
+      src="https://gc.zgo.at/count.js"
+    ></script>
+  </head>
+  <body>
+    <div id="bouncing-text" class="shimmer-text" />
 
     <script>
-        const lines = [
-"not just at work, but in every area of life",
-"not just buzzwords, but catalysts of extraordinary innovations",
-//"not just by optimizing code, but by learning how to think about systems",
-"not just fake but realistic-looking data",
-"not just for engineers, but also for students",
-// "not just for engineers, but also for students, teachers, and parents",
-//"not just for known CVEs but also for human factors that precede compromise",
-"not just for testing, but for predictive reliability",
-"not just functional, but artfully elegant",
-"not just good, but excellent",
-"not just good, but great",
-"not just helpful but also accountable",
-"not just how we build products, but how we build developers",
-"not just in our test suite, but in how our teams communicate",
-"not just in theory, but in real life",
-"not just on mobile, but also on web and desktop",
-"not just on the data itself but on the story of its shape",
-"not just on what worked, but also what didn't",
-"not just producing output, but developing understanding",
-//"not just to our team, but to the agents that will inevitably co-author them",
-"not just to solve problems, but to remove them entirely",
-"not just via keyboard and text, but also by voice",
-//"not just what changed, but whether it still means what it was supposed to",
-//"not just what is new, but how and when to use these features effectively",
-"not just what should pass, but the gold standard",
-"not just what you do, but why you do it",
-"not just what’s on the screen, but what it means",
-//"not just work in demos, but hold up under real-world conditions",
-"not just a solution but a silver bullet foundry",
-//"not just about reaching more people, but about leaving no one behind",
-"not just as communication, but as a deliberate design tool",
-//"not just at the infrastructure layer, but at the model behavior layer",
-        ];
+      const lines = [
+        "not just at work, but in every area of life",
+        "not just buzzwords, but catalysts of extraordinary innovations",
+        "not just fake but realistic-looking data",
+        "not just for engineers, but also for students",
+        "not just for testing, but for predictive reliability",
+        "not just functional, but artfully elegant",
+        "not just good, but excellent",
+        "not just good, but great",
+        "not just helpful but also accountable",
+        "not just how we build products, but how we build developers",
+        "not just in our test suite, but in how our teams communicate",
+        "not just in theory, but in real life",
+        "not just on mobile, but also on web and desktop",
+        "not just on the data itself but on the story of its shape",
+        "not just on what worked, but also what didn't",
+        "not just producing output, but developing understanding",
+        "not just to solve problems, but to remove them entirely",
+        "not just via keyboard and text, but also by voice",
+        "not just what should pass, but the gold standard",
+        "not just what you do, but why you do it",
+        "not just what's on the screen, but what it means",
+        "not just a solution but a silver bullet foundry",
+        "not just as communication, but as a deliberate design tool",
+      ];
 
-        const textElement = document.getElementById('bouncing-text');
+      const textElement = document.getElementById("bouncing-text");
 
-        var lineNo = 0;
+      let posX = window.innerWidth / 2;
+      let posY = window.innerHeight / 2;
+      let speedX = getRandomSpeed();
+      let speedY = getRandomSpeed();
+      if (getRandomBool()) speedX = -speedX;
+      if (getRandomBool()) speedY = -speedY;
 
-        let posX = window.innerWidth / 2;
-        let posY = window.innerHeight / 2;
-        let speedX = getRandomSpeed();
-        let speedY = getRandomSpeed();
-        if (getRandomBool()) speedX = -speedX;
-        if (getRandomBool()) speedY = -speedY;
+      function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
 
-        function getNextLine() {
-            lineNo = (lineNo + 1) % lines.length;
-            return lines[lineNo];
+      shuffle(lines);
+
+      var lineNo = 0;
+      textElement.innerText = getNextLine();
+
+      function getNextLine() {
+        lineNo = (lineNo + 1) % lines.length;
+        return lines[lineNo];
+      }
+
+      function getRandomInt(max) {
+        return Math.floor(Math.random() * max);
+      }
+
+      function getRandomBool() {
+        return Math.random() > 0.5;
+      }
+
+      function getRandomSpeed() {
+        return 3 + getRandomInt(1);
+      }
+
+      function animate() {
+        const rect = textElement.getBoundingClientRect();
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+
+        if (posX - rect.width / 2 <= 0) {
+          const nextSpeedX = getRandomSpeed();
+          speedX = nextSpeedX;
+          textElement.innerText = getNextLine();
+          const updatedRect = textElement.getBoundingClientRect();
+          posX = updatedRect.width / 2;
         }
 
-        function getRandomInt(max) {
-            return Math.floor(Math.random() * max);
+        if (posX + rect.width / 2 >= screenWidth) {
+          const nextSpeedX = getRandomSpeed();
+          speedX = -nextSpeedX;
+          textElement.innerText = getNextLine();
+          const updatedRect = textElement.getBoundingClientRect();
+          posX = screenWidth - updatedRect.width / 2;
         }
 
-        function getRandomBool() {
-            return Math.random() > 0.5;
+        if (posY - rect.height / 2 <= 0) {
+          const nextSpeedY = getRandomSpeed();
+          speedY = nextSpeedY;
+          textElement.innerText = getNextLine();
+          const updatedRect = textElement.getBoundingClientRect();
+          posY = updatedRect.height / 2;
         }
 
-        function getRandomSpeed() {
-            return 3 + getRandomInt(1);
+        if (posY + rect.height / 2 >= screenHeight) {
+          const nextSpeedY = getRandomSpeed();
+          speedY = -nextSpeedY;
+          textElement.innerText = getNextLine();
+          const updatedRect = textElement.getBoundingClientRect();
+          posY = screenHeight - updatedRect.height / 2;
         }
 
-        function getRandomLine() {
-            const i = getRandomInt(lines.length);
-            if (i == lineNo) {
-                return getRandomLine();
-            } else {
-                lineNo = i;
-                return lines[lineNo];
-            }
-        }
+        posX += speedX;
+        posY += speedY;
 
-        function animate() {
-            const rect = textElement.getBoundingClientRect();
-            const screenWidth = window.innerWidth;
-            const screenHeight = window.innerHeight;
+        textElement.style.left = `${posX}px`;
+        textElement.style.top = `${posY}px`;
 
-            if (posX - rect.width / 2 <= 0) {
-                const nextSpeedX = getRandomSpeed();
-                speedX = nextSpeedX;
-                textElement.innerText = getRandomLine();
-                const updatedRect = textElement.getBoundingClientRect();
-                posX = updatedRect.width / 2;
-            }
+        requestAnimationFrame(animate);
+      }
 
-            if (posX + rect.width / 2 >= screenWidth) {
-                const nextSpeedX = getRandomSpeed();
-                speedX = -nextSpeedX;
-                textElement.innerText = getRandomLine();
-                const updatedRect = textElement.getBoundingClientRect();
-                posX = screenWidth - updatedRect.width / 2;
-            }
-
-            if (posY - rect.height / 2 <= 0) {
-                const nextSpeedY = getRandomSpeed();
-                speedY = nextSpeedY;
-                textElement.innerText = getRandomLine();
-                const updatedRect = textElement.getBoundingClientRect();
-                posY = updatedRect.height / 2;
-            }
-
-            if (posY + rect.height / 2 >= screenHeight) {
-                const nextSpeedY = getRandomSpeed();
-                speedY = -nextSpeedY;
-                textElement.innerText = getRandomLine();
-                const updatedRect = textElement.getBoundingClientRect();
-                posY = screenHeight - updatedRect.height / 2;
-            }
-
-            posX += speedX;
-            posY += speedY;
-
-            textElement.style.left = `${posX}px`;
-            textElement.style.top = `${posY}px`;
-
-            requestAnimationFrame(animate);
-        }
-
-        // Start the animation
-        animate();
+      animate();
     </script>
-</body>
+  </body>
 </html>
