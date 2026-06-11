@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Expect...</title>
+  <style>
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      background-color: #121212;
+      color: #c6c6c6;
+      display: flex;
+      justify-content: left;
+      align-items: center;
+      height: 100vh;
+      font-size: clamp(0.5rem, 4vw, 4rem);
+    }
+
+    .cursor {
+      font-weight: bold;
+      animation: blink 0.9s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .container {
+      display: flex;
+      align-items: center;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      align-items: center;
+      padding: 50px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container"><p>Expect <span id="typewriter"></span><span class="cursor">|</span></p></div>
+  <script>
+    const lines = [
+      "a few dragons",
+      "a few scars",
+      "a live demo",
+      "a practical mindset shift",
+      "a touch of dark humor",
+      "a unique experience",
+      "actionable insights",
+      "actionable tips",
+      "architecture diagrams",
+      "battle-tested techniques",
+      "clear examples",
+      "concrete examples",
+      "concrete explanations",
+      "familiar scenarios",
+      "hard-earned lessons",
+      "honest lessons",
+      "honest stories",
+      "humor",
+      "insights",
+      "irreverence",
+      "live code demos",
+      "live demonstrations",
+      "live demos",
+      "lots of source code",
+      "many demos",
+      "maybe even to cry",
+      "minimal theory",
+      "practical demos",
+      "practical guidance",
+      "practical tips",
+      "real code",
+      "real-world examples",
+      "real-world scenarios",
+      "recognizable patterns",
+      "relatable stories",
+      "surprises",
+      "surprising outcomes",
+      "the unexpected",
+      "to laugh",
+      "to recognize yourself",
+      "to reflect",
+      "to see prototypes",
+      "tricky edge cases",
+      "working patterns",
+    ];
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    shuffle(lines);
+
+    var lineNo = 0;
+
+    function getNextLine() {
+      lineNo = (lineNo + 1) % lines.length;
+      return lines[lineNo];
+    }
+
+    const textElement = document.getElementById("typewriter");
+    const delay = 80; 
+    let index = 0;
+    let state = 0;
+
+    let text = getNextLine();
+
+    function animate() {
+      if (state == 0) {
+        state = 1;
+        setTimeout(animate, delay);
+        textElement.innerText = "";
+      }
+      else if (index < text.length) {
+        console.log(index);
+        textElement.innerText += text.charAt(index);
+        index++;
+        setTimeout(animate, delay);
+      } 
+      else {
+        state = 0;
+        text = getNextLine();
+        index = 0;
+        setTimeout(animate, delay * 10);
+      }
+    }
+
+  document.addEventListener("DOMContentLoaded", animate);
+
+  </script>
+</body>
+</html>
