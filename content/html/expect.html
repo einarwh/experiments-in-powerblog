@@ -43,7 +43,7 @@
     </script>
   </head>
 <body>
-  <div class="container"><p>Expect <span id="typewriter"></span><span class="cursor">|</span></p></div>
+  <div class="container"><p>Expect <span id="typing"></span><span class="cursor">|</span></p></div>
   <script>
     const lines = [
       "a few dragons",
@@ -108,7 +108,7 @@
       return lines[lineNo];
     }
 
-    const textElement = document.getElementById("typewriter");
+    const textElement = document.getElementById("typing");
     const delay = 80; 
     let index = 0;
     let state = 0;
