@@ -288,12 +288,14 @@ These are all equivalent, in that they lead to the same metadata being logged. T
 In fact, `BeginScope` will treat any composite object we pass it as a property bag. Which means we could do weird stuff like this: 
 
 ```csharp
-using var scope = logger.BeginScope(new Thread(() => {}));
+using var scope = logger.BeginScope(Stopwatch.StartNew());
 ```
 
-If we do that, the logging provider will scavenge the `Thread` object for any and all properties it might have (like `IsAlive`, `Priority`, and `Name`) to be used as metadata. I mention this not because it's a good idea, but because it's possible, and my silly little interface needs to handle it. 
+If we do that, the logging provider will scavenge the `Stopwatch` object for any and all properties it has (like `Elapsed`, `ElapsedMilliseconds`, `ElapsedTicks` and `IsRunning`) and use them as metadata. I mention this not because it's a good idea, but because it's possible and so must be handled somehow. 
 
-There's a different use case for scopes, as well, which may be thought of as tagging as opposed to passing a bag of properties. In that case, we simply pass in a string. 
+The exact semantics of something like this can be hard to predict. Does `BeginScope` create a snapshot of the properties, or are the property values sampled anew from the scope object on every log statement? As far as I can tell, that's up to the concrete `ILogger` implementation to decide. 
+
+There's a different use case for scopes as well, which may be thought of as tagging as opposed to passing a bag of properties. In that case, we simply pass in a string. 
 
 ```csharp
 using var scope = logger.BeginScope("Processing");
