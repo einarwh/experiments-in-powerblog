@@ -2,15 +2,19 @@
 :blog-post/tags [:tech ]
 :blog-post/author {:person/id :einarwh}
 
-<!-- :blog-post/published #time/ldt "2014-12-27T00:00:00" -->
+<!-- :blog-post/published #time/ldt "2026-09-22T21:30:00" -->
+
+:blog-post/description
+
+I've made a silly little fluent interface for making assertions about logging in my unit tests.
 
 :page/body
 
 # Fluent logs
 
-<p class="blog-post-date">September 19, 2026</p>
+<p class="blog-post-date">September 22, 2026</p>
 
-I made a silly little fluent interface for making assertions about any logging in my code in my unit tests. 
+I've made a silly little fluent interface for making assertions about logging in my unit tests, specifically my xUnit tests. 
 
 On reading that, certain thoughts might pop into your head, such as "but is it a good or a bad idea to validate logging in unit tests?" That's fine, I don't blame you. But such thoughts don't interest me, so I won't be addressing them. I will just concern myself with how the interface works. 
 
@@ -28,7 +32,7 @@ If the log is empty, all is well. Otherwise, the test will fail. For instance, w
 
 ```csharp
 [Fact]
-void TestEmptyLog() {
+void IsEmptyFailsIfLogIsntEmpty() {
     var log = new InMemoryLogger<object>();
     log.LogInformation("Hello");
     log.LogWarning("Oh no!");
@@ -50,7 +54,7 @@ We can make that fail as well, by providing an empty log.
 
 ```csharp
 [Fact]
-void TestEmptyLog() {
+void IsNotEmptyFailsIfLogIsEmpty() {
     var log = new InMemoryLogger<object>();
     Check.That(log).IsNotEmpty();
 }
@@ -192,11 +196,11 @@ There are two overloads, one which filters based on the full log entry, one on j
 
 ## Exceptions
 
-Sometimes, we want to log exceptions alongside the message. Or perhaps it's the other way around, we want to log the exception, and then we have to log a message as well. 
+Sometimes, we want to an log exception alongside the message. Or perhaps it's the other way around, we want to log the exception, and then we have to log a message as well. 
 
-How should I verify that the right exception was logged? I couldn't be too strict about it, because then it would be impossibly tedious to write the tests. It's a bad idea to require users to provide the exact same exception instance, and I definitely don't want to force anyone to construct false stack traces. Instead, I'm happy if the exception type and message are the same. 
+How should the interface verify that the right exception was logged? It can't be too strict about it, because then it would be impossibly tedious to write the tests. It's a bad idea to require users to provide the exact same exception instance, and I definitely don't want to force anyone to construct false stack traces. Instead, I'm happy if the exception type and message are the same. 
 
-For instance, say we want to make sure that our code catches and logs a `DisasterException`, and that we decide that our conventional "Oh no!" is the appropriate message to accompany such an event. Here's how we might do it.
+For instance, say we want to make sure that our code catches and logs a `DisasterException`, and that we decide that our conventional "Oh no!" is the appropriate message to accompany such an event. Here's how we would express that in a test:
 
 ```csharp
 Check.That(log)
@@ -231,7 +235,7 @@ Check.That(log)
             .WithException<FancyException>(it => it.Code == 17));
 ```
 
-In this case the error messages will be a bit more generic, since the content of the check is opaque to the test. A typical error will look like this:
+In this case the error messages will be a bit more generic, since the content of the check is opaque to the test. These are typical errors:
 
 ```text
 > Exception check failed for log entry #0: 'Oh no!'. Expected exception to check but found none.
@@ -256,7 +260,7 @@ logger.LogInformation("Starting processing.");
 logger.LogInformation("Finished processing.");
 ```
 
-This makes sure that the IDs for the job and the customer accompany all the log statements until the scope falls out of scope so to speak. The scope metadata is handled by whatever logging provider we're using. If we're logging to Application Insights, the metadata will pop up in customDimensions, for instance. This is very neat. 
+This makes sure that the IDs for the job and the customer accompany all the log statements until the scope falls out of scope so to speak. The scope metadata is handled by whatever logging provider we're using. If we're logging to Application Insights, the metadata will pop up in customDimensions, for instance. This is very neat and practical.
 
 The `BeginScope` method is incredibly flexible, which is both a blessing and a curse. In the example above we used a `Dictionary`, but we can provide the same metadata in many, many ways. 
 
@@ -308,7 +312,7 @@ using var scope = logger.BeginScope(
 
 In that case, the template is formatted into a message that ends up as the `Scope` property, and the placeholder names in the template become properties as well. 
 
-So that's roughly how scopes work in .NET logging. How can my little test utility make sure that we got the right scopes for the right log entries? 
+So that's roughly how scopes work in .NET logging. How can the fluent interface make sure that we got the right scopes for the right log entries? 
 
 There are two main choices that must be made: 
 
@@ -317,37 +321,37 @@ There are two main choices that must be made:
 
 In making my choices, I leaned towards minimizing the work I had to do, while providing reasonably useful error messages. 
 
-Calculating effective scope is more work than not doing it, so that was an easy choice in my mind. I treat each layer separately. That leaves just the matter of comparing scopes. 
+Calculating effective scope is more work than not doing it, so that was an easy choice in my mind. I treat each layered scope separately. That leaves just the matter of comparing individual scopes. 
 
 So how _should_ scopes be compared, given my aim to minimize the work I have to do? 
 
 The tagging scenario is easy. Strings and primitive values can just be compared directly. 
 
-It's the property bags that can lead to headaches. Shallow property bags are pretty easy, we just compare keys and values. Nested property bags are worse, because they can be arbitrarily deep. We must tackle those without working too hard. 
+It's the property bags that can lead to headaches, in particular nested property bags. Shallow property bags are easy, we just compare keys and values. But nested property bags are a pain, because they can be arbitrarily deep in principle. We must tackle those without working too hard. 
 
 Here's an example with a minimal nested property bag:
 
 ```csharp
 using var scope = logger.BeginScope(
     new {
-        JobId = job.Id,
+        JobId = 17,
         Details = new {
-            CustomerId = job.CustomerId
+            CustomerId = "..."
         }
     }); 
 ```
 
-If we pass a scope like that to the Application Insights logging provider, what happens? We get two properties added to customDimensions, `JobId` and `Details`. The value for the `JobId` depends on what `job.Id` is; probably an integer or a string. But what about `Details`? It becomes serialized as JSON, into something like:
+If we pass a scope like that to the Application Insights logging provider, what happens? We get two properties added to customDimensions, `JobId` and `Details`. The value for the `JobId` is the integer 17. But what about `Details`? It becomes serialized as JSON:
 
 ```json
 { "CustomerId": "..." }
 ```
 
-I decided to do something similar. Instead of descending into the dark depths of nested property bags, I treat all property bags as shallow. Any nested property bags are converted into JSON which is used for comparison. 
+I decided to do something similar. Instead of descending into the dark depths of nested property bags, I treat all property bags as shallow. Nested property bags are converted into JSON which is used for comparison. 
 
 What about the hybrid tagging/property-bag scenario? Well, that automatically becomes a shallow property bag, so it's not really much of a problem. 
 
-So with all those things sorted, we can finally look at some examples. It may be a bit anti-climatic after all that talk and hand-wringing. With scopes, there are things to think through to handle all potentially weird usage gracefully. But normal usage is straightforward. 
+So with all those things sorted, we can finally look at some examples. They might seem a bit anti-climatic after all that talk and hand-wringing. With scopes, there are things to think through to handle potentially weird usage gracefully. But normal usage is straightforward. 
 
 ```csharp
 Check.That(log)
@@ -362,13 +366,13 @@ Check.That(log)
 
 Here we're expecting a single scope with two properties. In the code using the `log`, there should be a corresponding `BeginScope` call with an equivalent bag of properties. What happens if there isn't? There are some obvious things that can go wrong. 
 
-We could have a scope with the correct properies, but one or more of the values is wrong. For instance, if the actual value for the "JobId" property was 11, we would get the following error: 
+We could have a scope with the correct properies, but one or more of the values is wrong. For instance, if the actual value for the "JobId" property were 11 instead of 12, we would get the following error: 
 
 ```text
 > Expected property 'JobId' to have value '12' in scope #0 for log entry #0 'Hey there!" but found '11' instead.
 ```
 
-You can see that each scope is referred to by index, starting at 0, just like the log entries. 
+(You can see that each scope is referred to by index, starting at 0, just like the log entries.)
 
 What if the value of the property is of the wrong type, say, string instead of integer?
 
@@ -397,7 +401,7 @@ Now if it happens to be "beep" instead, we get this error:
 > Expected property 'Details' to have value '{"CustomerId":"boop"}' in scope #0 for log entry #0 'Hey there!" but found '{"CustomerId":"beep"}' instead.
 ```
 
-Another thing that could be wrong, is that one or more properties could be missing from the scope, or it could have additional properties.
+What else could go wrong? One or more properties could be missing from the scope, or it could have additional properties.
 
 For instance, if the actual scope lacks the "CustomerId" property, the test will say as much: 
 
@@ -424,11 +428,11 @@ Mixing up different kinds of scopes spells trouble too:
 > Expected scope #0 of type Dictionary for log entry #0 'Hey there! but found scope of type String instead.
 ```
 
-And of course we could put the right property on the wrong scope, but that should manifest itself as some combination of the errors we've seen.
+And of course we could put the right property on the wrong scope, but that should manifest itself as some combination of the errors we've already seen.
 
 ## Individual messages
 
-Sometimes, we only care about individual log messages or entries. We can use the `Contains` method for that. There are four overloads, the example below uses all of them. 
+Sometimes, we only care about individual log messages or entries. We can use the `Contains` method for that. There are four overloads; the example below uses all of them. 
 
 ```csharp
 Check.That(log)
@@ -441,7 +445,7 @@ Check.That(log)
         entry.Level > LogLevel.Information);
 ```
 
-There is no implied order here. Each `Contains` checks all the log messages. 
+There is no implied order of log statements here. You could log the "Hey there!" last, no problem. Each `Contains` checks all the log messages. 
 
 Here's a list of possible test failures, one per line above:
 
@@ -501,3 +505,4 @@ Once the subflow has been ended, we are back at the regular interface, and can m
 
 ## Final words
 
+That concludes the tour of the interface. If you found it interesting and would like to play around with it, you can find the code [here](https://codeberg.org/einarwh/fluent-logs/raw/branch/main/FluentLogs/FluentLogs.cs). It's a single file that you can download or copy. I can't be bothered to create a Nuget package out of it. I offer absolutely no guarantees and no support. Things may change. There is no versioning. It may disappear without notice. But if you find it useful, that's cool. 
