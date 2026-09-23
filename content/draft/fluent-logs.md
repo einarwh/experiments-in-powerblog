@@ -145,7 +145,7 @@ Check.That(log)
 
 A `LogEntry` is what the `InMemoryLogger` keeps in memory. It holds on to the log message and the log level, and can also have an associated exception and one or more logging scopes, which we'll return to shortly. 
 
-For now, we have one more thing that a test might complain about. Say we log a single "Oh no!" at warning level, but our assertion species that it should have been logged at error level instead:
+For now, we have one more thing that a test might complain about. Say we log a single "Oh no!" at warning level, but our assertion specifies that it should have been logged at error level instead:
 
 ```csharp
 Check.That(log).Logged(LogEntry.Error("Oh no!"));
@@ -154,12 +154,12 @@ Check.That(log).Logged(LogEntry.Error("Oh no!"));
 The failure message is basically what I just wrote:
 
 ```text
-> Expected log level of log entry #0 'Oh no!' to be 'Error' but was 'Warning'.
+> Expected level of log entry #0 'Oh no!' to be 'Error' but was 'Warning'.
 ```
 
 ## Filtering
 
-It may be that we don't care about _all_ the log messages, just some of them. Perhaps we're only interested in messages at certain log levels. If so, there are a couple of options for filtering. 
+It may be that we don't care about _all_ the log messages, just some of them. Perhaps we're only interested in messages at certain log levels, for instance. If so, there are a couple of options for filtering. 
 
 To check messages at a certain log level or above, we use the `Level` method. It allows us to specify the lower bound for the messages to include. 
 
@@ -212,9 +212,9 @@ Check.That(log)
 If we're lucky, the test passes and everything is fine. If not, we could get either one of these fairly lengthy error messages:
 
 ```text
-> Exception check failed for log entry #0: 'Oh no!'. Expected exception of type 'DisasterException' with message 'Boom' but found none.
-> Exception check failed for log entry #0: 'Oh no!'. Expected exception of type 'DisasterException' with message 'Boom' but was exception of type 'NotImplementedException' with message 'Boom'.
-> Exception check failed for log entry #0: 'Oh no!'. Expected exception of type 'DisasterException' with message 'Boom' but was exception of type 'DisasterException' with message 'BOOOOOM'.
+> Exception check failed for log entry #0: 'Oh no!'. Expected exception of type 'DisasterException' with message 'Boom', but found none.
+> Exception check failed for log entry #0: 'Oh no!'. Expected exception of type 'DisasterException' with message 'Boom', but was exception of type 'NotImplementedException' with message 'Boom'.
+> Exception check failed for log entry #0: 'Oh no!'. Expected exception of type 'DisasterException' with message 'Boom', but was exception of type 'DisasterException' with message 'BOOOOOM'.
 ```
 
 This probably covers most cases, but sometimes we get into awkward situations. For instance, what if there is no public constructor for the exception we're expecting? In that case, we can do this instead:
@@ -238,7 +238,7 @@ Check.That(log)
 In this case the error messages will be a bit more generic, since the content of the check is opaque to the test. These are typical errors:
 
 ```text
-> Exception check failed for log entry #0: 'Oh no!'. Expected exception to check but found none.
+> Exception check failed for log entry #0: 'Oh no!'. Expected exception to check, but found none.
 > Exception check failed for log entry #0: 'Oh no!'. Expected exception of type 'FancyException' with message 'Boom' didn't satisfy the provided check.
 > Exception check failed for log entry #0: 'Oh no!'. Expected exception of type 'NotImplementedException' with message 'Boom' didn't satisfy the type requirement 'FancyException' of the provided check.
 ```
@@ -260,7 +260,7 @@ logger.LogInformation("Starting processing.");
 logger.LogInformation("Finished processing.");
 ```
 
-This makes sure that the IDs for the job and the customer accompany all the log statements until the scope falls out of scope so to speak. The scope metadata is handled by whatever logging provider we're using. If we're logging to Application Insights, the metadata will pop up in customDimensions, for instance. This is very neat and practical.
+This makes sure that the IDs for the job and the customer accompany all the log statements until the scope falls out of scope so to speak. The scope metadata is handled by whatever log provider we're using. If we're logging to Application Insights, the metadata will pop up in customDimensions, for instance. This is very neat and practical.
 
 The `BeginScope` method is incredibly flexible, which is both a blessing and a curse. In the example above we used a `Dictionary`, but we can provide the same metadata in many, many ways. 
 
@@ -268,12 +268,14 @@ One alternative is a sequence of key-value pairs, like so:
 
 ```csharp
 using var scope = logger.BeginScope(new [] {
-    new KeyValuePair<string, string>("JobId", job.Id),
-    new KeyValuePair<string, string>("CustomerId", job.CustomerId)
+    new KeyValuePair<string, object>("JobId", job.Id),
+    new KeyValuePair<string, object>("CustomerId", job.CustomerId)
 });
 ```
 
-Or we could use an anonymous object: 
+...which opens up the problematic possibility of duplicate keys which must be handled in one way or another by the log provider. In comparing scopes, I've opted for a last-pair-wins strategy.
+
+Another alternative is to use an anonymous object: 
 
 ```csharp
 using var scope = logger.BeginScope(
@@ -291,7 +293,7 @@ In fact, `BeginScope` will treat any composite object we pass it as a property b
 using var scope = logger.BeginScope(Stopwatch.StartNew());
 ```
 
-If we do that, the logging provider will scavenge the `Stopwatch` object for any and all properties it has (like `Elapsed`, `ElapsedMilliseconds`, `ElapsedTicks` and `IsRunning`) and use them as metadata. I mention this not because it's a good idea, but because it's possible and so must be handled somehow. 
+If we do that, the log provider will scavenge the `Stopwatch` object for any and all properties it has (like `Elapsed`, `ElapsedMilliseconds`, `ElapsedTicks` and `IsRunning`) and use them as metadata. I mention this not because it's a good idea, but because it's possible and so must be handled somehow. 
 
 The exact semantics of something like this can be hard to predict. Does `BeginScope` create a snapshot of the properties, or are the property values sampled anew from the scope object on every log statement? As far as I can tell, that's up to the concrete `ILogger` implementation to decide. 
 
@@ -301,7 +303,7 @@ There's a different use case for scopes as well, which may be thought of as tagg
 using var scope = logger.BeginScope("Processing");
 ```
 
-What happens to this string? Again, it depends on the logging provider. In the case of Application Insights, it ends up as the value of the `Scope` property in customDimensions. The same goes for any primitive value we might pass in, such as an integer or a boolean.
+What happens to this string? Again, it depends on the log provider. In the case of Application Insights, it ends up as the value of the `Scope` property in customDimensions. The same goes for any primitive value we might pass in, such as an integer or a boolean.
 
 That pretty much covers the various uses of `BeginScope` as defined on `ILogger`. However, there is also an extension method called `BeginScope`, which combines the tagging and property bag approaches in a way. We can pass it a message template and parameters, much like we would for a typical log statement:
 
@@ -343,7 +345,7 @@ using var scope = logger.BeginScope(
     }); 
 ```
 
-If we pass a scope like that to the Application Insights logging provider, what happens? We get two properties added to customDimensions, `JobId` and `Details`. The value for the `JobId` is the integer 17. But what about `Details`? It becomes serialized as JSON:
+If we pass a scope like that to the Application Insights log provider, what happens? We get two properties added to customDimensions, `JobId` and `Details`. The value for the `JobId` is the integer 17. But what about `Details`? It becomes serialized as JSON:
 
 ```json
 { "CustomerId": "..." }
@@ -371,7 +373,7 @@ Here we're expecting a single scope with two properties. In the code using the `
 We could have a scope with the correct properies, but one or more of the values is wrong. For instance, if the actual value for the "JobId" property were 11 instead of 12, we would get the following error: 
 
 ```text
-> Expected property 'JobId' to have value '12' in scope #0 for log entry #0 'Hey there!" but found '11' instead.
+> Expected property 'JobId' to have value '12' in scope #0 for log entry #0 'Hey there!, but found '11' instead.
 ```
 
 (You can see that each scope is referred to by index, starting at 0, just like the log entries.)
@@ -379,10 +381,10 @@ We could have a scope with the correct properies, but one or more of the values 
 What if the value of the property is of the wrong type, say, string instead of integer?
 
 ```text
-> Expected property 'JobId' to have value '12' of type 'Int32' in scope #0 for log entry #0 'Hey there!" but found 'abc' of type 'String' instead.
+> Expected property 'JobId' to have value '12' of type 'Int32' in scope #0 for log entry #0 'Hey there!', but found 'abc' of type 'String' instead.
 ```
 
-If the value mismatch occurs inside a nested property bag, the error message will include JSON representations of both the expected and the actual property value. Say, for instance, that we assert that the "CustomerId" should be "boop", like so: 
+If the value mismatch occurs inside a nested property bag, the error message will include JSON representations of both the expected and the actual property value. Say, for instance, that we assert that the "CustomerId" should be "toad", like so: 
 
 ```csharp
 Check.That(log)
@@ -392,15 +394,15 @@ Check.That(log)
                 new {
                     JobId = 12,
                     Details = new {
-                        CustomerId = "boop"
+                        CustomerId = "toad"
                     }
                 }));
 ```
 
-Now if it happens to be "beep" instead, we get this error:
+Now if it happens to be "frog" instead, we get this error:
 
 ```text
-> Expected property 'Details' to have value '{"CustomerId":"boop"}' in scope #0 for log entry #0 'Hey there!" but found '{"CustomerId":"beep"}' instead.
+> Expected property 'Details' to have value '{"CustomerId":"toad"}' in scope #0 for log entry #0 'Hey there!', but found '{"CustomerId":"frog"}' instead.
 ```
 
 What else could go wrong? One or more properties could be missing from the scope, or it could have additional properties.
@@ -408,26 +410,26 @@ What else could go wrong? One or more properties could be missing from the scope
 For instance, if the actual scope lacks the "CustomerId" property, the test will say as much: 
 
 ```text
-> Expected property 'CustomerId' with value '...' in scope #0 for log entry #0 'Hey there!" but found nothing. 
+> Expected property 'CustomerId' with value '...' in scope #0 for log entry #0 'Hey there!', but found nothing. 
 ```
 
 Similarly if the scope contains an additional "RequestedBy" property with some value: 
 
 ```text
-> Unexpected property 'RequestedBy' with value 'some value' in scope #0 for log entry #0 'Hey there!". 
+> Unexpected property 'RequestedBy' with value 'some value' in scope #0 for log entry #0 'Hey there!'. 
 ```
 
 It could be that there is no scope at all, or that there is more than one, which leads to messages like the following:
 
 ```text
-> Expected scope #0 of type Dictionary for log entry #0 'Hey there! but found nothing.
-> Unexpected scope #1 of type Dictionary for log entry #0 'Hey there!.
+> Expected scope #0 of type Dictionary for log entry #0 'Hey there!', but found nothing.
+> Unexpected scope #1 of type Dictionary for log entry #0 'Hey there!'.
 ```
 
 Mixing up different kinds of scopes spells trouble too: 
 
 ```text
-> Expected scope #0 of type Dictionary for log entry #0 'Hey there! but found scope of type String instead.
+> Expected scope #0 of type Dictionary for log entry #0 'Hey there!', but found scope of type String instead.
 ```
 
 And of course we could put the right property on the wrong scope, but that should manifest itself as some combination of the errors we've already seen.
@@ -453,7 +455,7 @@ Here's a list of possible test failures, one per line above:
 
 ```text
 > Found no log entry with message 'Hey there!'.
-> Expected log level of log entry 'Ooops!!' to be 'Error', but was 'Warning'.
+> Expected level of log entry 'Ooops!!' to be 'Error', but was 'Warning'.
 > Found no log entry with log message satisfying the check.
 > Found no log entry satisfying the check.
 ```

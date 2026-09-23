@@ -4,7 +4,8 @@
   --hillary: #adaa8a;
   --dawn-pink: #f1eadf;
   --alizarin: #e23128;
-  --active-link-red: light-dark(#ca1e00, #da70d6);
+  --old-active-link-dark-mode: #da70d6;
+  --active-link-red: light-dark(#ca1e00, #d88);
   --passive-link-red: #8b0000;
   --olive: #5a7800;
   --venice: #075a78;

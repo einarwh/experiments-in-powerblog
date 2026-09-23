@@ -10,7 +10,7 @@
 
        :optimus/bundles {"app.css"
                          {:public-dir "public"
-                          :paths ["/css/jonas.css" "/css/themes/ascetic.mod.css"]}}
+                          :paths ["/css/jonas.css" "/css/themes/highlight.css"]}}
 
        :optimus/assets [{:public-dir "public"
                          :paths [#".*\.js" #".*\.svg" #".*\.jpg" #".*\.png" #".*\.gif" #".*\.mp4"]}]
