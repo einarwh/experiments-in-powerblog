@@ -1,4 +1,4 @@
-:page/title Art from AI
+:page/title Art from AI debris
 :blog-post/tags [:tech ]
 :blog-post/author {:person/id :einarwh}
 
@@ -10,7 +10,7 @@ An attempt at making something amusing by reusing snippets of AI-generated text.
 
 :page/body
 
-# Art from AI
+# Art from AI debris
 
 <p class="blog-post-date">May 26, 2026</p>
 
